@@ -17,7 +17,7 @@ export const metadata = {
   description:
     "PulseIQ helps small businesses identify revenue leaks, workflow inefficiencies, missed leads, and customer experience risks using operational analytics and AI-style insights.",
 };
-
+<meta name="google-site-verification" content="VwlG8w2T82XWnxuSVl8RnMHezQMB1gfMts5OTen1RYc" />
 
 export default function RootLayout({
   children,

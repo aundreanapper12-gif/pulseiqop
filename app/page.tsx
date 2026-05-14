@@ -223,15 +223,35 @@ const money = (value: number) =>
   );
 }
 
-function Card({ children, className = "" }) {
+function Card({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={className}>{children}</div>;
 }
 
-function CardContent({ children, className = "" }) {
+function CardContent({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={className}>{children}</div>;
 }
 
-function Button({ children, className = "", variant = "default" }) {
+function Button({
+  children,
+  className = "",
+  variant = "default",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  variant?: "default" | "outline";
+}) {
   const base = "inline-flex items-center justify-center font-semibold transition";
   const styles =
     variant === "outline"

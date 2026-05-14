@@ -12,12 +12,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "PulseIQ Operations | AI-Powered Operational Intelligence",
   description:
     "PulseIQ helps small businesses identify revenue leaks, workflow inefficiencies, missed leads, and customer experience risks using operational analytics and AI-style insights.",
+  verification: {
+    google: "VwlG8w2T82XWnxuSVl8RnMHezQMB1gfMts5OTen1RYc",
+  },
 };
-<meta name="google-site-verification" content="VwlG8w2T82XWnxuSVl8RnMHezQMB1gfMts5OTen1RYc" />
 
 export default function RootLayout({
   children,

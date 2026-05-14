@@ -410,7 +410,7 @@ export default function PulseIQRevenueLeakScanner() {
                 <BarChart data={results.chartData}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip formatter={(value: number) => money(value)} />
+                 <Tooltip formatter={(value) => money(Number(value || 0))} />
                   <Bar dataKey="value" radius={[12, 12, 0, 0]}>
                     {results.chartData.map((_, index) => (
                       <Cell key={index} fill={["#7a5cff", "#e85d75", "#2fbf9b", "#e9b44c", "#231a16"][index % 5]} />
@@ -434,7 +434,7 @@ export default function PulseIQRevenueLeakScanner() {
                 <AreaChart data={results.improvementData}>
                   <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,.65)", fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "rgba(255,255,255,.45)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <Tooltip formatter={(value: number) => money(value)} contentStyle={{ borderRadius: 16 }} />
+                  <Tooltip formatter={(value) => money(Number(value || 0))} contentStyle={{ borderRadius: 16 }} />
                   <Area type="monotone" dataKey="leak" stroke="#e9b44c" strokeWidth={4} fill="#e9b44c" fillOpacity={0.22} />
                 </AreaChart>
               </ResponsiveContainer>

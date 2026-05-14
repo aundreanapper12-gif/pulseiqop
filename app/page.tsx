@@ -32,7 +32,7 @@ type FormState = {
 
 const industryPresets: Record<IndustryKey, { label: string; values: Partial<FormState>; focus: string }> = {
   general: {
-    label: "General Business",
+    label: "General",
     values: {},
     focus: "missed leads, slow follow-up, workflow waste, and customer experience gaps",
   },
@@ -105,7 +105,6 @@ export default function PulseIQRevenueLeakScanner() {
     const complaintRiskLoss = form.complaints * (form.averageCustomerValue * 0.25);
     const manualLaborLoss = form.manualHours * 25;
     const responsePenalty = form.responseHours > 24 ? form.averageCustomerValue * 3 : form.responseHours > 8 ? form.averageCustomerValue : 0;
-
     const estimatedMonthlyLeak = missedLeadLoss + cancellationLoss + complaintRiskLoss + manualLaborLoss + responsePenalty;
     const annualLeak = estimatedMonthlyLeak * 12;
     const leakPercent = form.monthlyRevenue > 0 ? Math.round((estimatedMonthlyLeak / form.monthlyRevenue) * 100) : 0;
@@ -154,8 +153,24 @@ export default function PulseIQRevenueLeakScanner() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <section className="mx-auto max-w-7xl px-6 py-10 md:py-16">
+    <main className="min-h-screen overflow-hidden bg-[#f7f1ea] text-[#231a16]">
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute left-[-10%] top-[-10%] h-96 w-96 rounded-full bg-[#e9b44c]/30 blur-3xl" />
+        <div className="absolute right-[-10%] top-[10%] h-[30rem] w-[30rem] rounded-full bg-[#7a5cff]/20 blur-3xl" />
+        <div className="absolute bottom-[-15%] left-[30%] h-[26rem] w-[26rem] rounded-full bg-[#2fbf9b]/20 blur-3xl" />
+      </div>
+
+      <section className="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-14">
+        <nav className="mb-12 flex items-center justify-between rounded-full border border-[#231a16]/10 bg-white/70 px-5 py-3 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-2 font-black tracking-tight">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#231a16] text-[#f7f1ea]">P</div>
+            PulseIQ Operations
+          </div>
+          <a href="#pricing" className="hidden rounded-full bg-[#231a16] px-5 py-2 text-sm font-bold text-white transition hover:bg-[#3b2c26] sm:block">
+            Get Audit
+          </a>
+        </nav>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -163,71 +178,80 @@ export default function PulseIQRevenueLeakScanner() {
           className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center"
         >
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-200">
-              <Sparkles className="h-4 w-4" /> PulseIQ Operations
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#e9b44c]/50 bg-[#fff8e8] px-4 py-2 text-sm font-bold text-[#7c5418] shadow-sm">
+              <Sparkles className="h-4 w-4" /> Free Business Revenue Scan
             </div>
-            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Find where your business is leaking revenue.
+            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-tight text-[#231a16] md:text-7xl">
+              Find the hidden leaks draining your business.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-              PulseIQ is a free operational audit scanner that estimates missed revenue, workflow waste, customer experience risk, and automation opportunities in minutes.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5c504b]">
+              PulseIQ turns missed leads, slow response times, cancellations, complaints, and workflow waste into a simple business health score and revenue-risk estimate.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="#scanner" className="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-6 py-4 font-semibold text-slate-950 transition hover:bg-cyan-300">
+              <a href="#scanner" className="inline-flex items-center justify-center rounded-2xl bg-[#231a16] px-7 py-4 font-extrabold text-white shadow-xl shadow-[#231a16]/20 transition hover:-translate-y-0.5 hover:bg-[#3b2c26]">
                 Run Free Scan <Calculator className="ml-2 h-5 w-5" />
               </a>
-              <a href="#pricing" className="inline-flex items-center justify-center rounded-2xl border border-slate-600 px-6 py-4 font-semibold text-white transition hover:bg-white hover:text-slate-950">
-                View Audit Options <Mail className="ml-2 h-5 w-5" />
+              <a href="#pricing" className="inline-flex items-center justify-center rounded-2xl border border-[#231a16]/15 bg-white/70 px-7 py-4 font-extrabold text-[#231a16] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white">
+                See Audit Options <Mail className="ml-2 h-5 w-5" />
               </a>
             </div>
           </div>
 
-          <Card className="rounded-3xl border border-slate-800 bg-white/10 shadow-2xl backdrop-blur">
-            <CardContent className="p-6 md:p-8">
-              <div className="flex items-center justify-between gap-4">
+          <Card className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/75 shadow-2xl shadow-[#231a16]/10 backdrop-blur-xl">
+            <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-[#e9b44c] via-[#7a5cff] to-[#2fbf9b]" />
+            <CardContent className="p-7 md:p-9">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-wide text-slate-400">Estimated Monthly Leak</p>
-                  <p className="mt-2 text-4xl font-bold text-cyan-300">{money(results.estimatedMonthlyLeak)}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-[#8b7a70]">Estimated Monthly Leak</p>
+                  <p className="mt-3 text-5xl font-black tracking-tight text-[#231a16]">{money(results.estimatedMonthlyLeak)}</p>
+                  <p className="mt-2 text-sm font-semibold text-[#7a6b62]">About {results.leakPercent}% of monthly revenue entered</p>
                 </div>
-                <TrendingDown className="h-12 w-12 text-cyan-300" />
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-slate-900/80 p-4">
-                  <p className="text-sm text-slate-400">Health Score</p>
-                  <p className="text-3xl font-bold">{results.score}/100</p>
-                </div>
-                <div className="rounded-2xl bg-slate-900/80 p-4">
-                  <p className="text-sm text-slate-400">Risk Level</p>
-                  <p className="text-2xl font-bold">{results.riskLevel}</p>
+                <div className="rounded-3xl bg-[#fff1c7] p-4 text-[#7c5418]">
+                  <TrendingDown className="h-10 w-10" />
                 </div>
               </div>
-              <p className="mt-5 text-sm leading-6 text-slate-300">
-                This estimate equals about <span className="font-bold text-cyan-200">{results.leakPercent}%</span> of the monthly revenue entered.
-              </p>
+
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                <div className="rounded-3xl bg-[#231a16] p-5 text-white shadow-lg">
+                  <p className="text-sm text-white/60">Health Score</p>
+                  <p className="mt-1 text-4xl font-black">{results.score}/100</p>
+                </div>
+                <div className="rounded-3xl bg-[#f2e8dc] p-5 shadow-inner">
+                  <p className="text-sm text-[#7a6b62]">Risk Level</p>
+                  <p className="mt-1 text-3xl font-black text-[#231a16]">{results.riskLevel}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
         <section className="mt-12 grid gap-4 md:grid-cols-4">
-          <Feature icon={<ShieldCheck />} title="Business Health Score" text="See how risky your current workflow may be." />
-          <Feature icon={<TrendingDown />} title="Revenue Leak Estimate" text="Translate missed leads and delays into dollars." />
+          <Feature icon={<ShieldCheck />} title="Health Score" text="See how risky the current workflow may be." />
+          <Feature icon={<TrendingDown />} title="Leak Estimate" text="Translate missed opportunities into dollars." />
           <Feature icon={<Zap />} title="Automation Ideas" text="Spot repetitive work that can be simplified." />
-          <Feature icon={<Users />} title="CX Risk Review" text="Find communication gaps hurting customers." />
+          <Feature icon={<Users />} title="CX Risk" text="Find customer experience gaps quickly." />
         </section>
 
         <section id="scanner" className="mt-12 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <Card className="rounded-3xl bg-white text-slate-950 shadow-xl">
+          <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 text-[#231a16] shadow-2xl shadow-[#231a16]/8 backdrop-blur">
             <CardContent className="p-6 md:p-8">
-              <h2 className="text-2xl font-bold">Free Revenue Leak Scan</h2>
-              <p className="mt-2 text-slate-600">Choose an industry preset or enter your own numbers. Results update instantly.</p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-black tracking-tight">Free Revenue Leak Scan</h2>
+                  <p className="mt-2 text-[#6a5c55]">Choose a preset or enter your own numbers. Results update instantly.</p>
+                </div>
+                <div className="hidden rounded-2xl bg-[#f7f1ea] p-3 text-[#7a5cff] sm:block">
+                  <BarChart3 className="h-6 w-6" />
+                </div>
+              </div>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {(Object.keys(industryPresets) as IndustryKey[]).map((key) => (
                   <button
                     key={key}
                     onClick={() => applyPreset(key)}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      form.industry === key ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                    className={`rounded-full border px-4 py-2 text-sm font-extrabold transition ${
+                      form.industry === key ? "border-[#231a16] bg-[#231a16] text-white shadow-lg" : "border-[#ded1c4] bg-[#fbf7f2] text-[#66564d] hover:border-[#231a16]/40 hover:bg-white"
                     }`}
                   >
                     {industryPresets[key].label}
@@ -235,7 +259,7 @@ export default function PulseIQRevenueLeakScanner() {
                 ))}
               </div>
 
-              <div className="mt-6 grid gap-4">
+              <div className="mt-7 grid gap-4">
                 <Input label="Business Name" value={form.businessName} onChange={(v) => updateField("businessName", v)} placeholder="Example: Main Street Salon" />
                 <Input label="Monthly Revenue" type="number" value={form.monthlyRevenue} onChange={(v) => updateField("monthlyRevenue", v)} />
                 <Input label="Missed Leads Per Month" type="number" value={form.missedLeads} onChange={(v) => updateField("missedLeads", v)} />
@@ -249,13 +273,14 @@ export default function PulseIQRevenueLeakScanner() {
           </Card>
 
           <div className="grid gap-6">
-            <Card className="rounded-3xl border border-slate-800 bg-slate-900 shadow-xl">
+            <Card className="overflow-hidden rounded-[2rem] bg-[#231a16] text-white shadow-2xl shadow-[#231a16]/20">
+              <div className="h-2 bg-gradient-to-r from-[#e9b44c] via-[#7a5cff] to-[#2fbf9b]" />
               <CardContent className="p-6 md:p-8">
                 <div className="flex items-center gap-3">
-                  <BarChart3 className="h-7 w-7 text-cyan-300" />
-                  <h2 className="text-2xl font-bold">Your PulseIQ Results</h2>
+                  <div className="rounded-2xl bg-white/10 p-3 text-[#e9b44c]"><BarChart3 className="h-6 w-6" /></div>
+                  <h2 className="text-2xl font-black">Your PulseIQ Results</h2>
                 </div>
-                <p className="mt-3 text-slate-300">For this business type, PulseIQ is watching for {results.focus}.</p>
+                <p className="mt-4 text-white/65">For this business type, PulseIQ is watching for {results.focus}.</p>
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   <Metric label="Monthly Leak" value={money(results.estimatedMonthlyLeak)} />
@@ -263,43 +288,46 @@ export default function PulseIQRevenueLeakScanner() {
                   <Metric label="Score" value={`${results.score}/100`} />
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950 p-5">
+                <div className="mt-6 rounded-3xl border border-white/10 bg-white/8 p-5">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-1 h-5 w-5 text-amber-300" />
+                    <div className="rounded-2xl bg-[#e9b44c]/20 p-2 text-[#ffd275]"><AlertTriangle className="h-5 w-5" /></div>
                     <div>
-                      <p className="font-semibold">Biggest Leak: {results.leaks[0].label}</p>
-                      <p className="mt-1 text-sm text-slate-400">{results.leaks[0].note}</p>
+                      <p className="font-black">Biggest Leak: {results.leaks[0].label}</p>
+                      <p className="mt-1 text-sm leading-6 text-white/60">{results.leaks[0].note}</p>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl bg-white text-slate-950 shadow-xl">
+            <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 text-[#231a16] shadow-xl backdrop-blur">
               <CardContent className="p-6 md:p-8">
-                <h3 className="text-xl font-bold">Top Revenue Leaks</h3>
-                <div className="mt-4 grid gap-3">
-                  {results.leaks.slice(0, 3).map((leak) => (
-                    <div key={leak.label} className="rounded-2xl border border-slate-200 p-4">
+                <h3 className="text-2xl font-black">Top Revenue Leaks</h3>
+                <div className="mt-5 grid gap-3">
+                  {results.leaks.slice(0, 3).map((leak, index) => (
+                    <div key={leak.label} className="rounded-3xl border border-[#eadfd3] bg-[#fbf7f2] p-5">
                       <div className="flex items-center justify-between gap-4">
-                        <p className="font-semibold">{leak.label}</p>
-                        <p className="font-bold text-slate-900">{money(leak.amount)}</p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#231a16] text-sm font-black text-white">{index + 1}</div>
+                          <p className="font-black">{leak.label}</p>
+                        </div>
+                        <p className="font-black text-[#7a5cff]">{money(leak.amount)}</p>
                       </div>
-                      <p className="mt-1 text-sm text-slate-600">{leak.note}</p>
+                      <p className="mt-2 text-sm leading-6 text-[#6a5c55]">{leak.note}</p>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 shadow-xl">
+            <Card className="rounded-[2rem] border border-[#2fbf9b]/20 bg-[#e8fff8] text-[#12392f] shadow-xl">
               <CardContent className="p-6 md:p-8">
-                <h3 className="text-xl font-bold">Top 3 Recommendations</h3>
-                <div className="mt-4 grid gap-3">
+                <h3 className="text-2xl font-black">Top 3 Recommendations</h3>
+                <div className="mt-5 grid gap-3">
                   {results.recommendations.map((rec) => (
-                    <div key={rec} className="flex gap-3 rounded-2xl bg-slate-950/70 p-4">
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-cyan-300" />
-                      <p className="text-slate-100">{rec}</p>
+                    <div key={rec} className="flex gap-3 rounded-3xl bg-white/75 p-4 shadow-sm">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#179575]" />
+                      <p className="font-semibold leading-6 text-[#244b42]">{rec}</p>
                     </div>
                   ))}
                 </div>
@@ -309,21 +337,21 @@ export default function PulseIQRevenueLeakScanner() {
         </section>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-2">
-          <Card className="rounded-3xl bg-white p-6 text-slate-950 shadow-xl md:p-8">
-            <h2 className="text-2xl font-bold">Get the Full PulseIQ Report</h2>
-            <p className="mt-2 text-slate-600">Collect leads now. Later, connect this form to email, Google Sheets, Notion, or Stripe.</p>
+          <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 p-6 text-[#231a16] shadow-2xl shadow-[#231a16]/8 backdrop-blur md:p-8">
+            <h2 className="text-3xl font-black tracking-tight">Get the Full PulseIQ Report</h2>
+            <p className="mt-2 text-[#6a5c55]">Use this as your lead magnet. Later, connect it to Formspree, Google Sheets, Notion, or Stripe.</p>
             <form onSubmit={handleLeadSubmit} className="mt-6 grid gap-4">
               <Input label="Your Name" value={lead.name} onChange={(v) => setLead((prev) => ({ ...prev, name: v }))} placeholder="Your name" />
               <Input label="Email Address" value={lead.email} onChange={(v) => setLead((prev) => ({ ...prev, email: v }))} placeholder="you@email.com" />
-              <button className="rounded-2xl bg-slate-950 px-5 py-4 font-semibold text-white transition hover:bg-slate-800">
+              <button className="rounded-2xl bg-[#231a16] px-5 py-4 font-black text-white shadow-xl shadow-[#231a16]/20 transition hover:-translate-y-0.5 hover:bg-[#3b2c26]">
                 Send Me My Full Report
               </button>
-              {leadSaved && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">Lead captured on page. Next step: connect this form to a real email tool.</p>}
+              {leadSaved && <p className="rounded-2xl bg-[#e8fff8] p-4 text-sm font-bold text-[#16745e]">Lead captured on page. Next step: connect this form to a real email tool.</p>}
             </form>
           </Card>
 
-          <Card className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl md:p-8">
-            <h2 className="text-2xl font-bold">How PulseIQ Works</h2>
+          <Card className="rounded-[2rem] bg-[#231a16] p-6 text-white shadow-2xl shadow-[#231a16]/20 md:p-8">
+            <h2 className="text-3xl font-black tracking-tight">How PulseIQ Works</h2>
             <div className="mt-6 grid gap-4">
               <Step number="1" title="Scan" text="Enter business basics like missed leads, customer value, response time, and manual work." />
               <Step number="2" title="Score" text="PulseIQ converts operational issues into a business health score and estimated revenue risk." />
@@ -333,9 +361,10 @@ export default function PulseIQRevenueLeakScanner() {
         </section>
 
         <section id="pricing" className="mt-12">
-          <div className="mb-6 text-center">
-            <h2 className="text-3xl font-bold">Simple Audit Options</h2>
-            <p className="mt-2 text-slate-300">Start free, then upgrade when a business wants deeper help.</p>
+          <div className="mb-7 text-center">
+            <p className="font-black uppercase tracking-[0.25em] text-[#7a5cff]">Audit Options</p>
+            <h2 className="mt-2 text-4xl font-black tracking-tight text-[#231a16]">Simple ways to turn leaks into action.</h2>
+            <p className="mt-3 text-[#6a5c55]">Start free, then upgrade when a business wants deeper help.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-4">
             <Pricing title="Free Scan" price="$0" text="Instant business score and revenue leak estimate." />
@@ -345,10 +374,11 @@ export default function PulseIQRevenueLeakScanner() {
           </div>
         </section>
 
-        <section className="mt-12 rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6 text-center md:p-10">
-          <h2 className="text-3xl font-bold">Built for small businesses that need clarity fast.</h2>
-          <p className="mx-auto mt-3 max-w-3xl text-slate-300">
-            PulseIQ turns everyday operational problems into clear numbers, practical recommendations, and a simple path toward better follow-up, stronger customer experience, and less wasted time.
+        <section className="mt-12 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#231a16] via-[#35251f] to-[#5d3d22] p-8 text-center text-white shadow-2xl shadow-[#231a16]/20 md:p-12">
+          <p className="font-black uppercase tracking-[0.25em] text-[#e9b44c]">PulseIQ Operations</p>
+          <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-black tracking-tight">A small business tool that makes operational problems visible.</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-white/65">
+            Turn missed leads, delayed follow-up, and messy workflows into clear numbers, practical recommendations, and better business decisions.
           </p>
         </section>
       </section>
@@ -366,21 +396,21 @@ function money(value: number) {
 
 function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300">{icon}</div>
-      <h3 className="font-bold">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+    <div className="rounded-[1.7rem] border border-[#231a16]/10 bg-white/70 p-5 shadow-lg shadow-[#231a16]/5 backdrop-blur transition hover:-translate-y-1 hover:bg-white">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#231a16] text-[#e9b44c]">{icon}</div>
+      <h3 className="font-black text-[#231a16]">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-[#6a5c55]">{text}</p>
     </div>
   );
 }
 
 function Step({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div className="flex gap-4 rounded-2xl bg-slate-950 p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-400 font-bold text-slate-950">{number}</div>
+    <div className="flex gap-4 rounded-3xl bg-white/8 p-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e9b44c] font-black text-[#231a16]">{number}</div>
       <div>
-        <h3 className="font-bold">{title}</h3>
-        <p className="mt-1 text-sm leading-6 text-slate-400">{text}</p>
+        <h3 className="font-black">{title}</h3>
+        <p className="mt-1 text-sm leading-6 text-white/60">{text}</p>
       </div>
     </div>
   );
@@ -388,11 +418,11 @@ function Step({ number, title, text }: { number: string; title: string; text: st
 
 function Pricing({ title, price, text, featured = false }: { title: string; price: string; text: string; featured?: boolean }) {
   return (
-    <div className={`rounded-3xl p-6 shadow-xl ${featured ? "bg-cyan-400 text-slate-950" : "border border-slate-800 bg-slate-900 text-white"}`}>
-      <p className="text-sm font-semibold uppercase tracking-wide opacity-80">{title}</p>
-      <p className="mt-3 text-3xl font-bold">{price}</p>
-      <p className={`mt-3 text-sm leading-6 ${featured ? "text-slate-800" : "text-slate-400"}`}>{text}</p>
-      <button className={`mt-5 w-full rounded-2xl px-4 py-3 font-semibold ${featured ? "bg-slate-950 text-white" : "bg-white text-slate-950"}`}>Choose Plan</button>
+    <div className={`rounded-[1.7rem] p-6 shadow-xl transition hover:-translate-y-1 ${featured ? "bg-[#231a16] text-white shadow-[#231a16]/20" : "border border-[#231a16]/10 bg-white/75 text-[#231a16] shadow-[#231a16]/5 backdrop-blur"}`}>
+      <p className={`text-sm font-black uppercase tracking-wide ${featured ? "text-[#e9b44c]" : "text-[#7a5cff]"}`}>{title}</p>
+      <p className="mt-3 text-4xl font-black">{price}</p>
+      <p className={`mt-3 text-sm leading-6 ${featured ? "text-white/65" : "text-[#6a5c55]"}`}>{text}</p>
+      <button className={`mt-6 w-full rounded-2xl px-4 py-3 font-black ${featured ? "bg-[#e9b44c] text-[#231a16]" : "bg-[#231a16] text-white"}`}>Choose Plan</button>
     </div>
   );
 }
@@ -420,9 +450,9 @@ function Input({
 }) {
   return (
     <label className="grid gap-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-black text-[#4a3d37]">{label}</span>
       <input
-        className="rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-900 focus:ring-4 focus:ring-slate-200"
+        className="rounded-2xl border border-[#ded1c4] bg-[#fffaf5] px-4 py-3 font-semibold text-[#231a16] outline-none transition placeholder:text-[#a99c92] focus:border-[#7a5cff] focus:bg-white focus:ring-4 focus:ring-[#7a5cff]/10"
         type={type}
         value={value}
         placeholder={placeholder}
@@ -434,9 +464,9 @@ function Input({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-950 p-4">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-white">{value}</p>
+    <div className="rounded-3xl bg-white/8 p-4 ring-1 ring-white/10">
+      <p className="text-sm text-white/50">{label}</p>
+      <p className="mt-1 text-2xl font-black text-white">{value}</p>
     </div>
   );
 }

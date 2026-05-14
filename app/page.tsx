@@ -8,6 +8,7 @@ import {
   Calculator,
   CheckCircle2,
   Download,
+  FileText,
   Mail,
   ShieldCheck,
   Sparkles,
@@ -15,6 +16,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type IndustryKey = "general" | "salon" | "law" | "contractor" | "medspa" | "realestate" | "callcenter";
 
@@ -135,6 +137,24 @@ export default function PulseIQRevenueLeakScanner() {
     if (form.manualHours > 5) recommendations.push("Automate repetitive admin work with intake forms, scheduling tools, saved replies, or AI-assisted templates.");
     if (recommendations.length === 0) recommendations.push("Your operations look stable. Next, track conversion rate, retention, and repeat customer value.");
 
+    const chartData = leaks.slice(0, 5).map((leak) => ({
+      name: leak.label.replace(" Revenue", ""),
+      value: Math.round(leak.amount),
+    }));
+
+    const improvementData = [
+      { label: "Now", leak: Math.round(estimatedMonthlyLeak) },
+      { label: "30 Days", leak: Math.round(estimatedMonthlyLeak * 0.75) },
+      { label: "60 Days", leak: Math.round(estimatedMonthlyLeak * 0.55) },
+      { label: "90 Days", leak: Math.round(estimatedMonthlyLeak * 0.35) },
+    ];
+
+    const beforeAfter = {
+      current: Math.round(estimatedMonthlyLeak),
+      improved: Math.round(estimatedMonthlyLeak * 0.35),
+      recovered: Math.round(estimatedMonthlyLeak * 0.65),
+    };
+
     return {
       estimatedMonthlyLeak,
       annualLeak,
@@ -142,6 +162,9 @@ export default function PulseIQRevenueLeakScanner() {
       score,
       riskLevel,
       leaks,
+      chartData,
+      improvementData,
+      beforeAfter,
       recommendations: recommendations.slice(0, 3),
       focus: industryPresets[form.industry].focus,
     };
@@ -334,6 +357,88 @@ export default function PulseIQRevenueLeakScanner() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        <section className="mt-12 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+          <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 p-6 shadow-2xl shadow-[#231a16]/8 backdrop-blur md:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-black uppercase tracking-[0.25em] text-[#7a5cff]">Leak Breakdown</p>
+                <h2 className="mt-2 text-3xl font-black tracking-tight">Where the money is slipping away</h2>
+              </div>
+              <div className="rounded-2xl bg-[#f7f1ea] p-3 text-[#7a5cff]"><BarChart3 className="h-6 w-6" /></div>
+            </div>
+            <div className="mt-6 h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={results.chartData}>
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(value: number) => money(value)} />
+                  <Bar dataKey="value" radius={[12, 12, 0, 0]}>
+                    {results.chartData.map((_, index) => (
+                      <Cell key={index} fill={["#7a5cff", "#e85d75", "#2fbf9b", "#e9b44c", "#231a16"][index % 5]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card className="rounded-[2rem] bg-[#231a16] p-6 text-white shadow-2xl shadow-[#231a16]/20 md:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-black uppercase tracking-[0.25em] text-[#e9b44c]">90-Day Preview</p>
+                <h2 className="mt-2 text-3xl font-black tracking-tight">What improvement could look like</h2>
+              </div>
+              <div className="rounded-2xl bg-white/10 p-3 text-[#e9b44c]"><TrendingDown className="h-6 w-6" /></div>
+            </div>
+            <div className="mt-6 h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={results.improvementData}>
+                  <XAxis dataKey="label" tick={{ fill: "rgba(255,255,255,.65)", fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,.45)", fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(value: number) => money(value)} contentStyle={{ borderRadius: 16 }} />
+                  <Area type="monotone" dataKey="leak" stroke="#e9b44c" strokeWidth={4} fill="#e9b44c" fillOpacity={0.22} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </section>
+
+        <section className="mt-12 grid gap-8 lg:grid-cols-3">
+          <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 p-6 shadow-xl backdrop-blur md:p-8 lg:col-span-2">
+            <p className="font-black uppercase tracking-[0.25em] text-[#2fbf9b]">Before vs. After</p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight">A practical recovery target</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-3xl bg-[#fff3f0] p-5">
+                <p className="text-sm font-bold text-[#8b5148]">Current Monthly Leak</p>
+                <p className="mt-2 text-3xl font-black text-[#e85d75]">{money(results.beforeAfter.current)}</p>
+              </div>
+              <div className="rounded-3xl bg-[#f3efff] p-5">
+                <p className="text-sm font-bold text-[#5c4e9c]">Potential Recovery</p>
+                <p className="mt-2 text-3xl font-black text-[#7a5cff]">{money(results.beforeAfter.recovered)}</p>
+              </div>
+              <div className="rounded-3xl bg-[#e8fff8] p-5">
+                <p className="text-sm font-bold text-[#16745e]">Improved Leak Target</p>
+                <p className="mt-2 text-3xl font-black text-[#179575]">{money(results.beforeAfter.improved)}</p>
+              </div>
+            </div>
+            <p className="mt-5 leading-7 text-[#6a5c55]">
+              This preview assumes the business reduces missed leads, slow follow-up, manual work, and preventable cancellations over 90 days. It is an estimate, not a guarantee.
+            </p>
+          </Card>
+
+          <Card className="rounded-[2rem] border border-[#231a16]/10 bg-white/85 p-6 shadow-xl backdrop-blur md:p-8">
+            <p className="font-black uppercase tracking-[0.25em] text-[#7a5cff]">Report Preview</p>
+            <div className="mt-5 rounded-3xl bg-[#f7f1ea] p-5 shadow-inner">
+              <FileText className="h-9 w-9 text-[#7a5cff]" />
+              <h3 className="mt-4 text-2xl font-black">Mini Audit PDF</h3>
+              <p className="mt-2 text-sm leading-6 text-[#6a5c55]">Includes leak breakdown, recommended workflow changes, KPI tracker, and a 30-day action plan.</p>
+              <button className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#231a16] px-5 py-4 font-black text-white">
+                Download Sample <Download className="ml-2 h-5 w-5" />
+              </button>
+            </div>
+          </Card>
         </section>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-2">

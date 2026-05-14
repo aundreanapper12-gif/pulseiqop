@@ -241,7 +241,19 @@ function Button({ children, className = "", variant = "default" }) {
   return <button className={`${base} ${styles} ${className}`}>{children}</button>;
 }
 
-function Input({ label, value, onChange, type = "text", placeholder = "" }) {
+function Input({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder = "",
+}: {
+  label: string;
+  value: string | number;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+}) {
   return (
     <label className="grid gap-2">
       <span className="text-sm font-semibold text-slate-700">{label}</span>

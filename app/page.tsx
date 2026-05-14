@@ -18,7 +18,7 @@ export default function PulseIQRevenueLeakScanner() {
     manualHours: 10,
   });
 
-  const updateField = (field, value) => {
+  const updateField = (field: string, value: string | number) => {
     setForm((prev) => ({
       ...prev,
       [field]: field === "businessName" || field === "industry" ? value : Number(value),

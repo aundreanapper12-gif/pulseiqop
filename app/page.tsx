@@ -72,7 +72,7 @@ export default function PulseIQRevenueLeakScanner() {
     };
   }, [form]);
 
-  const money = (value) =>
+const money = (value: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",

@@ -155,6 +155,13 @@ export default function PulseIQRevenueLeakScanner() {
       recovered: Math.round(estimatedMonthlyLeak * 0.65),
     };
 
+    const aiInsight =
+      score < 45
+        ? "Your current numbers suggest the business may be losing revenue through multiple operational leaks at once. The fastest win is usually improving lead response speed and missed-lead recovery."
+        : score < 70
+          ? "Your business shows moderate operational risk. A few workflow improvements could reduce preventable revenue loss and improve customer consistency."
+          : "Your business appears operationally stable. The next growth opportunity is tracking conversion, repeat customers, and automation ROI more closely.";
+
     return {
       estimatedMonthlyLeak,
       annualLeak,
@@ -165,6 +172,7 @@ export default function PulseIQRevenueLeakScanner() {
       chartData,
       improvementData,
       beforeAfter,
+      aiInsight,
       recommendations: recommendations.slice(0, 3),
       focus: industryPresets[form.industry].focus,
     };
@@ -173,6 +181,10 @@ export default function PulseIQRevenueLeakScanner() {
   const handleLeadSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLeadSaved(true);
+  };
+
+  const handlePrintReport = () => {
+    window.print();
   };
 
   return (
@@ -240,8 +252,23 @@ export default function PulseIQRevenueLeakScanner() {
                   <p className="mt-1 text-4xl font-black">{results.score}/100</p>
                 </div>
                 <div className="rounded-3xl bg-[#f2e8dc] p-5 shadow-inner">
-                  <p className="text-sm text-[#7a6b62]">Risk Level</p>
-                  <p className="mt-1 text-3xl font-black text-[#231a16]">{results.riskLevel}</p>
+                  <p className="text-sm text-[#7a6b62]">Annual Risk</p>
+                  <p className="mt-1 text-3xl font-black text-[#231a16]">{money(results.annualLeak)}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl bg-[#f7f1ea] p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-black text-[#6a5c55]">Business Health Gauge</p>
+                  <p className="text-sm font-black text-[#7a5cff]">{results.riskLevel}</p>
+                </div>
+                <div className="h-4 overflow-hidden rounded-full bg-[#ded1c4]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${results.score}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="h-full rounded-full bg-gradient-to-r from-[#e85d75] via-[#e9b44c] to-[#2fbf9b]"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -317,6 +344,16 @@ export default function PulseIQRevenueLeakScanner() {
                     <div>
                       <p className="font-black">Biggest Leak: {results.leaks[0].label}</p>
                       <p className="mt-1 text-sm leading-6 text-white/60">{results.leaks[0].note}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-3xl border border-[#7a5cff]/30 bg-[#7a5cff]/15 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-2xl bg-white/10 p-2 text-[#c8bcff]"><Sparkles className="h-5 w-5" /></div>
+                    <div>
+                      <p className="font-black text-[#ded8ff]">AI Operational Insight</p>
+                      <p className="mt-1 text-sm leading-6 text-white/65">{results.aiInsight}</p>
                     </div>
                   </div>
                 </div>
@@ -434,8 +471,11 @@ export default function PulseIQRevenueLeakScanner() {
               <FileText className="h-9 w-9 text-[#7a5cff]" />
               <h3 className="mt-4 text-2xl font-black">Mini Audit PDF</h3>
               <p className="mt-2 text-sm leading-6 text-[#6a5c55]">Includes leak breakdown, recommended workflow changes, KPI tracker, and a 30-day action plan.</p>
-              <button className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#231a16] px-5 py-4 font-black text-white">
-                Download Sample <Download className="ml-2 h-5 w-5" />
+              <button
+                onClick={handlePrintReport}
+                className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#231a16] px-5 py-4 font-black text-white transition hover:-translate-y-0.5 hover:bg-[#3b2c26]"
+              >
+                Print / Save PDF <Download className="ml-2 h-5 w-5" />
               </button>
             </div>
           </Card>
@@ -463,6 +503,21 @@ export default function PulseIQRevenueLeakScanner() {
               <Step number="3" title="Improve" text="Use the top recommendations to reduce missed revenue, improve follow-up, and simplify workflows." />
             </div>
           </Card>
+        </section>
+
+        <section className="mt-12 grid gap-6 md:grid-cols-3">
+          <Testimonial
+            quote="PulseIQ makes it easy to see where missed opportunities are hiding before they turn into lost revenue."
+            name="Sample Salon Owner"
+          />
+          <Testimonial
+            quote="The business health score turns messy operational problems into something clear and actionable."
+            name="Sample Service Business"
+          />
+          <Testimonial
+            quote="This is the kind of quick audit small businesses need before investing in bigger systems."
+            name="Sample Operations Lead"
+          />
         </section>
 
         <section id="pricing" className="mt-12">
@@ -517,6 +572,16 @@ function Step({ number, title, text }: { number: string; title: string; text: st
         <h3 className="font-black">{title}</h3>
         <p className="mt-1 text-sm leading-6 text-white/60">{text}</p>
       </div>
+    </div>
+  );
+}
+
+function Testimonial({ quote, name }: { quote: string; name: string }) {
+  return (
+    <div className="rounded-[1.7rem] border border-[#231a16]/10 bg-white/75 p-6 shadow-xl shadow-[#231a16]/5 backdrop-blur">
+      <div className="mb-4 flex gap-1 text-[#e9b44c]">★★★★★</div>
+      <p className="text-lg font-bold leading-7 text-[#231a16]">“{quote}”</p>
+      <p className="mt-4 text-sm font-black uppercase tracking-wide text-[#7a5cff]">{name}</p>
     </div>
   );
 }

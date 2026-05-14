@@ -288,7 +288,13 @@ function Input({
   );
 }
 
-function Metric({ label, value }) {
+function Metric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-2xl bg-slate-950 p-4">
       <p className="text-sm text-slate-400">{label}</p>

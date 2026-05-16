@@ -22,11 +22,9 @@ export default function Home() {
   });
 
   const results = useMemo(() => {
-    const missedLeads = Math.round(
-      inputs.monthlyLeads * (inputs.missedLeadRate / 100)
-    );
-
+    const missedLeads = Math.round(inputs.monthlyLeads * (inputs.missedLeadRate / 100));
     const estimatedLoss = missedLeads * inputs.avgLeadValue;
+    const annualLoss = estimatedLoss * 12;
 
     const riskScore = Math.min(
       100,
@@ -38,20 +36,9 @@ export default function Home() {
     );
 
     const efficiencyScore = Math.max(0, 100 - riskScore);
+    const riskLevel = riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
 
-    const annualLoss = estimatedLoss * 12;
-
-    const riskLevel =
-      riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
-
-    return {
-      missedLeads,
-      estimatedLoss,
-      annualLoss,
-      riskScore,
-      efficiencyScore,
-      riskLevel,
-    };
+    return { missedLeads, estimatedLoss, annualLoss, riskScore, efficiencyScore, riskLevel };
   }, [inputs]);
 
   function updateInput(key: keyof ScannerInput, value: string) {
@@ -63,8 +50,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f7f2ea] text-[#241c16]">
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 border-b border-[#e1d5c5] bg-[#f7f2ea]/90 px-6 py-4 backdrop-blur md:px-16">
+      <a
+        href="#contact"
+        className="fixed bottom-5 right-5 z-50 rounded-full bg-[#241c16] px-5 py-3 text-sm font-bold text-white shadow-2xl hover:bg-[#3b2f27]"
+      >
+        Free Audit
+      </a>
+
+      <nav className="sticky top-0 z-40 border-b border-[#e1d5c5] bg-[#f7f2ea]/90 px-6 py-4 backdrop-blur md:px-16">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <a href="#" className="text-xl font-black">
             PulseIQ Solutions
@@ -72,14 +65,14 @@ export default function Home() {
 
           <div className="hidden gap-6 text-sm font-semibold md:flex">
             <a href="#scanner">Scanner</a>
-            <a href="#dashboard">Dashboard</a>
+            <a href="#how">How It Works</a>
+            <a href="#who">Who We Help</a>
             <a href="#case-study">Case Study</a>
             <a href="#contact">Free Audit</a>
           </div>
         </div>
       </nav>
 
-      {/* HERO */}
       <section className="px-6 py-20 md:px-16">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-center">
           <div>
@@ -88,14 +81,12 @@ export default function Home() {
             </p>
 
             <h1 className="text-4xl font-black leading-tight md:text-6xl">
-              Find the hidden leaks costing your business time, revenue, and
-              customer trust.
+              Find the hidden leaks costing your business time, revenue, and trust.
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-[#5f5147]">
-              PulseIQ scans missed leads, follow-up delays, workflow friction,
-              staffing pressure, and customer experience gaps to show where
-              your business can improve.
+              PulseIQ scans missed leads, response delays, workflow friction, staffing pressure,
+              and customer experience gaps so businesses know what to fix first.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
@@ -107,10 +98,10 @@ export default function Home() {
               </a>
 
               <a
-                href="#contact"
+                href="#case-study"
                 className="rounded-xl border border-[#241c16] px-6 py-3 font-semibold hover:bg-white"
               >
-                Request Free Audit
+                View Case Study
               </a>
             </div>
           </div>
@@ -119,8 +110,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TRUST METRICS */}
-      <section className="px-6 pb-8 md:px-16">
+      <section className="px-6 pb-10 md:px-16">
         <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-4">
           <MetricCard title="Monthly Risk" value={`$${results.estimatedLoss.toLocaleString()}`} />
           <MetricCard title="Annualized Risk" value={`$${results.annualLoss.toLocaleString()}`} />
@@ -129,7 +119,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SCANNER */}
       <section id="scanner" className="px-6 py-20 md:px-16">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2">
           <div>
@@ -142,51 +131,17 @@ export default function Home() {
             </h2>
 
             <p className="mt-5 text-[#5f5147]">
-              Adjust the numbers below to see how missed leads and slow
-              response times can quietly affect revenue.
+              Adjust the numbers below to see how missed leads and slow response times can
+              quietly affect revenue.
             </p>
 
             <div className="mt-8 rounded-3xl bg-white p-6 shadow-xl">
-              <ScannerField
-                label="Industry"
-                value={inputs.industry}
-                onChange={(value) => updateInput("industry", value)}
-              />
-
-              <ScannerField
-                label="Monthly Leads"
-                type="number"
-                value={inputs.monthlyLeads}
-                onChange={(value) => updateInput("monthlyLeads", value)}
-              />
-
-              <ScannerField
-                label="Missed Lead Rate %"
-                type="number"
-                value={inputs.missedLeadRate}
-                onChange={(value) => updateInput("missedLeadRate", value)}
-              />
-
-              <ScannerField
-                label="Average Lead Value"
-                type="number"
-                value={inputs.avgLeadValue}
-                onChange={(value) => updateInput("avgLeadValue", value)}
-              />
-
-              <ScannerField
-                label="Average Response Delay Hours"
-                type="number"
-                value={inputs.responseDelayHours}
-                onChange={(value) => updateInput("responseDelayHours", value)}
-              />
-
-              <ScannerField
-                label="Team Size"
-                type="number"
-                value={inputs.teamSize}
-                onChange={(value) => updateInput("teamSize", value)}
-              />
+              <ScannerField label="Industry" value={inputs.industry} onChange={(v) => updateInput("industry", v)} />
+              <ScannerField label="Monthly Leads" type="number" value={inputs.monthlyLeads} onChange={(v) => updateInput("monthlyLeads", v)} />
+              <ScannerField label="Missed Lead Rate %" type="number" value={inputs.missedLeadRate} onChange={(v) => updateInput("missedLeadRate", v)} />
+              <ScannerField label="Average Lead Value" type="number" value={inputs.avgLeadValue} onChange={(v) => updateInput("avgLeadValue", v)} />
+              <ScannerField label="Average Response Delay Hours" type="number" value={inputs.responseDelayHours} onChange={(v) => updateInput("responseDelayHours", v)} />
+              <ScannerField label="Team Size" type="number" value={inputs.teamSize} onChange={(v) => updateInput("teamSize", v)} />
             </div>
           </div>
 
@@ -199,22 +154,13 @@ export default function Home() {
               {inputs.industry} Risk Snapshot
             </h3>
 
-            <ScoreGauge score={results.efficiencyScore} />
+            <CircularGauge score={results.efficiencyScore} />
 
             <div className="mt-8 grid gap-4">
               <ResultRow label="Estimated Missed Leads" value={results.missedLeads} />
-              <ResultRow
-                label="Monthly Revenue Leakage"
-                value={`$${results.estimatedLoss.toLocaleString()}`}
-              />
-              <ResultRow
-                label="Annualized Revenue Risk"
-                value={`$${results.annualLoss.toLocaleString()}`}
-              />
-              <ResultRow
-                label="Operational Risk Score"
-                value={`${results.riskScore}/100`}
-              />
+              <ResultRow label="Monthly Revenue Leakage" value={`$${results.estimatedLoss.toLocaleString()}`} />
+              <ResultRow label="Annualized Revenue Risk" value={`$${results.annualLoss.toLocaleString()}`} />
+              <ResultRow label="Operational Risk Score" value={`${results.riskScore}/100`} />
             </div>
 
             <AIRecommendation results={results} inputs={inputs} />
@@ -222,17 +168,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CHART SECTION */}
+      <section id="how" className="px-6 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-3xl font-black md:text-4xl">How It Works</h2>
+          <p className="mt-4 max-w-2xl text-[#5f5147]">
+            PulseIQ turns scattered operational problems into a clear improvement plan.
+          </p>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-4">
+            <StepCard number="01" title="Scan" text="Enter business volume, missed leads, response delays, and team size." />
+            <StepCard number="02" title="Score" text="PulseIQ calculates revenue leakage, risk level, and business health." />
+            <StepCard number="03" title="Prioritize" text="The dashboard identifies which bottlenecks need attention first." />
+            <StepCard number="04" title="Improve" text="Use the recommendations to improve workflows, follow-up, and staffing." />
+          </div>
+        </div>
+      </section>
+
+      <section id="who" className="px-6 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-3xl font-black md:text-4xl">Who We Help</h2>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-5">
+            {["Law Firms", "Medical Offices", "Home Services", "Support Teams", "Small Businesses"].map((item) => (
+              <div key={item} className="rounded-3xl bg-white p-6 text-center shadow-lg">
+                <p className="text-lg font-black">{item}</p>
+                <p className="mt-3 text-sm text-[#5f5147]">
+                  Reduce missed opportunities and improve operational visibility.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="dashboard" className="px-6 py-16 md:px-16">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-3xl font-black md:text-4xl">
             Operational Dashboard Preview
           </h2>
-
-          <p className="mt-4 max-w-2xl text-[#5f5147]">
-            This turns scanner inputs into visual insight so business owners can
-            quickly see what needs attention first.
-          </p>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <BarChartCard
@@ -258,7 +231,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CASE STUDY */}
       <section id="case-study" className="px-6 py-20 md:px-16">
         <div className="mx-auto max-w-7xl rounded-3xl bg-white p-8 shadow-xl md:p-12">
           <p className="font-semibold uppercase tracking-wide text-[#9b6b43]">
@@ -270,9 +242,8 @@ export default function Home() {
           </h2>
 
           <p className="mt-5 max-w-3xl text-[#5f5147]">
-            A small service business with steady monthly inquiries was losing
-            revenue because missed leads, delayed follow-up, and unclear
-            workflow ownership were not being tracked together.
+            A service business with steady inquiries was losing revenue because missed leads,
+            delayed follow-up, and unclear workflow ownership were not tracked together.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -303,7 +274,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CONTACT FORM */}
+      <section className="px-6 py-12 md:px-16">
+        <div className="mx-auto max-w-7xl rounded-3xl border border-[#dccfbd] bg-[#fbf8f3] p-8">
+          <p className="font-semibold uppercase tracking-wide text-[#9b6b43]">
+            Portfolio Credibility
+          </p>
+          <h2 className="mt-3 text-3xl font-black">Built as an operational analytics prototype.</h2>
+          <p className="mt-4 max-w-3xl text-[#5f5147]">
+            PulseIQ Solutions was built with Next.js, TypeScript, Tailwind CSS, and an operations-focused
+            analytics framework designed around customer experience, workforce pressure, and revenue leakage.
+          </p>
+        </div>
+      </section>
+
       <section id="contact" className="px-6 pb-24 md:px-16">
         <div className="mx-auto grid max-w-7xl gap-10 rounded-3xl bg-[#241c16] p-8 text-white shadow-2xl md:grid-cols-2 md:p-12">
           <div>
@@ -316,26 +299,30 @@ export default function Home() {
             </h2>
 
             <p className="mt-5 text-[#eadccf]">
-              Use this section as your lead capture area. Later, you can connect
-              it to Formspree, Google Forms, Airtable, or a real backend.
+              Connect this form to Formspree, Google Forms, Airtable, or your own backend to collect leads.
             </p>
           </div>
 
-          <form className="rounded-3xl bg-white p-6 text-[#241c16]">
-            <ScannerField label="Name" value="" onChange={() => {}} />
-            <ScannerField label="Business Name" value="" onChange={() => {}} />
-            <ScannerField label="Email" value="" onChange={() => {}} />
-            <ScannerField label="Biggest Operational Challenge" value="" onChange={() => {}} />
+          <form
+            action="https://formspree.io/f/YOUR_FORM_ID"
+            method="POST"
+            className="rounded-3xl bg-white p-6 text-[#241c16]"
+          >
+            <FormField name="name" label="Name" />
+            <FormField name="business" label="Business Name" />
+            <FormField name="email" label="Email" type="email" />
+            <FormField name="challenge" label="Biggest Operational Challenge" />
 
             <button
-              type="button"
+              type="submit"
               className="mt-2 w-full rounded-xl bg-[#241c16] px-6 py-3 font-bold text-white hover:bg-[#3b2f27]"
-              onClick={() =>
-                alert("Lead form demo only. Connect this to Formspree or Airtable next.")
-              }
             >
               Request Free Audit
             </button>
+
+            <p className="mt-3 text-xs text-[#7a6a5d]">
+              Replace YOUR_FORM_ID with your real Formspree endpoint when ready.
+            </p>
           </form>
         </div>
       </section>
@@ -351,10 +338,7 @@ function DashboardPreview({ results }: { results: any }) {
           <h2 className="text-xl font-black">PulseIQ Command Center</h2>
           <p className="text-sm text-[#7a6a5d]">Live demo preview</p>
         </div>
-
-        <span className="rounded-full bg-[#efe3d3] px-3 py-1 text-sm font-semibold">
-          Active Scan
-        </span>
+        <span className="rounded-full bg-[#efe3d3] px-3 py-1 text-sm font-semibold">Active Scan</span>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -367,39 +351,47 @@ function DashboardPreview({ results }: { results: any }) {
       <div className="mt-6 rounded-2xl bg-[#241c16] p-5 text-white">
         <p className="text-sm text-[#d8c6b2]">AI Insight</p>
         <p className="mt-2 text-lg font-semibold">
-          Missed leads and delayed follow-up are the strongest indicators of
-          revenue leakage in this scan.
+          Missed leads and delayed follow-up are the strongest indicators of revenue leakage in this scan.
         </p>
       </div>
     </div>
   );
 }
 
-function ScoreGauge({ score }: { score: number }) {
-  return (
-    <div className="mt-8">
-      <div className="mb-2 flex justify-between text-sm text-[#eadccf]">
-        <span>Business Health Score</span>
-        <span>{score}/100</span>
-      </div>
+function CircularGauge({ score }: { score: number }) {
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
 
-      <div className="h-5 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-[#d8b894] transition-all duration-700"
-          style={{ width: `${score}%` }}
-        />
+  return (
+    <div className="mt-8 flex justify-center">
+      <div className="relative h-40 w-40">
+        <svg className="h-full w-full -rotate-90" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r={radius} stroke="rgba(255,255,255,0.12)" strokeWidth="14" fill="none" />
+          <circle
+            cx="70"
+            cy="70"
+            r={radius}
+            stroke="#d8b894"
+            strokeWidth="14"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-700"
+          />
+        </svg>
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-4xl font-black">{score}</p>
+          <p className="text-xs text-[#eadccf]">Health Score</p>
+        </div>
       </div>
     </div>
   );
 }
 
-function AIRecommendation({
-  results,
-  inputs,
-}: {
-  results: any;
-  inputs: ScannerInput;
-}) {
+function AIRecommendation({ results, inputs }: { results: any; inputs: ScannerInput }) {
   const recommendation =
     results.riskScore >= 70
       ? "High risk detected. Prioritize lead follow-up, routing ownership, and missed inquiry tracking immediately."
@@ -411,10 +403,9 @@ function AIRecommendation({
     <div className="mt-8 rounded-2xl bg-white/10 p-5">
       <p className="font-semibold">AI-Style Recommendation</p>
       <p className="mt-2 text-[#eadccf]">{recommendation}</p>
-
       <p className="mt-4 text-sm text-[#d8b894]">
-        Based on {inputs.monthlyLeads} monthly leads, {inputs.missedLeadRate}%
-        missed lead rate, and {inputs.responseDelayHours} hour response delay.
+        Based on {inputs.monthlyLeads} monthly leads, {inputs.missedLeadRate}% missed lead rate,
+        and {inputs.responseDelayHours} hour response delay.
       </p>
     </div>
   );
@@ -422,19 +413,14 @@ function AIRecommendation({
 
 function MetricCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#e3d7c8] bg-[#fbf8f3] p-5">
+    <div className="rounded-2xl border border-[#e3d7c8] bg-[#fbf8f3] p-5 shadow-sm">
       <p className="text-sm text-[#7a6a5d]">{title}</p>
       <p className="mt-2 text-2xl font-black text-[#241c16]">{value}</p>
     </div>
   );
 }
 
-function ScannerField({
-  label,
-  value,
-  onChange,
-  type = "text",
-}: {
+function ScannerField({ label, value, onChange, type = "text" }: {
   label: string;
   value: string | number;
   onChange: (value: string) => void;
@@ -442,14 +428,25 @@ function ScannerField({
 }) {
   return (
     <label className="mb-4 block">
-      <span className="mb-2 block text-sm font-semibold text-[#5f5147]">
-        {label}
-      </span>
-
+      <span className="mb-2 block text-sm font-semibold text-[#5f5147]">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-xl border border-[#dccfbd] bg-[#fbf8f3] px-4 py-3 outline-none focus:border-[#9b6b43]"
+      />
+    </label>
+  );
+}
+
+function FormField({ label, name, type = "text" }: { label: string; name: string; type?: string }) {
+  return (
+    <label className="mb-4 block">
+      <span className="mb-2 block text-sm font-semibold text-[#5f5147]">{label}</span>
+      <input
+        name={name}
+        type={type}
+        required
         className="w-full rounded-xl border border-[#dccfbd] bg-[#fbf8f3] px-4 py-3 outline-none focus:border-[#9b6b43]"
       />
     </label>
@@ -465,28 +462,19 @@ function ResultRow({ label, value }: { label: string; value: string | number }) 
   );
 }
 
-function BarChartCard({
-  title,
-  data,
-}: {
-  title: string;
-  data: { label: string; value: number }[];
-}) {
+function BarChartCard({ title, data }: { title: string; data: { label: string; value: number }[] }) {
   return (
     <div className="rounded-3xl bg-white p-8 shadow-xl">
       <h3 className="text-2xl font-black">{title}</h3>
-
       <div className="mt-6 space-y-5">
         {data.map((item) => {
           const width = Math.min(100, Math.max(5, item.value));
-
           return (
             <div key={item.label}>
               <div className="mb-2 flex justify-between text-sm font-semibold">
                 <span>{item.label}</span>
                 <span>{Math.round(width)}%</span>
               </div>
-
               <div className="h-4 overflow-hidden rounded-full bg-[#efe3d3]">
                 <div
                   className="h-full rounded-full bg-[#3b2f27] transition-all duration-700"
@@ -501,11 +489,20 @@ function BarChartCard({
   );
 }
 
+function StepCard({ number, title, text }: { number: string; title: string; text: string }) {
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-lg">
+      <p className="text-sm font-black text-[#9b6b43]">{number}</p>
+      <h3 className="mt-3 text-xl font-black">{title}</h3>
+      <p className="mt-3 text-sm text-[#5f5147]">{text}</p>
+    </div>
+  );
+}
+
 function InsightBox({ title, points }: { title: string; points: string[] }) {
   return (
     <div className="rounded-3xl border border-[#e3d7c8] bg-[#fbf8f3] p-6">
       <h3 className="text-2xl font-black">{title}</h3>
-
       <ul className="mt-5 space-y-3 text-[#5f5147]">
         {points.map((point) => (
           <li key={point}>• {point}</li>

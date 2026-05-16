@@ -39,28 +39,46 @@ export default function Home() {
 
     const efficiencyScore = Math.max(0, 100 - riskScore);
 
+    const annualLoss = estimatedLoss * 12;
+
+    const riskLevel =
+      riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
+
     return {
       missedLeads,
       estimatedLoss,
+      annualLoss,
       riskScore,
       efficiencyScore,
+      riskLevel,
     };
   }, [inputs]);
 
   function updateInput(key: keyof ScannerInput, value: string) {
     setInputs((prev) => ({
       ...prev,
-      [key]:
-        key === "industry"
-          ? value
-          : Number(value) < 0
-          ? 0
-          : Number(value),
+      [key]: key === "industry" ? value : Math.max(0, Number(value)),
     }));
   }
 
   return (
     <main className="min-h-screen bg-[#f7f2ea] text-[#241c16]">
+      {/* NAV */}
+      <nav className="sticky top-0 z-50 border-b border-[#e1d5c5] bg-[#f7f2ea]/90 px-6 py-4 backdrop-blur md:px-16">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <a href="#" className="text-xl font-black">
+            PulseIQ Solutions
+          </a>
+
+          <div className="hidden gap-6 text-sm font-semibold md:flex">
+            <a href="#scanner">Scanner</a>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#case-study">Case Study</a>
+            <a href="#contact">Free Audit</a>
+          </div>
+        </div>
+      </nav>
+
       {/* HERO */}
       <section className="px-6 py-20 md:px-16">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-center">
@@ -69,15 +87,15 @@ export default function Home() {
               AI-Powered Operational Intelligence
             </p>
 
-            <h1 className="text-4xl font-bold leading-tight md:text-6xl">
+            <h1 className="text-4xl font-black leading-tight md:text-6xl">
               Find the hidden leaks costing your business time, revenue, and
               customer trust.
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-[#5f5147]">
-              PulseIQ helps small businesses identify missed opportunities,
-              workflow bottlenecks, customer experience gaps, and operational
-              friction before they become expensive problems.
+              PulseIQ scans missed leads, follow-up delays, workflow friction,
+              staffing pressure, and customer experience gaps to show where
+              your business can improve.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
@@ -89,78 +107,25 @@ export default function Home() {
               </a>
 
               <a
-                href="#dashboard"
+                href="#contact"
                 className="rounded-xl border border-[#241c16] px-6 py-3 font-semibold hover:bg-white"
               >
-                View Dashboard
+                Request Free Audit
               </a>
             </div>
           </div>
 
-          {/* DASHBOARD PREVIEW */}
-          <div
-            id="dashboard"
-            className="rounded-3xl border border-[#dccfbd] bg-white/80 p-6 shadow-2xl"
-          >
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold">Operational Health</h2>
-                <p className="text-sm text-[#7a6a5d]">Live demo preview</p>
-              </div>
-
-              <span className="rounded-full bg-[#efe3d3] px-3 py-1 text-sm font-semibold">
-                PulseIQ Score
-              </span>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <MetricCard title="Efficiency Score" value="84%" />
-              <MetricCard title="Revenue Risk" value="$3.9K" />
-              <MetricCard title="Missed Leads" value="26" />
-              <MetricCard title="Workflow Risk" value="Medium" />
-            </div>
-
-            <div className="mt-6 rounded-2xl bg-[#241c16] p-5 text-white">
-              <p className="text-sm text-[#d8c6b2]">AI Insight</p>
-              <p className="mt-2 text-lg font-semibold">
-                Response delays and missed follow-ups are the strongest
-                indicators of revenue leakage this month.
-              </p>
-            </div>
-          </div>
+          <DashboardPreview results={results} />
         </div>
       </section>
 
-      {/* LEAK CATEGORIES */}
-      <section className="px-6 py-16 md:px-16">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            What PulseIQ Detects
-          </h2>
-
-          <p className="mt-4 max-w-2xl text-[#5f5147]">
-            Businesses rarely lose money from one major failure. They lose it
-            through small operational leaks that repeat every day.
-          </p>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-4">
-            <FeatureCard
-              title="Revenue Leaks"
-              items={["Missed leads", "Delayed follow-ups", "Lost inquiries"]}
-            />
-            <FeatureCard
-              title="Workflow Friction"
-              items={["Bottlenecks", "Manual tasks", "Slow handoffs"]}
-            />
-            <FeatureCard
-              title="Customer Experience"
-              items={["Long wait times", "Repeat issues", "Confusing steps"]}
-            />
-            <FeatureCard
-              title="Workforce Strain"
-              items={["Uneven workload", "Burnout risk", "Queue pressure"]}
-            />
-          </div>
+      {/* TRUST METRICS */}
+      <section className="px-6 pb-8 md:px-16">
+        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-4">
+          <MetricCard title="Monthly Risk" value={`$${results.estimatedLoss.toLocaleString()}`} />
+          <MetricCard title="Annualized Risk" value={`$${results.annualLoss.toLocaleString()}`} />
+          <MetricCard title="Missed Leads" value={`${results.missedLeads}`} />
+          <MetricCard title="Risk Level" value={results.riskLevel} />
         </div>
       </section>
 
@@ -172,16 +137,16 @@ export default function Home() {
               Free Business Scanner
             </p>
 
-            <h2 className="text-3xl font-bold md:text-5xl">
-              Estimate where your business may be losing money.
+            <h2 className="text-3xl font-black md:text-5xl">
+              Estimate your operational leak risk.
             </h2>
 
             <p className="mt-5 text-[#5f5147]">
-              Enter a few numbers and PulseIQ will estimate missed lead risk,
-              potential revenue leakage, and operational efficiency.
+              Adjust the numbers below to see how missed leads and slow
+              response times can quietly affect revenue.
             </p>
 
-            <div className="mt-8 rounded-2xl bg-white p-6 shadow-lg">
+            <div className="mt-8 rounded-3xl bg-white p-6 shadow-xl">
               <ScannerField
                 label="Industry"
                 value={inputs.industry}
@@ -230,114 +195,228 @@ export default function Home() {
               Scanner Results
             </p>
 
-            <h3 className="mt-3 text-3xl font-bold">
+            <h3 className="mt-3 text-3xl font-black">
               {inputs.industry} Risk Snapshot
             </h3>
+
+            <ScoreGauge score={results.efficiencyScore} />
 
             <div className="mt-8 grid gap-4">
               <ResultRow label="Estimated Missed Leads" value={results.missedLeads} />
               <ResultRow
-                label="Estimated Monthly Revenue Leakage"
+                label="Monthly Revenue Leakage"
                 value={`$${results.estimatedLoss.toLocaleString()}`}
               />
-              <ResultRow label="Operational Risk Score" value={`${results.riskScore}/100`} />
               <ResultRow
-                label="Efficiency Score"
-                value={`${results.efficiencyScore}/100`}
+                label="Annualized Revenue Risk"
+                value={`$${results.annualLoss.toLocaleString()}`}
+              />
+              <ResultRow
+                label="Operational Risk Score"
+                value={`${results.riskScore}/100`}
               />
             </div>
 
-            <div className="mt-8 rounded-2xl bg-white/10 p-5">
-              <p className="font-semibold">PulseIQ Recommendation</p>
-              <p className="mt-2 text-[#eadccf]">
-                Review follow-up speed, missed inquiry tracking, and workload
-                distribution. These areas are likely creating preventable
-                revenue loss and customer frustration.
-              </p>
-            </div>
+            <AIRecommendation results={results} inputs={inputs} />
           </div>
         </div>
       </section>
 
-      {/* BEFORE AFTER */}
-      <section className="px-6 py-16 md:px-16">
+      {/* CHART SECTION */}
+      <section id="dashboard" className="px-6 py-16 md:px-16">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Before PulseIQ vs. After PulseIQ
+          <h2 className="text-3xl font-black md:text-4xl">
+            Operational Dashboard Preview
           </h2>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <div className="rounded-3xl bg-white p-8 shadow-lg">
-              <h3 className="text-2xl font-bold">Before</h3>
-              <ul className="mt-5 space-y-3 text-[#5f5147]">
-                <li>• Missed leads go unnoticed</li>
-                <li>• Teams react after problems grow</li>
-                <li>• Workflow issues are hard to see</li>
-                <li>• Customer frustration increases</li>
-                <li>• Reports show numbers without action</li>
-              </ul>
-            </div>
+          <p className="mt-4 max-w-2xl text-[#5f5147]">
+            This turns scanner inputs into visual insight so business owners can
+            quickly see what needs attention first.
+          </p>
 
-            <div className="rounded-3xl bg-[#3b2f27] p-8 text-white shadow-lg">
-              <h3 className="text-2xl font-bold">After</h3>
-              <ul className="mt-5 space-y-3 text-[#eadccf]">
-                <li>• Revenue leaks become visible</li>
-                <li>• Teams spot bottlenecks earlier</li>
-                <li>• Leaders know what to fix first</li>
-                <li>• Customer experience improves</li>
-                <li>• Data connects directly to action</li>
-              </ul>
-            </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <BarChartCard
+              title="Leak Drivers"
+              data={[
+                { label: "Missed Leads", value: inputs.missedLeadRate },
+                { label: "Response Delay", value: inputs.responseDelayHours * 5 },
+                { label: "Team Pressure", value: Math.max(0, 8 - inputs.teamSize) * 12 },
+                { label: "Workflow Risk", value: results.riskScore },
+              ]}
+            />
+
+            <BarChartCard
+              title="Improvement Focus"
+              data={[
+                { label: "Follow-Up", value: 90 },
+                { label: "Routing", value: 72 },
+                { label: "Staffing", value: 64 },
+                { label: "Automation", value: 83 },
+              ]}
+            />
           </div>
         </div>
       </section>
 
       {/* CASE STUDY */}
-      <section className="px-6 py-20 md:px-16">
+      <section id="case-study" className="px-6 py-20 md:px-16">
         <div className="mx-auto max-w-7xl rounded-3xl bg-white p-8 shadow-xl md:p-12">
           <p className="font-semibold uppercase tracking-wide text-[#9b6b43]">
-            Example Case Study
+            Portfolio Case Study
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
-            How one workflow analysis revealed hidden queue inefficiencies.
+          <h2 className="mt-3 text-3xl font-black md:text-4xl">
+            Simulated Small Business Revenue Leak Analysis
           </h2>
 
           <p className="mt-5 max-w-3xl text-[#5f5147]">
-            A simulated service business was receiving steady monthly leads but
-            losing opportunities due to delayed follow-up, unclear routing, and
-            overloaded team members during peak hours.
+            A small service business with steady monthly inquiries was losing
+            revenue because missed leads, delayed follow-up, and unclear
+            workflow ownership were not being tracked together.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <MetricCard title="Missed Lead Rate" value="12%" />
+            <MetricCard title="Problem Found" value="Follow-Up Delay" />
             <MetricCard title="Monthly Risk" value="$3,900" />
-            <MetricCard title="Fix Priority" value="Follow-Up Speed" />
+            <MetricCard title="Priority Fix" value="Lead Routing" />
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <InsightBox
+              title="Before"
+              points={[
+                "Missed leads were tracked separately from staffing pressure.",
+                "No one owned follow-up timing as a measurable KPI.",
+                "Reporting showed outcomes but not the operational cause.",
+              ]}
+            />
+
+            <InsightBox
+              title="After"
+              points={[
+                "Missed leads became connected to response speed and workload.",
+                "Follow-up delay became the first improvement priority.",
+                "The business gained a clear action plan instead of raw numbers.",
+              ]}
+            />
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-6 pb-24 md:px-16">
-        <div className="mx-auto max-w-5xl rounded-3xl bg-[#241c16] p-10 text-center text-white shadow-2xl">
-          <h2 className="text-3xl font-bold md:text-5xl">
-            Ready to find your operational leaks?
-          </h2>
+      {/* CONTACT FORM */}
+      <section id="contact" className="px-6 pb-24 md:px-16">
+        <div className="mx-auto grid max-w-7xl gap-10 rounded-3xl bg-[#241c16] p-8 text-white shadow-2xl md:grid-cols-2 md:p-12">
+          <div>
+            <p className="font-semibold uppercase tracking-wide text-[#d8b894]">
+              Free Mini Audit
+            </p>
 
-          <p className="mx-auto mt-5 max-w-2xl text-[#eadccf]">
-            Start with a simple scanner, then turn the results into better
-            workflows, stronger follow-up, and smarter business decisions.
-          </p>
+            <h2 className="mt-3 text-3xl font-black md:text-5xl">
+              Want a personalized operational leak review?
+            </h2>
 
-          <a
-            href="#scanner"
-            className="mt-8 inline-flex rounded-xl bg-[#d8b894] px-7 py-3 font-bold text-[#241c16] hover:bg-[#e8c9a3]"
-          >
-            Run the Free Scanner
-          </a>
+            <p className="mt-5 text-[#eadccf]">
+              Use this section as your lead capture area. Later, you can connect
+              it to Formspree, Google Forms, Airtable, or a real backend.
+            </p>
+          </div>
+
+          <form className="rounded-3xl bg-white p-6 text-[#241c16]">
+            <ScannerField label="Name" value="" onChange={() => {}} />
+            <ScannerField label="Business Name" value="" onChange={() => {}} />
+            <ScannerField label="Email" value="" onChange={() => {}} />
+            <ScannerField label="Biggest Operational Challenge" value="" onChange={() => {}} />
+
+            <button
+              type="button"
+              className="mt-2 w-full rounded-xl bg-[#241c16] px-6 py-3 font-bold text-white hover:bg-[#3b2f27]"
+              onClick={() =>
+                alert("Lead form demo only. Connect this to Formspree or Airtable next.")
+              }
+            >
+              Request Free Audit
+            </button>
+          </form>
         </div>
       </section>
     </main>
+  );
+}
+
+function DashboardPreview({ results }: { results: any }) {
+  return (
+    <div className="rounded-3xl border border-[#dccfbd] bg-white/80 p-6 shadow-2xl">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-black">PulseIQ Command Center</h2>
+          <p className="text-sm text-[#7a6a5d]">Live demo preview</p>
+        </div>
+
+        <span className="rounded-full bg-[#efe3d3] px-3 py-1 text-sm font-semibold">
+          Active Scan
+        </span>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <MetricCard title="Efficiency Score" value={`${results.efficiencyScore}%`} />
+        <MetricCard title="Revenue Risk" value={`$${results.estimatedLoss.toLocaleString()}`} />
+        <MetricCard title="Missed Leads" value={`${results.missedLeads}`} />
+        <MetricCard title="Risk Level" value={results.riskLevel} />
+      </div>
+
+      <div className="mt-6 rounded-2xl bg-[#241c16] p-5 text-white">
+        <p className="text-sm text-[#d8c6b2]">AI Insight</p>
+        <p className="mt-2 text-lg font-semibold">
+          Missed leads and delayed follow-up are the strongest indicators of
+          revenue leakage in this scan.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ScoreGauge({ score }: { score: number }) {
+  return (
+    <div className="mt-8">
+      <div className="mb-2 flex justify-between text-sm text-[#eadccf]">
+        <span>Business Health Score</span>
+        <span>{score}/100</span>
+      </div>
+
+      <div className="h-5 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-[#d8b894] transition-all duration-700"
+          style={{ width: `${score}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AIRecommendation({
+  results,
+  inputs,
+}: {
+  results: any;
+  inputs: ScannerInput;
+}) {
+  const recommendation =
+    results.riskScore >= 70
+      ? "High risk detected. Prioritize lead follow-up, routing ownership, and missed inquiry tracking immediately."
+      : results.riskScore >= 40
+      ? "Moderate risk detected. Improve response time, assign follow-up ownership, and monitor workload patterns weekly."
+      : "Low risk detected. Continue monitoring response speed and lead capture to prevent small leaks from growing.";
+
+  return (
+    <div className="mt-8 rounded-2xl bg-white/10 p-5">
+      <p className="font-semibold">AI-Style Recommendation</p>
+      <p className="mt-2 text-[#eadccf]">{recommendation}</p>
+
+      <p className="mt-4 text-sm text-[#d8b894]">
+        Based on {inputs.monthlyLeads} monthly leads, {inputs.missedLeadRate}%
+        missed lead rate, and {inputs.responseDelayHours} hour response delay.
+      </p>
+    </div>
   );
 }
 
@@ -345,20 +424,7 @@ function MetricCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[#e3d7c8] bg-[#fbf8f3] p-5">
       <p className="text-sm text-[#7a6a5d]">{title}</p>
-      <p className="mt-2 text-2xl font-bold text-[#241c16]">{value}</p>
-    </div>
-  );
-}
-
-function FeatureCard({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="rounded-3xl bg-white p-6 shadow-lg">
-      <h3 className="text-xl font-bold">{title}</h3>
-      <ul className="mt-4 space-y-2 text-[#5f5147]">
-        {items.map((item) => (
-          <li key={item}>• {item}</li>
-        ))}
-      </ul>
+      <p className="mt-2 text-2xl font-black text-[#241c16]">{value}</p>
     </div>
   );
 }
@@ -394,7 +460,57 @@ function ResultRow({ label, value }: { label: string; value: string | number }) 
   return (
     <div className="flex items-center justify-between rounded-2xl bg-white/10 p-4">
       <span className="text-[#eadccf]">{label}</span>
-      <span className="text-xl font-bold">{value}</span>
+      <span className="text-xl font-black">{value}</span>
+    </div>
+  );
+}
+
+function BarChartCard({
+  title,
+  data,
+}: {
+  title: string;
+  data: { label: string; value: number }[];
+}) {
+  return (
+    <div className="rounded-3xl bg-white p-8 shadow-xl">
+      <h3 className="text-2xl font-black">{title}</h3>
+
+      <div className="mt-6 space-y-5">
+        {data.map((item) => {
+          const width = Math.min(100, Math.max(5, item.value));
+
+          return (
+            <div key={item.label}>
+              <div className="mb-2 flex justify-between text-sm font-semibold">
+                <span>{item.label}</span>
+                <span>{Math.round(width)}%</span>
+              </div>
+
+              <div className="h-4 overflow-hidden rounded-full bg-[#efe3d3]">
+                <div
+                  className="h-full rounded-full bg-[#3b2f27] transition-all duration-700"
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function InsightBox({ title, points }: { title: string; points: string[] }) {
+  return (
+    <div className="rounded-3xl border border-[#e3d7c8] bg-[#fbf8f3] p-6">
+      <h3 className="text-2xl font-black">{title}</h3>
+
+      <ul className="mt-5 space-y-3 text-[#5f5147]">
+        {points.map((point) => (
+          <li key={point}>• {point}</li>
+        ))}
+      </ul>
     </div>
   );
 }

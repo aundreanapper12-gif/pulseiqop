@@ -1,803 +1,378 @@
-"use client";
+const pulseiqUrl = "https://www.pulseiqsolutions.site/";
+const linkedInUrl = "https://www.linkedin.com/in/aundreanapper1205";
+const emailAddress = "aundreanapper12@gmail.com/";
+const projects = [
+  {
+    title: "PulseIQ Operations Intelligence",
+    type: "Live Website / AI Operations Tool",
+    description:
+      "A business operations website and dashboard concept that helps companies identify hidden workflow gaps, missed lead risks, customer friction, and operational inefficiencies.",
+    impact:
+      "Shows employers that I can combine business analysis, customer experience, AI ideas, and dashboard thinking into one practical solution.",
+    tools: ["Next.js", "Operations Analytics", "AI Insights", "Customer Experience"],
+    liveUrl: pulseiqUrl,
+    buttonText: "Open PulseIQ Website",
+  },
+  {
+    title: "Revenue Leak Scanner",
+    type: "Business Analysis Project",
+    description:
+      "A scoring tool concept that reviews missed leads, follow-up delays, unclear contact options, website friction, and automation opportunities for small businesses.",
+    impact:
+      "Helps businesses understand where they may be losing money, time, and customer trust before the problem grows.",
+    tools: ["Business Analysis", "Scoring Model", "Process Improvement", "Automation Strategy"],
+    liveUrl: pulseiqUrl,
+    buttonText: "View Scanner Concept",
+  },
+  {
+    title: "KPI Operations Dashboard",
+    type: "Portfolio Dashboard Project",
+    description:
+      "A professional dashboard concept tracking operational health, efficiency score, response speed, missed opportunity risk, and customer satisfaction.",
+    impact:
+      "Demonstrates how I use metrics to explain performance, identify trends, and support better leadership decisions.",
+    tools: ["KPI Tracking", "Excel Thinking", "Dashboard Design", "Performance Analytics"],
+    liveUrl: pulseiqUrl,
+    buttonText: "View Dashboard Demo",
+  },
+  {
+    title: "Performance Readiness Scorecard",
+    type: "Workforce Analytics Project",
+    description:
+      "A scorecard concept that measures quality, consistency, efficiency, missed opportunity risk, and coaching readiness for remote operations teams.",
+    impact:
+      "Connects daily work performance to coaching, training, QA, and advancement readiness.",
+    tools: ["Workforce Analytics", "QA Metrics", "Coaching", "Excel Dashboards"],
+    liveUrl: pulseiqUrl,
+    buttonText: "View Scorecard Concept",
+  },
+  {
+    title: "Supplier Delivery Analysis",
+    type: "Academic Business Analytics Project",
+    description:
+      "A descriptive analytics project analyzing shipment timing, supplier performance, defect rates, and delivery trends using business data.",
+    impact:
+      "Shows applied analytics skills through descriptive statistics, pivot tables, trend identification, and visual reporting.",
+    tools: ["Excel", "Descriptive Statistics", "Pivot Tables", "Data Visualization"],
+    liveUrl: "#contact",
+    buttonText: "Ask About This Project",
+  },
+];
 
-import { useMemo, useState } from "react";
+const skills = [
+  "Operations Analytics",
+  "Customer Experience",
+  "KPI Dashboards",
+  "Business Analysis",
+  "Workflow Improvement",
+  "Excel Data Analysis",
+  "AI Workflow Ideas",
+  "Process Documentation",
+  "QA Thinking",
+  "Training Support",
+  "Performance Coaching",
+  "Remote Operations",
+  "HR Analytics Interest",
+  "Workforce Analytics",
+  "Problem Solving",
+  "Customer Support Strategy",
+];
 
-type ScannerInput = {
-  industry: string;
-  monthlyLeads: number;
-  missedLeadRate: number;
-  avgLeadValue: number;
-  responseDelayHours: number;
-  teamSize: number;
-};
+const resumeHighlights = [
+  "Built portfolio projects focused on operations analytics, customer experience, KPI tracking, AI workflow ideas, and process improvement.",
+  "Created dashboard and scorecard concepts that translate performance data into clear business insights and leadership recommendations.",
+  "Applied business analytics coursework to real-world problems using Excel, descriptive statistics, visual reporting, and what-if thinking.",
+  "Developed training-style resources, workflow guides, coaching prompts, and documentation designed to help teams perform more consistently.",
+  "Focused on remote roles that combine customer experience, QA, operations, HR, analytics, and workforce performance.",
+];
 
-type Results = {
-  missedLeads: number;
-  estimatedLoss: number;
-  annualLoss: number;
-  riskScore: number;
-  efficiencyScore: number;
-  riskLevel: string;
-};
+const dashboardMetrics = [
+  { label: "Operational Health", value: "88%", note: "Overall business workflow score" },
+  { label: "Efficiency Score", value: "91/100", note: "Performance and process strength" },
+  { label: "CX Score", value: "94%", note: "Customer experience indicator" },
+  { label: "Risk Level", value: "Low", note: "Missed opportunity risk" },
+];
 
-export default function Home() {
-  const [darkMode, setDarkMode] = useState(false);
-
-  const [inputs, setInputs] = useState<ScannerInput>({
-    industry: "Small Business",
-    monthlyLeads: 220,
-    missedLeadRate: 12,
-    avgLeadValue: 150,
-    responseDelayHours: 8,
-    teamSize: 4,
-  });
-
-  const results = useMemo<Results>(() => {
-    const missedLeads = Math.round(
-      inputs.monthlyLeads * (inputs.missedLeadRate / 100)
-    );
-
-    const estimatedLoss = missedLeads * inputs.avgLeadValue;
-    const annualLoss = estimatedLoss * 12;
-
-    const riskScore = Math.min(
-      100,
-      Math.round(
-        inputs.missedLeadRate * 2 +
-          inputs.responseDelayHours * 3 +
-          Math.max(0, 8 - inputs.teamSize) * 4
-      )
-    );
-
-    const efficiencyScore = Math.max(0, 100 - riskScore);
-    const riskLevel =
-      riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
-
-    return {
-      missedLeads,
-      estimatedLoss,
-      annualLoss,
-      riskScore,
-      efficiencyScore,
-      riskLevel,
-    };
-  }, [inputs]);
-
-  const theme = darkMode
-    ? "bg-[#14100d] text-[#fff7ed]"
-    : "bg-[#f7f2ea] text-[#241c16]";
-
-  function updateInput(key: keyof ScannerInput, value: string) {
-    setInputs((prev) => ({
-      ...prev,
-      [key]: key === "industry" ? value : Math.max(0, Number(value)),
-    }));
-  }
-
-  function downloadReport() {
-    const report = `
-PulseIQ Solutions - Operational Risk Summary
-
-Industry: ${inputs.industry}
-Monthly Leads: ${inputs.monthlyLeads}
-Missed Lead Rate: ${inputs.missedLeadRate}%
-Average Lead Value: $${inputs.avgLeadValue}
-Average Response Delay: ${inputs.responseDelayHours} hours
-Team Size: ${inputs.teamSize}
-
-Estimated Missed Leads: ${results.missedLeads}
-Monthly Revenue Leakage: $${results.estimatedLoss.toLocaleString()}
-Annualized Revenue Risk: $${results.annualLoss.toLocaleString()}
-Operational Risk Score: ${results.riskScore}/100
-Business Health Score: ${results.efficiencyScore}/100
-Risk Level: ${results.riskLevel}
-
-AI-Style Recommendation:
-${getRecommendation(results)}
-
-Priority Action Plan:
-1. Track missed inquiries as a measurable KPI.
-2. Assign ownership for follow-up timing.
-3. Review workload pressure during peak demand.
-4. Reduce manual handoffs and unclear routing.
-5. Monitor operational health weekly.
-`;
-
-    const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "pulseiq-operational-risk-summary.txt";
-    link.click();
-
-    URL.revokeObjectURL(url);
-  }
-
+export default function PortfolioPage() {
   return (
-    <main className={`min-h-screen ${theme}`}>
-      <a
-        href="#contact"
-        className="fixed bottom-5 right-5 z-50 rounded-full bg-[#d8b894] px-5 py-3 text-sm font-black text-[#241c16] shadow-2xl hover:bg-[#e8c9a3]"
-      >
-        Free Audit
-      </a>
-
-      <nav className="sticky top-0 z-40 border-b border-[#8b735f]/20 bg-inherit px-6 py-4 backdrop-blur md:px-16">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <a href="#" className="text-xl font-black">
-            PulseIQ Solutions
+    <main className="min-h-screen bg-[#070A13] text-white">
+      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#070A13]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
+          <a href="#home" className="text-lg font-black tracking-tight">
+            Aundrea<span className="text-violet-300">.</span>
           </a>
 
-          <div className="hidden gap-6 text-sm font-semibold md:flex">
-            <a href="#scanner">Scanner</a>
-            <a href="#analytics">Analytics</a>
-            <a href="#how">How It Works</a>
-            <a href="#case-study">Case Study</a>
-            <a href="#contact">Free Audit</a>
+          <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+            <a href="#about" className="hover:text-white">About</a>
+            <a href="#projects" className="hover:text-white">Projects</a>
+            <a href="#skills" className="hover:text-white">Skills</a>
+            <a href="#resume" className="hover:text-white">Resume</a>
+            <a href="#contact" className="hover:text-white">Contact</a>
           </div>
 
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="rounded-full border border-[#8b735f]/40 px-4 py-2 text-sm font-bold"
+          <a
+            href={pulseiqUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-100"
           >
-            {darkMode ? "Light" : "Dark"}
-          </button>
+            Open PulseIQ
+          </a>
         </div>
       </nav>
 
-      <section className="px-6 py-20 md:px-16">
-        <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-center">
-          <div className="animate-fadeIn">
-            <p className="mb-4 inline-flex rounded-full bg-[#3b2f27] px-4 py-2 text-sm font-medium text-white">
-              AI-Powered Operational Intelligence
-            </p>
+      <section id="home" className="relative overflow-hidden px-6 py-24 lg:px-8 lg:py-32">
+        <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-violet-600/20 blur-3xl" />
+        <div className="absolute right-0 top-40 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-3xl" />
 
-            <h1 className="text-4xl font-black leading-tight md:text-6xl">
-              Operational intelligence for businesses losing time, revenue, and
-              efficiency to hidden workflow leaks.
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-violet-200 shadow-2xl backdrop-blur">
+              Operations Analytics • AI Workflows • Customer Experience
+            </div>
+
+            <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-6xl lg:text-7xl">
+              I turn business problems into clear operational insights.
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg text-[#8b735f]">
-              PulseIQ helps identify missed opportunities, customer friction,
-              staffing pressure, and operational bottlenecks before they become
-              expensive.
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
+              I’m Aundrea Napper, an operations and analytics-focused professional building practical dashboards, scorecards, and AI-inspired tools for customer experience, workflow improvement, and workforce performance.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#scanner"
-                className="rounded-xl bg-[#d8b894] px-6 py-3 font-black text-[#241c16] shadow-lg hover:bg-[#e8c9a3]"
+                href="#projects"
+                className="rounded-full bg-violet-300 px-7 py-4 text-center font-bold text-slate-950 shadow-xl shadow-violet-500/20 transition hover:-translate-y-1 hover:bg-violet-200"
               >
-                Run Free Scanner
+                View Portfolio Projects
               </a>
 
-              <button
-                onClick={downloadReport}
-                className="rounded-xl border border-[#8b735f]/50 px-6 py-3 font-black hover:bg-white/10"
+              <a
+                href={pulseiqUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/15 bg-white/5 px-7 py-4 text-center font-bold text-white backdrop-blur transition hover:-translate-y-1 hover:bg-white/10"
               >
-                Download Sample Report
-              </button>
+                Visit PulseIQ Operations
+              </a>
             </div>
           </div>
 
-          <CommandCenter results={results} />
-        </div>
-      </section>
-
-      <section className="px-6 pb-10 md:px-16">
-        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-4">
-          <MetricCard title="Operational Scans" value="1,240+" />
-          <MetricCard title="Workflow Risks Analyzed" value="8,900+" />
-          <MetricCard title="Potential Leaks Found" value="$2.4M" />
-          <MetricCard title="Improvement Areas" value="4 Core" />
-        </div>
-      </section>
-
-      <section id="scanner" className="px-6 py-20 md:px-16">
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2">
-          <div>
-            <p className="mb-3 font-semibold uppercase tracking-wide text-[#d8b894]">
-              Free Business Scanner
-            </p>
-
-            <h2 className="text-3xl font-black md:text-5xl">
-              Estimate your operational leak risk.
-            </h2>
-
-            <p className="mt-5 text-[#8b735f]">
-              Adjust the numbers below to see how missed leads and response
-              delays affect revenue, staffing pressure, and customer experience.
-            </p>
-
-            <div className="mt-8 rounded-3xl bg-white/10 p-6 shadow-xl ring-1 ring-[#8b735f]/20">
-              <ScannerField
-                label="Industry"
-                value={inputs.industry}
-                onChange={(v) => updateInput("industry", v)}
-              />
-              <ScannerField
-                label="Monthly Leads"
-                type="number"
-                value={inputs.monthlyLeads}
-                onChange={(v) => updateInput("monthlyLeads", v)}
-              />
-              <ScannerField
-                label="Missed Lead Rate %"
-                type="number"
-                value={inputs.missedLeadRate}
-                onChange={(v) => updateInput("missedLeadRate", v)}
-              />
-              <ScannerField
-                label="Average Lead Value"
-                type="number"
-                value={inputs.avgLeadValue}
-                onChange={(v) => updateInput("avgLeadValue", v)}
-              />
-              <ScannerField
-                label="Average Response Delay Hours"
-                type="number"
-                value={inputs.responseDelayHours}
-                onChange={(v) => updateInput("responseDelayHours", v)}
-              />
-              <ScannerField
-                label="Team Size"
-                type="number"
-                value={inputs.teamSize}
-                onChange={(v) => updateInput("teamSize", v)}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-[#241c16] p-8 text-white shadow-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#d8b894]">
-              Scanner Results
-            </p>
-
-            <h3 className="mt-3 text-3xl font-black">
-              {inputs.industry} Risk Snapshot
-            </h3>
-
-            <CircularGauge score={results.efficiencyScore} />
-
-            <div className="mt-8 grid gap-4">
-              <ResultRow label="Estimated Missed Leads" value={results.missedLeads} />
-              <ResultRow
-                label="Monthly Revenue Leakage"
-                value={`$${results.estimatedLoss.toLocaleString()}`}
-              />
-              <ResultRow
-                label="Annualized Revenue Risk"
-                value={`$${results.annualLoss.toLocaleString()}`}
-              />
-              <ResultRow
-                label="Operational Risk Score"
-                value={`${results.riskScore}/100`}
-              />
-            </div>
-
-            <AIRecommendation results={results} inputs={inputs} />
-
-            <button
-              onClick={downloadReport}
-              className="mt-6 w-full rounded-xl bg-[#d8b894] px-6 py-3 font-black text-[#241c16] hover:bg-[#e8c9a3]"
-            >
-              Download Risk Summary
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="analytics" className="px-6 py-16 md:px-16">
-        <div className="mx-auto max-w-7xl">
-          <p className="font-semibold uppercase tracking-wide text-[#d8b894]">
-            Visual Analytics
-          </p>
-
-          <h2 className="mt-3 text-3xl font-black md:text-4xl">
-            Turn operational activity into decision-ready insight.
-          </h2>
-
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            <LineChartCard />
-            <HeatmapCard />
-            <BarChartCard
-              title="Leak Drivers"
-              data={[
-                { label: "Missed Leads", value: inputs.missedLeadRate },
-                { label: "Response Delay", value: inputs.responseDelayHours * 5 },
-                {
-                  label: "Team Pressure",
-                  value: Math.max(0, 8 - inputs.teamSize) * 12,
-                },
-                { label: "Workflow Risk", value: results.riskScore },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="how" className="px-6 py-16 md:px-16">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black md:text-4xl">How It Works</h2>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-4">
-            <StepCard
-              number="01"
-              title="Scan"
-              text="Enter lead volume, missed leads, response delays, and team size."
-            />
-            <StepCard
-              number="02"
-              title="Score"
-              text="PulseIQ calculates revenue leakage, risk level, and business health."
-            />
-            <StepCard
-              number="03"
-              title="Prioritize"
-              text="The dashboard shows which bottlenecks need attention first."
-            />
-            <StepCard
-              number="04"
-              title="Improve"
-              text="Use the recommendations to improve workflows and reduce friction."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 py-16 md:px-16">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-black md:text-4xl">Who We Help</h2>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-5">
-            {["Law Firms", "Medical Offices", "Home Services", "Support Teams", "Small Businesses"].map(
-              (item) => (
-                <div
-                  key={item}
-                  className="rounded-3xl bg-white/10 p-6 text-center shadow-lg ring-1 ring-[#8b735f]/20"
-                >
-                  <p className="text-lg font-black">{item}</p>
-                  <p className="mt-3 text-sm text-[#8b735f]">
-                    Reduce missed opportunities and improve visibility.
-                  </p>
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
+            <div className="rounded-[1.5rem] bg-[#0D1224] p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Featured Project</p>
+                  <h2 className="text-2xl font-bold">PulseIQ Command Center</h2>
                 </div>
-              )
-            )}
+                <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  Live Website
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {dashboardMetrics.map((metric) => (
+                  <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                    <p className="text-sm text-slate-400">{metric.label}</p>
+                    <p className="mt-2 text-3xl font-black">{metric.value}</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">{metric.note}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-violet-300/20 bg-violet-300/10 p-5">
+                <p className="text-sm font-semibold text-violet-100">AI Insight Example</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Missed lead risk decreases when response speed, follow-up consistency, workflow clarity, and staffing coverage are reviewed together instead of separately.
+                </p>
+              </div>
+
+              <a
+                href={pulseiqUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-6 block rounded-full bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-violet-100"
+              >
+                Open Live PulseIQ Site
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="case-study" className="px-6 py-20 md:px-16">
-        <div className="mx-auto max-w-7xl rounded-3xl bg-white/10 p-8 shadow-xl ring-1 ring-[#8b735f]/20 md:p-12">
-          <p className="font-semibold uppercase tracking-wide text-[#d8b894]">
-            Portfolio Case Study
-          </p>
+      <section id="about" className="px-6 py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">About Me</p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+              Built for roles where data meets people.
+            </h2>
+          </div>
 
-          <h2 className="mt-3 text-3xl font-black md:text-4xl">
-            Simulated Small Business Revenue Leak Analysis
+          <div className="space-y-6 text-lg leading-8 text-slate-300">
+            <p>
+              My work sits at the intersection of operations, customer experience, HR thinking, and business analytics. I’m focused on roles where I can help teams improve workflows, understand performance, support customers better, and make smarter decisions with data.
+            </p>
+            <p>
+              This portfolio highlights how I think: identify the problem, measure what matters, find the pattern, explain the business impact, and recommend realistic next steps.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" className="px-6 py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Featured Projects</p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+              Projects employers can click, understand, and remember.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-300">
+              These projects connect analytics, operations, customer experience, process improvement, and AI-powered business thinking.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {projects.map((project) => (
+              <article
+                key={project.title}
+                className="group rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:bg-white/[0.07]"
+              >
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <p className="rounded-full bg-violet-300/10 px-4 py-2 text-xs font-bold text-violet-200">
+                    {project.type}
+                  </p>
+                  <span className="text-2xl transition group-hover:translate-x-1">↗</span>
+                </div>
+
+                <h3 className="text-2xl font-black">{project.title}</h3>
+                <p className="mt-4 leading-7 text-slate-300">{project.description}</p>
+
+                <div className="mt-6 rounded-2xl border border-white/10 bg-[#0D1224] p-5">
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Business Impact</p>
+                  <p className="mt-2 leading-7 text-slate-200">{project.impact}</p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {project.tools.map((tool) => (
+                    <span key={tool} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={project.liveUrl}
+                    target={project.liveUrl.startsWith("http") ? "_blank" : undefined}
+                    rel={project.liveUrl.startsWith("http") ? "noreferrer" : undefined}
+                    className="rounded-full bg-violet-300 px-5 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-violet-200"
+                  >
+                    {project.buttonText}
+                  </a>
+
+                  <a
+                    href="#contact"
+                    className="rounded-full border border-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10"
+                  >
+                    Discuss Project
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="skills" className="px-6 py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-8 lg:p-12">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Skills</p>
+          <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+            What I bring to a team
           </h2>
 
-          <p className="mt-5 max-w-3xl text-[#8b735f]">
-            A service business with steady inquiries was losing revenue because
-            missed leads, delayed follow-up, and unclear workflow ownership were
-            not tracked together.
-          </p>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <MetricCard title="Problem Found" value="Follow-Up Delay" />
-            <MetricCard title="Monthly Risk" value="$3,900" />
-            <MetricCard title="Priority Fix" value="Lead Routing" />
-          </div>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <InsightBox
-              title="Before"
-              points={[
-                "Missed leads were tracked separately from staffing pressure.",
-                "No one owned follow-up timing as a measurable KPI.",
-                "Reporting showed outcomes but not the operational cause.",
-              ]}
-            />
-
-            <InsightBox
-              title="After"
-              points={[
-                "Missed leads became connected to response speed and workload.",
-                "Follow-up delay became the first improvement priority.",
-                "The business gained a clear action plan instead of raw numbers.",
-              ]}
-            />
+          <div className="mt-10 flex flex-wrap gap-3">
+            {skills.map((skill) => (
+              <span key={skill} className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-black/10">
+                {skill}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-12 md:px-16">
-        <div className="mx-auto max-w-7xl rounded-3xl border border-[#8b735f]/20 bg-white/10 p-8">
-          <p className="font-semibold uppercase tracking-wide text-[#d8b894]">
-            Built By
-          </p>
-
-          <h2 className="mt-3 text-3xl font-black">Aundrea Napper</h2>
-
-          <p className="mt-4 max-w-3xl text-[#8b735f]">
-            Business Administration student concentrating in HR Management and
-            Business Analytics. PulseIQ Solutions was built as an operational
-            analytics prototype using Next.js, TypeScript, Tailwind CSS, and a
-            business intelligence framework focused on customer experience,
-            workforce pressure, and revenue leakage.
-          </p>
-        </div>
-      </section>
-
-      <section id="contact" className="px-6 pb-24 md:px-16">
-        <div className="mx-auto grid max-w-7xl gap-10 rounded-3xl bg-[#241c16] p-8 text-white shadow-2xl md:grid-cols-2 md:p-12">
+      <section id="resume" className="px-6 py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="font-semibold uppercase tracking-wide text-[#d8b894]">
-              Free Mini Audit
-            </p>
-
-            <h2 className="mt-3 text-3xl font-black md:text-5xl">
-              Want a personalized operational leak review?
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Resume Highlights</p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+              Positioning for operations, QA, training, HR, and analytics roles.
             </h2>
-
-            <p className="mt-5 text-[#eadccf]">
-              Submit your business details and receive a simple operational risk
-              review focused on missed opportunities, workflow friction, and
-              customer experience gaps.
+            <p className="mt-6 text-lg leading-8 text-slate-300">
+              This section gives employers a quick snapshot of how my experience and projects translate into professional value.
             </p>
           </div>
 
-          <form
-            action="https://formspree.io/f/YOUR_FORM_ID"
-            method="POST"
-            className="rounded-3xl bg-white p-6 text-[#241c16]"
-          >
-            <FormField name="name" label="Name" />
-            <FormField name="business" label="Business Name" />
-            <FormField name="email" label="Email" type="email" />
-            <FormField name="challenge" label="Biggest Operational Challenge" />
-
-            <button
-              type="submit"
-              className="mt-2 w-full rounded-xl bg-[#241c16] px-6 py-3 font-black text-white hover:bg-[#3b2f27]"
-            >
-              Request Free Audit
-            </button>
-
-            <p className="mt-3 text-xs text-[#7a6a5d]">
-              Replace YOUR_FORM_ID with your real Formspree endpoint.
-            </p>
-          </form>
+          <div className="space-y-4">
+            {resumeHighlights.map((item) => (
+              <div key={item} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+                <p className="leading-7 text-slate-200">{item}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
+      <section className="px-6 py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-violet-300/20 bg-violet-300/10 p-8 text-center shadow-2xl shadow-violet-500/10 lg:p-14">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-200">Career Focus</p>
+          <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">Roles I’m targeting</h2>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+            Operations Coordinator, Customer Experience Specialist, QA Specialist, Training Coordinator, Workforce Analytics Assistant, HR Operations Assistant, Business Analyst Assistant, and Remote Team Support roles.
+          </p>
+        </div>
+      </section>
+
+      <section id="contact" className="px-6 py-24 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Contact</p>
+          <h2 className="mt-4 text-5xl font-black tracking-tight">Let’s connect.</h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            I’m open to remote opportunities where I can support operations, customer experience, training, QA, HR, analytics, and process improvement.
+          </p>
+
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <a
+              href={`mailto:${emailAddress}`}
+              className="rounded-full bg-violet-300 px-8 py-4 font-bold text-slate-950 shadow-xl shadow-violet-500/20 transition hover:-translate-y-1 hover:bg-violet-200"
+            >
+              Email Me
+            </a>
+
+            <a
+              href={linkedInUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-white/15 bg-white/5 px-8 py-4 font-bold text-white transition hover:-translate-y-1 hover:bg-white/10"
+            >
+              LinkedIn
+            </a>
+
+            <a
+              href={pulseiqUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-white/15 bg-white/5 px-8 py-4 font-bold text-white transition hover:-translate-y-1 hover:bg-white/10"
+            >
+              PulseIQ Website
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 px-6 py-8 text-center text-sm text-slate-500 lg:px-8">
+        © 2026 Aundrea Napper. Operations Analytics Portfolio.
+      </footer>
     </main>
-  );
-}
-
-function getRecommendation(results: Results) {
-  if (results.riskScore >= 70) {
-    return "High risk detected. Prioritize lead follow-up, routing ownership, and missed inquiry tracking immediately.";
-  }
-
-  if (results.riskScore >= 40) {
-    return "Moderate risk detected. Improve response time, assign follow-up ownership, and monitor workload patterns weekly.";
-  }
-
-  return "Low risk detected. Continue monitoring response speed and lead capture to prevent small leaks from growing.";
-}
-
-function CommandCenter({ results }: { results: Results }) {
-  return (
-    <div className="animate-fadeIn rounded-3xl border border-[#8b735f]/20 bg-white/10 p-6 shadow-2xl backdrop-blur">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-black">PulseIQ Command Center</h2>
-          <p className="text-sm text-[#8b735f]">Live operational preview</p>
-        </div>
-
-        <span className="rounded-full bg-[#d8b894] px-3 py-1 text-sm font-black text-[#241c16]">
-          Active Scan
-        </span>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <MetricCard title="Efficiency Score" value={`${results.efficiencyScore}%`} />
-        <MetricCard
-          title="Revenue Risk"
-          value={`$${results.estimatedLoss.toLocaleString()}`}
-        />
-        <MetricCard title="Missed Leads" value={`${results.missedLeads}`} />
-        <MetricCard title="Risk Level" value={results.riskLevel} />
-      </div>
-
-      <div className="mt-6 rounded-2xl bg-[#241c16] p-5 text-white">
-        <p className="text-sm text-[#d8c6b2]">AI Insight</p>
-        <p className="mt-2 text-lg font-semibold">
-          Missed leads and delayed follow-up are the strongest indicators of
-          revenue leakage in this scan.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function CircularGauge({ score }: { score: number }) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  return (
-    <div className="mt-8 flex justify-center">
-      <div className="relative h-40 w-40">
-        <svg className="h-full w-full -rotate-90" viewBox="0 0 140 140">
-          <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            stroke="rgba(255,255,255,0.12)"
-            strokeWidth="14"
-            fill="none"
-          />
-          <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            stroke="#d8b894"
-            strokeWidth="14"
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            className="transition-all duration-700"
-          />
-        </svg>
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-4xl font-black">{score}</p>
-          <p className="text-xs text-[#eadccf]">Health Score</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AIRecommendation({
-  results,
-  inputs,
-}: {
-  results: Results;
-  inputs: ScannerInput;
-}) {
-  return (
-    <div className="mt-8 rounded-2xl bg-white/10 p-5">
-      <p className="font-semibold">AI-Style Recommendation</p>
-      <p className="mt-2 text-[#eadccf]">{getRecommendation(results)}</p>
-      <p className="mt-4 text-sm text-[#d8b894]">
-        Based on {inputs.monthlyLeads} monthly leads, {inputs.missedLeadRate}%
-        missed lead rate, and {inputs.responseDelayHours} hour response delay.
-      </p>
-    </div>
-  );
-}
-
-function MetricCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[#8b735f]/20 bg-white/10 p-5 shadow-sm backdrop-blur">
-      <p className="text-sm text-[#8b735f]">{title}</p>
-      <p className="mt-2 text-2xl font-black">{value}</p>
-    </div>
-  );
-}
-
-function ScannerField({
-  label,
-  value,
-  onChange,
-  type = "text",
-}: {
-  label: string;
-  value: string | number;
-  onChange: (value: string) => void;
-  type?: string;
-}) {
-  return (
-    <label className="mb-4 block">
-      <span className="mb-2 block text-sm font-semibold text-[#8b735f]">
-        {label}
-      </span>
-
-      <input
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-[#8b735f]/30 bg-white px-4 py-3 text-[#241c16] outline-none focus:border-[#d8b894]"
-      />
-    </label>
-  );
-}
-
-function FormField({
-  label,
-  name,
-  type = "text",
-}: {
-  label: string;
-  name: string;
-  type?: string;
-}) {
-  return (
-    <label className="mb-4 block">
-      <span className="mb-2 block text-sm font-semibold text-[#5f5147]">
-        {label}
-      </span>
-
-      <input
-        name={name}
-        type={type}
-        required
-        className="w-full rounded-xl border border-[#dccfbd] bg-[#fbf8f3] px-4 py-3 outline-none focus:border-[#9b6b43]"
-      />
-    </label>
-  );
-}
-
-function ResultRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl bg-white/10 p-4">
-      <span className="text-[#eadccf]">{label}</span>
-      <span className="text-xl font-black">{value}</span>
-    </div>
-  );
-}
-
-function BarChartCard({
-  title,
-  data,
-}: {
-  title: string;
-  data: { label: string; value: number }[];
-}) {
-  return (
-    <div className="rounded-3xl bg-white/10 p-8 shadow-xl ring-1 ring-[#8b735f]/20">
-      <h3 className="text-2xl font-black">{title}</h3>
-
-      <div className="mt-6 space-y-5">
-        {data.map((item) => {
-          const width = Math.min(100, Math.max(5, item.value));
-
-          return (
-            <div key={item.label}>
-              <div className="mb-2 flex justify-between text-sm font-semibold">
-                <span>{item.label}</span>
-                <span>{Math.round(width)}%</span>
-              </div>
-
-              <div className="h-4 overflow-hidden rounded-full bg-[#8b735f]/20">
-                <div
-                  className="h-full rounded-full bg-[#d8b894] transition-all duration-700"
-                  style={{ width: `${width}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function LineChartCard() {
-  const points = [22, 28, 35, 31, 44, 39, 52, 48, 60, 66, 71, 76];
-
-  return (
-    <div className="rounded-3xl bg-white/10 p-8 shadow-xl ring-1 ring-[#8b735f]/20">
-      <h3 className="text-2xl font-black">Revenue Risk Trend</h3>
-      <p className="mt-2 text-sm text-[#8b735f]">
-        Simulated monthly operational leak exposure.
-      </p>
-
-      <div className="mt-8 flex h-44 items-end gap-3">
-        {points.map((point, index) => (
-          <div
-            key={index}
-            className="flex flex-1 flex-col items-center justify-end gap-2"
-          >
-            <div
-              className="w-full rounded-t-xl bg-[#d8b894] transition-all duration-700"
-              style={{ height: `${point}%` }}
-            />
-            <span className="text-xs text-[#8b735f]">{index + 1}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeatmapCard() {
-  const cells = [
-    "Low",
-    "Med",
-    "High",
-    "Med",
-    "High",
-    "Low",
-    "Med",
-    "High",
-    "High",
-    "Med",
-    "Low",
-    "Med",
-  ];
-
-  return (
-    <div className="rounded-3xl bg-white/10 p-8 shadow-xl ring-1 ring-[#8b735f]/20">
-      <h3 className="text-2xl font-black">Workflow Heatmap</h3>
-      <p className="mt-2 text-sm text-[#8b735f]">
-        Simulated risk levels across workflow areas.
-      </p>
-
-      <div className="mt-8 grid grid-cols-4 gap-3">
-        {cells.map((cell, index) => (
-          <div
-            key={index}
-            className={`rounded-2xl p-4 text-center text-xs font-black ${
-              cell === "High"
-                ? "bg-[#3b2f27] text-white"
-                : cell === "Med"
-                ? "bg-[#d8b894] text-[#241c16]"
-                : "bg-[#efe3d3] text-[#241c16]"
-            }`}
-          >
-            {cell}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepCard({
-  number,
-  title,
-  text,
-}: {
-  number: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-3xl bg-white/10 p-6 shadow-lg ring-1 ring-[#8b735f]/20">
-      <p className="text-sm font-black text-[#d8b894]">{number}</p>
-      <h3 className="mt-3 text-xl font-black">{title}</h3>
-      <p className="mt-3 text-sm text-[#8b735f]">{text}</p>
-    </div>
-  );
-}
-
-function InsightBox({
-  title,
-  points,
-}: {
-  title: string;
-  points: string[];
-}) {
-  return (
-    <div className="rounded-3xl border border-[#8b735f]/20 bg-white/10 p-6">
-      <h3 className="text-2xl font-black">{title}</h3>
-
-      <ul className="mt-5 space-y-3 text-[#8b735f]">
-        {points.map((point) => (
-          <li key={point}>• {point}</li>
-        ))}
-      </ul>
-    </div>
   );
 }

@@ -1,377 +1,451 @@
-const pulseiqUrl = "https://www.pulseiqsolutions.site/";
-const linkedInUrl = "https://www.linkedin.com/in/aundreanapper1205";
-const emailAddress = "aundreanapper12@gmail.com/";
-const projects = [
+"use client";
+
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  BarChart3,
+  Brain,
+  CheckCircle2,
+  LineChart,
+  Radar,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Workflow,
+  Zap,
+} from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+const trendData = [
+  { month: "Jan", efficiency: 62, revenueRisk: 42 },
+  { month: "Feb", efficiency: 68, revenueRisk: 36 },
+  { month: "Mar", efficiency: 74, revenueRisk: 28 },
+  { month: "Apr", efficiency: 81, revenueRisk: 21 },
+  { month: "May", efficiency: 88, revenueRisk: 14 },
+];
+
+const leakData = [
+  { name: "Missed Calls", value: 38 },
+  { name: "Slow Follow-Up", value: 27 },
+  { name: "Scheduling Gaps", value: 19 },
+  { name: "Workflow Errors", value: 16 },
+];
+
+const features = [
   {
-    title: "PulseIQ Operations Intelligence",
-    type: "Live Website / AI Operations Tool",
-    description:
-      "A business operations website and dashboard concept that helps companies identify hidden workflow gaps, missed lead risks, customer friction, and operational inefficiencies.",
-    impact:
-      "Shows employers that I can combine business analysis, customer experience, AI ideas, and dashboard thinking into one practical solution.",
-    tools: ["Next.js", "Operations Analytics", "AI Insights", "Customer Experience"],
-    liveUrl: pulseiqUrl,
-    buttonText: "Open PulseIQ Website",
+    icon: TrendingUp,
+    title: "Revenue Leak Detection",
+    desc: "Find where missed calls, slow replies, and broken workflows are costing you money.",
   },
   {
-    title: "Revenue Leak Scanner",
-    type: "Business Analysis Project",
-    description:
-      "A scoring tool concept that reviews missed leads, follow-up delays, unclear contact options, website friction, and automation opportunities for small businesses.",
-    impact:
-      "Helps businesses understand where they may be losing money, time, and customer trust before the problem grows.",
-    tools: ["Business Analysis", "Scoring Model", "Process Improvement", "Automation Strategy"],
-    liveUrl: pulseiqUrl,
-    buttonText: "View Scanner Concept",
+    icon: Workflow,
+    title: "Workflow Intelligence",
+    desc: "Identify bottlenecks across intake, scheduling, follow-up, and customer experience.",
   },
   {
-    title: "KPI Operations Dashboard",
-    type: "Portfolio Dashboard Project",
-    description:
-      "A professional dashboard concept tracking operational health, efficiency score, response speed, missed opportunity risk, and customer satisfaction.",
-    impact:
-      "Demonstrates how I use metrics to explain performance, identify trends, and support better leadership decisions.",
-    tools: ["KPI Tracking", "Excel Thinking", "Dashboard Design", "Performance Analytics"],
-    liveUrl: pulseiqUrl,
-    buttonText: "View Dashboard Demo",
+    icon: Brain,
+    title: "AI Recommendations",
+    desc: "Receive practical next steps based on your business patterns and operational risks.",
   },
   {
-    title: "Performance Readiness Scorecard",
-    type: "Workforce Analytics Project",
-    description:
-      "A scorecard concept that measures quality, consistency, efficiency, missed opportunity risk, and coaching readiness for remote operations teams.",
-    impact:
-      "Connects daily work performance to coaching, training, QA, and advancement readiness.",
-    tools: ["Workforce Analytics", "QA Metrics", "Coaching", "Excel Dashboards"],
-    liveUrl: pulseiqUrl,
-    buttonText: "View Scorecard Concept",
-  },
-  {
-    title: "Supplier Delivery Analysis",
-    type: "Academic Business Analytics Project",
-    description:
-      "A descriptive analytics project analyzing shipment timing, supplier performance, defect rates, and delivery trends using business data.",
-    impact:
-      "Shows applied analytics skills through descriptive statistics, pivot tables, trend identification, and visual reporting.",
-    tools: ["Excel", "Descriptive Statistics", "Pivot Tables", "Data Visualization"],
-    liveUrl: "#contact",
-    buttonText: "Ask About This Project",
+    icon: Radar,
+    title: "Operational Health Scoring",
+    desc: "Turn scattered business activity into a clear score your team can actually act on.",
   },
 ];
 
-const skills = [
-  "Operations Analytics",
-  "Customer Experience",
-  "KPI Dashboards",
-  "Business Analysis",
-  "Workflow Improvement",
-  "Excel Data Analysis",
-  "AI Workflow Ideas",
-  "Process Documentation",
-  "QA Thinking",
-  "Training Support",
-  "Performance Coaching",
-  "Remote Operations",
-  "HR Analytics Interest",
-  "Workforce Analytics",
-  "Problem Solving",
-  "Customer Support Strategy",
-];
-
-const resumeHighlights = [
-  "Built portfolio projects focused on operations analytics, customer experience, KPI tracking, AI workflow ideas, and process improvement.",
-  "Created dashboard and scorecard concepts that translate performance data into clear business insights and leadership recommendations.",
-  "Applied business analytics coursework to real-world problems using Excel, descriptive statistics, visual reporting, and what-if thinking.",
-  "Developed training-style resources, workflow guides, coaching prompts, and documentation designed to help teams perform more consistently.",
-  "Focused on remote roles that combine customer experience, QA, operations, HR, analytics, and workforce performance.",
-];
-
-const dashboardMetrics = [
-  { label: "Operational Health", value: "88%", note: "Overall business workflow score" },
-  { label: "Efficiency Score", value: "91/100", note: "Performance and process strength" },
-  { label: "CX Score", value: "94%", note: "Customer experience indicator" },
-  { label: "Risk Level", value: "Low", note: "Missed opportunity risk" },
-];
-
-export default function PortfolioPage() {
+export default function Home() {
   return (
-    <main className="min-h-screen bg-[#070A13] text-white">
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#070A13]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-          <a href="#home" className="text-lg font-black tracking-tight">
-            Aundrea<span className="text-violet-300">.</span>
-          </a>
+    <main className="min-h-screen bg-[#f7f2ea] text-[#111111]">
+      {/* NAV */}
+      <nav className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f2ea]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-white">
+              <Sparkles size={18} />
+            </div>
+            <span className="text-xl font-black tracking-tight">PulseIQ</span>
+          </div>
 
-          <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-            <a href="#about" className="hover:text-white">About</a>
-            <a href="#projects" className="hover:text-white">Projects</a>
-            <a href="#skills" className="hover:text-white">Skills</a>
-            <a href="#resume" className="hover:text-white">Resume</a>
-            <a href="#contact" className="hover:text-white">Contact</a>
+          <div className="hidden items-center gap-8 text-sm font-semibold text-black/70 md:flex">
+            <a href="#features">Features</a>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#scan">Free Scan</a>
+            <a href="#services">Services</a>
           </div>
 
           <a
-            href={pulseiqUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-100"
+            href="#scan"
+            className="rounded-full bg-black px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:scale-105"
           >
-            Open PulseIQ
+            Get Free Scan
           </a>
         </div>
       </nav>
 
-      <section id="home" className="relative overflow-hidden px-6 py-24 lg:px-8 lg:py-32">
-        <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="absolute right-0 top-40 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-3xl" />
+      {/* HERO */}
+      <section className="relative overflow-hidden px-6 py-24">
+        <div className="absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-rose-200/40 blur-3xl" />
+        <div className="absolute right-20 top-40 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-violet-200 shadow-2xl backdrop-blur">
-              Operations Analytics • AI Workflows • Customer Experience
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm font-bold shadow-sm">
+              <Zap size={16} />
+              AI-Powered Operational Intelligence
             </div>
 
-            <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-6xl lg:text-7xl">
-              I turn business problems into clear operational insights.
+            <h1 className="text-5xl font-black leading-tight tracking-tight md:text-7xl">
+              Your business is losing revenue every day.{" "}
+              <span className="text-black/50">PulseIQ shows you where.</span>
             </h1>
 
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
-              I’m Aundrea Napper, an operations and analytics-focused professional building practical dashboards, scorecards, and AI-inspired tools for customer experience, workflow improvement, and workforce performance.
+            <p className="mt-7 max-w-xl text-lg leading-8 text-black/65">
+              PulseIQ helps service businesses uncover missed leads, workflow
+              gaps, staffing risks, and customer experience issues using AI,
+              analytics, and operational intelligence.
             </p>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#projects"
-                className="rounded-full bg-violet-300 px-7 py-4 text-center font-bold text-slate-950 shadow-xl shadow-violet-500/20 transition hover:-translate-y-1 hover:bg-violet-200"
+                href="#scan"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-bold text-white shadow-xl transition hover:scale-105"
               >
-                View Portfolio Projects
+                Get Free Business Scan <ArrowRight size={18} />
               </a>
+              <a
+                href="#dashboard"
+                className="inline-flex items-center justify-center rounded-full border border-black/15 bg-white/70 px-7 py-4 font-bold text-black shadow-sm transition hover:scale-105"
+              >
+                View Dashboard
+              </a>
+            </div>
+          </motion.div>
 
-              <a
-                href={pulseiqUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/15 bg-white/5 px-7 py-4 text-center font-bold text-white backdrop-blur transition hover:-translate-y-1 hover:bg-white/10"
-              >
-                Visit PulseIQ Operations
-              </a>
+          {/* HERO DASHBOARD */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="rounded-[2rem] border border-black/10 bg-white/75 p-5 shadow-2xl backdrop-blur-xl"
+          >
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-black/50">
+                  PulseIQ Command Center
+                </p>
+                <h3 className="text-2xl font-black">Operational Snapshot</h3>
+              </div>
+              <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-black text-emerald-700">
+                LIVE
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                ["Efficiency Score", "88%", "+14%"],
+                ["Revenue at Risk", "$18.4K", "-32%"],
+                ["Missed Leads", "42", "-21%"],
+              ].map(([label, value, change]) => (
+                <div
+                  key={label}
+                  className="rounded-3xl border border-black/10 bg-[#faf7f1] p-4"
+                >
+                  <p className="text-xs font-bold uppercase text-black/45">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-2xl font-black">{value}</p>
+                  <p className="mt-1 text-sm font-bold text-emerald-600">
+                    {change}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 h-64 rounded-3xl border border-black/10 bg-white p-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData}>
+                  <defs>
+                    <linearGradient id="efficiency" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="5%" stopColor="#111" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#111" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="efficiency"
+                    stroke="#111"
+                    fill="url(#efficiency)"
+                    strokeWidth={3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="mt-5 rounded-3xl bg-black p-5 text-white">
+              <p className="text-sm font-bold text-white/50">AI Insight</p>
+              <p className="mt-2 text-lg font-semibold leading-7">
+                Missed lead risk spikes after 3 PM. Add a follow-up workflow and
+                backup coverage window to recover an estimated $4.2K/month.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* LOGO / TRUST STRIP */}
+      <section className="border-y border-black/10 bg-white/55 px-6 py-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 text-sm font-black uppercase tracking-[0.2em] text-black/35">
+          <span>Revenue Intelligence</span>
+          <span>Workflow Audits</span>
+          <span>KPI Dashboards</span>
+          <span>Customer Experience</span>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-14 max-w-2xl">
+            <p className="mb-3 font-black uppercase tracking-[0.25em] text-black/40">
+              What PulseIQ Finds
+            </p>
+            <h2 className="text-4xl font-black tracking-tight md:text-6xl">
+              Turn messy operations into measurable intelligence.
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={feature.title}
+                  whileHover={{ y: -8 }}
+                  className="rounded-[2rem] border border-black/10 bg-white/70 p-7 shadow-sm"
+                >
+                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="text-xl font-black">{feature.title}</h3>
+                  <p className="mt-4 leading-7 text-black/60">
+                    {feature.desc}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* DASHBOARD */}
+      <section id="dashboard" className="bg-black px-6 py-24 text-white">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="mb-3 font-black uppercase tracking-[0.25em] text-white/40">
+              Live Intelligence Layer
+            </p>
+            <h2 className="text-4xl font-black tracking-tight md:text-6xl">
+              See the hidden patterns behind lost revenue.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
+              PulseIQ converts missed calls, late follow-ups, inconsistent
+              staffing, and customer friction into clear executive-level action.
+            </p>
+
+            <div className="mt-8 space-y-4">
+              {[
+                "Operational health score",
+                "Revenue leak estimate",
+                "Workflow bottleneck alerts",
+                "AI-generated next steps",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <CheckCircle2 className="text-emerald-400" size={20} />
+                  <span className="font-semibold text-white/80">{item}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <div className="rounded-[1.5rem] bg-[#0D1224] p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400">Featured Project</p>
-                  <h2 className="text-2xl font-bold">PulseIQ Command Center</h2>
+          <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-3xl bg-white p-5 text-black">
+                <p className="text-sm font-bold text-black/40">Leak Sources</p>
+                <div className="mt-4 h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={leakData}>
+                      <XAxis dataKey="name" hide />
+                      <YAxis hide />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#111" radius={[12, 12, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-                <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                  Live Website
-                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {dashboardMetrics.map((metric) => (
-                  <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-                    <p className="text-sm text-slate-400">{metric.label}</p>
-                    <p className="mt-2 text-3xl font-black">{metric.value}</p>
-                    <p className="mt-2 text-xs leading-5 text-slate-500">{metric.note}</p>
+              <div className="space-y-4">
+                {[
+                  ["Response Delay", "High Risk", "bg-red-500/20 text-red-200"],
+                  ["Staffing Coverage", "Moderate", "bg-amber-500/20 text-amber-200"],
+                  ["Customer Follow-Up", "Needs Review", "bg-blue-500/20 text-blue-200"],
+                ].map(([title, status, color]) => (
+                  <div
+                    key={title}
+                    className="rounded-3xl border border-white/10 bg-white/10 p-5"
+                  >
+                    <p className="text-sm font-bold text-white/45">{title}</p>
+                    <p className={`mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black ${color}`}>
+                      {status}
+                    </p>
                   </div>
                 ))}
               </div>
+            </div>
 
-              <div className="mt-6 rounded-2xl border border-violet-300/20 bg-violet-300/10 p-5">
-                <p className="text-sm font-semibold text-violet-100">AI Insight Example</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Missed lead risk decreases when response speed, follow-up consistency, workflow clarity, and staffing coverage are reviewed together instead of separately.
-                </p>
-              </div>
-
-              <a
-                href={pulseiqUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-6 block rounded-full bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-violet-100"
-              >
-                Open Live PulseIQ Site
-              </a>
+            <div className="mt-4 rounded-3xl border border-white/10 bg-white/10 p-5">
+              <p className="text-sm font-bold text-white/45">
+                Recommended Action
+              </p>
+              <p className="mt-2 text-xl font-bold leading-8">
+                Create a same-day follow-up system for unanswered leads and
+                assign ownership by shift window.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="about" className="px-6 py-20 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">About Me</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
-              Built for roles where data meets people.
-            </h2>
-          </div>
-
-          <div className="space-y-6 text-lg leading-8 text-slate-300">
-            <p>
-              My work sits at the intersection of operations, customer experience, HR thinking, and business analytics. I’m focused on roles where I can help teams improve workflows, understand performance, support customers better, and make smarter decisions with data.
-            </p>
-            <p>
-              This portfolio highlights how I think: identify the problem, measure what matters, find the pattern, explain the business impact, and recommend realistic next steps.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="projects" className="px-6 py-20 lg:px-8">
+      {/* SERVICES */}
+      <section id="services" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12 max-w-3xl">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Featured Projects</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
-              Projects employers can click, understand, and remember.
-            </h2>
-            <p className="mt-5 text-lg leading-8 text-slate-300">
-              These projects connect analytics, operations, customer experience, process improvement, and AI-powered business thinking.
+          <div className="mb-12 text-center">
+            <p className="mb-3 font-black uppercase tracking-[0.25em] text-black/40">
+              Services
             </p>
+            <h2 className="text-4xl font-black md:text-6xl">
+              Simple offers. Serious operational clarity.
+            </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {projects.map((project) => (
-              <article
-                key={project.title}
-                className="group rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:bg-white/[0.07]"
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                name: "AI Revenue Leak Audit",
+                price: "$97",
+                desc: "A focused audit identifying missed revenue and operational gaps.",
+              },
+              {
+                name: "KPI Dashboard Build",
+                price: "$297",
+                desc: "A custom dashboard for tracking leads, calls, follow-up, and efficiency.",
+              },
+              {
+                name: "Operations Intelligence Plan",
+                price: "$497+",
+                desc: "A complete workflow improvement plan with AI recommendations.",
+              },
+            ].map((service) => (
+              <div
+                key={service.name}
+                className="rounded-[2rem] border border-black/10 bg-white/75 p-8 shadow-sm"
               >
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <p className="rounded-full bg-violet-300/10 px-4 py-2 text-xs font-bold text-violet-200">
-                    {project.type}
-                  </p>
-                  <span className="text-2xl transition group-hover:translate-x-1">↗</span>
-                </div>
-
-                <h3 className="text-2xl font-black">{project.title}</h3>
-                <p className="mt-4 leading-7 text-slate-300">{project.description}</p>
-
-                <div className="mt-6 rounded-2xl border border-white/10 bg-[#0D1224] p-5">
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Business Impact</p>
-                  <p className="mt-2 leading-7 text-slate-200">{project.impact}</p>
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {project.tools.map((tool) => (
-                    <span key={tool} className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={project.liveUrl}
-                    target={project.liveUrl.startsWith("http") ? "_blank" : undefined}
-                    rel={project.liveUrl.startsWith("http") ? "noreferrer" : undefined}
-                    className="rounded-full bg-violet-300 px-5 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-violet-200"
-                  >
-                    {project.buttonText}
-                  </a>
-
-                  <a
-                    href="#contact"
-                    className="rounded-full border border-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10"
-                  >
-                    Discuss Project
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="skills" className="px-6 py-20 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-8 lg:p-12">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Skills</p>
-          <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
-            What I bring to a team
-          </h2>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            {skills.map((skill) => (
-              <span key={skill} className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-black/10">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="resume" className="px-6 py-20 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Resume Highlights</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
-              Positioning for operations, QA, training, HR, and analytics roles.
-            </h2>
-            <p className="mt-6 text-lg leading-8 text-slate-300">
-              This section gives employers a quick snapshot of how my experience and projects translate into professional value.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {resumeHighlights.map((item) => (
-              <div key={item} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <p className="leading-7 text-slate-200">{item}</p>
+                <h3 className="text-2xl font-black">{service.name}</h3>
+                <p className="mt-4 text-black/60">{service.desc}</p>
+                <p className="mt-8 text-4xl font-black">{service.price}</p>
+                <button className="mt-8 w-full rounded-full bg-black px-6 py-4 font-bold text-white">
+                  Start Here
+                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-[2.5rem] border border-violet-300/20 bg-violet-300/10 p-8 text-center shadow-2xl shadow-violet-500/10 lg:p-14">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-200">Career Focus</p>
-          <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">Roles I’m targeting</h2>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-            Operations Coordinator, Customer Experience Specialist, QA Specialist, Training Coordinator, Workforce Analytics Assistant, HR Operations Assistant, Business Analyst Assistant, and Remote Team Support roles.
-          </p>
+      {/* SCAN FORM */}
+      <section id="scan" className="px-6 pb-24">
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-[2.5rem] bg-[#111] p-8 text-white md:p-12 lg:grid-cols-2">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold">
+              <Target size={16} />
+              Free Business Scan
+            </div>
+            <h2 className="text-4xl font-black md:text-5xl">
+              Find your biggest operational leak in under 3 minutes.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
+              Enter a few quick details and receive a starter view of your
+              operational risk, revenue leak potential, and workflow improvement
+              opportunities.
+            </p>
+          </div>
+
+          <form className="rounded-[2rem] bg-white p-6 text-black">
+            <div className="grid gap-4">
+              {[
+                "Business Name",
+                "Monthly Leads",
+                "Missed Call %",
+                "Average Response Time",
+                "Review Score",
+                "Biggest Workflow Problem",
+              ].map((label) => (
+                <div key={label}>
+                  <label className="text-sm font-black text-black/50">
+                    {label}
+                  </label>
+                  <input
+                    className="mt-2 w-full rounded-2xl border border-black/10 bg-[#f7f2ea] px-4 py-3 outline-none"
+                    placeholder={label}
+                  />
+                </div>
+              ))}
+              <button
+                type="button"
+                className="mt-2 rounded-full bg-black px-6 py-4 font-black text-white"
+              >
+                Generate My Scan
+              </button>
+            </div>
+          </form>
         </div>
       </section>
 
-      <section id="contact" className="px-6 py-24 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-300">Contact</p>
-          <h2 className="mt-4 text-5xl font-black tracking-tight">Let’s connect.</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            I’m open to remote opportunities where I can support operations, customer experience, training, QA, HR, analytics, and process improvement.
-          </p>
+      {/* FOOTER */}
+      <footer className="border-t border-black/10 px-6 py-10">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 md:flex-row md:items-center">
+          <div>
+            <h3 className="text-2xl font-black">PulseIQ Operations</h3>
+            <p className="mt-2 text-black/55">
+              AI-powered operational intelligence for service businesses.
+            </p>
+          </div>
 
-          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-            <a
-              href={`mailto:${emailAddress}`}
-              className="rounded-full bg-violet-300 px-8 py-4 font-bold text-slate-950 shadow-xl shadow-violet-500/20 transition hover:-translate-y-1 hover:bg-violet-200"
-            >
-              Email Me
-            </a>
-
-            <a
-              href={linkedInUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-white/15 bg-white/5 px-8 py-4 font-bold text-white transition hover:-translate-y-1 hover:bg-white/10"
-            >
-              LinkedIn
-            </a>
-
-            <a
-              href={pulseiqUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-white/15 bg-white/5 px-8 py-4 font-bold text-white transition hover:-translate-y-1 hover:bg-white/10"
-            >
-              PulseIQ Website
-            </a>
+          <div className="flex gap-5 text-sm font-bold text-black/55">
+            <a href="#features">Features</a>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#scan">Scan</a>
           </div>
         </div>
-      </section>
-
-      <footer className="border-t border-white/10 px-6 py-8 text-center text-sm text-slate-500 lg:px-8">
-        © 2026 Aundrea Napper. Operations Analytics Portfolio.
       </footer>
     </main>
   );

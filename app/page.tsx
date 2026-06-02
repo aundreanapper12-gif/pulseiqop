@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Mail,
   Radar,
-  ShieldCheck,
   Sparkles,
   Target,
   TrendingUp,
@@ -29,59 +28,18 @@ import {
 const emailAddress = "aundreanapper12@gmail.com";
 
 const trendData = [
-  { month: "Jan", efficiency: 62, risk: 42 },
-  { month: "Feb", efficiency: 68, risk: 36 },
-  { month: "Mar", efficiency: 74, risk: 29 },
-  { month: "Apr", efficiency: 81, risk: 22 },
-  { month: "May", efficiency: 88, risk: 15 },
+  { month: "Jan", efficiency: 62 },
+  { month: "Feb", efficiency: 68 },
+  { month: "Mar", efficiency: 74 },
+  { month: "Apr", efficiency: 81 },
+  { month: "May", efficiency: 88 },
 ];
 
 const leakData = [
   { name: "Missed Calls", value: 38 },
   { name: "Slow Follow-Up", value: 27 },
-  { name: "Scheduling Gaps", value: 19 },
-  { name: "Workflow Errors", value: 16 },
-];
-
-const features = [
-  {
-    icon: TrendingUp,
-    title: "Revenue Leak Detection",
-    desc: "Estimate how much revenue may be lost through missed calls, slow replies, and weak follow-up.",
-  },
-  {
-    icon: Workflow,
-    title: "Workflow Intelligence",
-    desc: "Find bottlenecks across intake, scheduling, customer communication, and daily operations.",
-  },
-  {
-    icon: BarChart3,
-    title: "KPI Dashboarding",
-    desc: "Turn scattered business activity into simple metrics leaders can understand and act on.",
-  },
-  {
-    icon: Radar,
-    title: "Operational Health Score",
-    desc: "Get a quick snapshot of risk level, efficiency, and recommended improvement areas.",
-  },
-];
-
-const services = [
-  {
-    name: "Revenue Leak Audit",
-    price: "$97",
-    desc: "A focused review of missed leads, slow response times, and customer follow-up gaps.",
-  },
-  {
-    name: "KPI Dashboard Build",
-    price: "$297",
-    desc: "A simple dashboard to track leads, response speed, workflow issues, and operational health.",
-  },
-  {
-    name: "Operations Improvement Plan",
-    price: "$497+",
-    desc: "A practical action plan for improving workflows, customer experience, and team performance.",
-  },
+  { name: "Scheduling", value: 19 },
+  { name: "Workflow", value: 16 },
 ];
 
 export default function Home() {
@@ -96,9 +54,8 @@ export default function Home() {
     const monthlyLoss = missedLeads * leadValue;
     const annualLoss = monthlyLoss * 12;
 
-    let score = 100;
-    score -= missRate * 2;
-    score -= Math.min(responseDelay * 3, 30);
+    let score = 100 - missRate * 2 - Math.min(responseDelay * 3, 30);
+
     if (teamSize <= 2) score -= 8;
     if (monthlyLeads > 200 && teamSize <= 4) score -= 7;
 
@@ -128,15 +85,13 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f7f2ea] text-[#111111]">
-      <nav className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f2ea]/85 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f2ea]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <a href="#home" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-white">
               <Sparkles size={18} />
             </div>
-            <span className="text-xl font-black tracking-tight">
-              PulseIQ Operations
-            </span>
+            <span className="text-xl font-black">PulseIQ Operations</span>
           </a>
 
           <div className="hidden items-center gap-8 text-sm font-semibold text-black/70 md:flex">
@@ -149,18 +104,15 @@ export default function Home() {
 
           <a
             href="#scan"
-            className="rounded-full bg-black px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:scale-105"
+            className="rounded-full bg-black px-5 py-3 text-sm font-bold text-white"
           >
             Get Free Scan
           </a>
         </div>
       </nav>
 
-      <section id="home" className="relative overflow-hidden px-6 py-24">
-        <div className="absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-rose-200/40 blur-3xl" />
-        <div className="absolute right-20 top-40 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
-
-        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
+      <section id="home" className="px-6 py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm font-bold shadow-sm">
               <Zap size={16} />
@@ -168,8 +120,7 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl font-black leading-tight tracking-tight md:text-7xl">
-              Find where your business is losing revenue before it becomes a
-              bigger problem.
+              Find where your business is losing revenue.
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-black/65">
@@ -181,20 +132,20 @@ export default function Home() {
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <a
                 href="#scan"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-bold text-white shadow-xl transition hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-bold text-white"
               >
                 Run Free Business Scan <ArrowRight size={18} />
               </a>
               <a
                 href="#services"
-                className="inline-flex items-center justify-center rounded-full border border-black/15 bg-white/70 px-7 py-4 font-bold text-black shadow-sm transition hover:scale-105"
+                className="inline-flex items-center justify-center rounded-full border border-black/15 bg-white/70 px-7 py-4 font-bold text-black"
               >
                 View Services
               </a>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-black/10 bg-white/75 p-5 shadow-2xl backdrop-blur-xl">
+          <div className="rounded-[2rem] border border-black/10 bg-white/75 p-5 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-black/50">
@@ -208,35 +159,14 @@ export default function Home() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                ["Health Score", `${scan.healthScore}/100`, scan.riskLevel],
-                ["Monthly Leak", `$${scan.monthlyLoss.toLocaleString()}`, "Est."],
-                ["Missed Leads", `${scan.missedLeads}`, "Monthly"],
-              ].map(([label, value, note]) => (
-                <div
-                  key={label}
-                  className="rounded-3xl border border-black/10 bg-[#faf7f1] p-4"
-                >
-                  <p className="text-xs font-bold uppercase text-black/45">
-                    {label}
-                  </p>
-                  <p className="mt-2 text-2xl font-black">{value}</p>
-                  <p className="mt-1 text-sm font-bold text-emerald-600">
-                    {note}
-                  </p>
-                </div>
-              ))}
+              <Metric label="Health Score" value={`${scan.healthScore}/100`} note={scan.riskLevel} />
+              <Metric label="Monthly Leak" value={`$${scan.monthlyLoss.toLocaleString()}`} note="Estimate" />
+              <Metric label="Missed Leads" value={`${scan.missedLeads}`} note="Monthly" />
             </div>
 
             <div className="mt-5 h-64 rounded-3xl border border-black/10 bg-white p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData}>
-                  <defs>
-                    <linearGradient id="efficiency" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#111" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#111" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis dataKey="month" />
                   <YAxis />
@@ -245,7 +175,8 @@ export default function Home() {
                     type="monotone"
                     dataKey="efficiency"
                     stroke="#111"
-                    fill="url(#efficiency)"
+                    fill="#111"
+                    fillOpacity={0.15}
                     strokeWidth={3}
                   />
                 </AreaChart>
@@ -253,10 +184,10 @@ export default function Home() {
             </div>
 
             <div className="mt-5 rounded-3xl bg-black p-5 text-white">
-              <p className="text-sm font-bold text-white/50">AI Insight</p>
+              <p className="text-sm font-bold text-white/50">Insight</p>
               <p className="mt-2 text-lg font-semibold leading-7">
                 Missed lead risk increases when response delays, unclear
-                ownership, and inconsistent follow-up happen at the same time.
+                ownership, and inconsistent follow-up happen together.
               </p>
             </div>
           </div>
@@ -274,33 +205,34 @@ export default function Home() {
 
       <section id="features" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-14 max-w-2xl">
-            <p className="mb-3 font-black uppercase tracking-[0.25em] text-black/40">
-              What PulseIQ Finds
-            </p>
-            <h2 className="text-4xl font-black tracking-tight md:text-6xl">
-              Turn messy operations into measurable intelligence.
-            </h2>
-          </div>
+          <p className="mb-3 font-black uppercase tracking-[0.25em] text-black/40">
+            What PulseIQ Finds
+          </p>
+          <h2 className="max-w-3xl text-4xl font-black tracking-tight md:text-6xl">
+            Turn messy operations into measurable intelligence.
+          </h2>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.title}
-                  className="rounded-[2rem] border border-black/10 bg-white/70 p-7 shadow-sm transition hover:-translate-y-2"
-                >
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
-                    <Icon size={22} />
-                  </div>
-                  <h3 className="text-xl font-black">{feature.title}</h3>
-                  <p className="mt-4 leading-7 text-black/60">
-                    {feature.desc}
-                  </p>
-                </div>
-              );
-            })}
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Feature
+              icon={<TrendingUp size={22} />}
+              title="Revenue Leak Detection"
+              text="Estimate lost revenue from missed calls, slow replies, and weak follow-up."
+            />
+            <Feature
+              icon={<Workflow size={22} />}
+              title="Workflow Intelligence"
+              text="Find bottlenecks across intake, scheduling, communication, and daily operations."
+            />
+            <Feature
+              icon={<BarChart3 size={22} />}
+              title="KPI Dashboarding"
+              text="Turn business activity into simple metrics leaders can act on."
+            />
+            <Feature
+              icon={<Radar size={22} />}
+              title="Health Scoring"
+              text="Get a clear snapshot of risk level, efficiency, and improvement areas."
+            />
           </div>
         </div>
       </section>
@@ -323,7 +255,7 @@ export default function Home() {
               {[
                 "Operational health score",
                 "Revenue leak estimate",
-                "Workflow bottleneck alerts",
+                "Workflow bottleneck review",
                 "Recommended next steps",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
@@ -334,7 +266,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
+          <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-3xl bg-white p-5 text-black">
                 <p className="text-sm font-bold text-black/40">Leak Sources</p>
@@ -351,23 +283,9 @@ export default function Home() {
               </div>
 
               <div className="space-y-4">
-                {[
-                  ["Response Delay", "High Risk", "bg-red-500/20 text-red-200"],
-                  ["Staffing Coverage", "Moderate", "bg-amber-500/20 text-amber-200"],
-                  ["Customer Follow-Up", "Needs Review", "bg-blue-500/20 text-blue-200"],
-                ].map(([title, status, color]) => (
-                  <div
-                    key={title}
-                    className="rounded-3xl border border-white/10 bg-white/10 p-5"
-                  >
-                    <p className="text-sm font-bold text-white/45">{title}</p>
-                    <p
-                      className={`mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black ${color}`}
-                    >
-                      {status}
-                    </p>
-                  </div>
-                ))}
+                <Status title="Response Delay" status="High Risk" />
+                <Status title="Staffing Coverage" status="Moderate" />
+                <Status title="Customer Follow-Up" status="Needs Review" />
               </div>
             </div>
 
@@ -396,22 +314,21 @@ export default function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {services.map((service) => (
-              <div
-                key={service.name}
-                className="rounded-[2rem] border border-black/10 bg-white/75 p-8 shadow-sm"
-              >
-                <h3 className="text-2xl font-black">{service.name}</h3>
-                <p className="mt-4 text-black/60">{service.desc}</p>
-                <p className="mt-8 text-4xl font-black">{service.price}</p>
-                <a
-                  href="#contact"
-                  className="mt-8 block rounded-full bg-black px-6 py-4 text-center font-bold text-white"
-                >
-                  Start Here
-                </a>
-              </div>
-            ))}
+            <Service
+              name="Revenue Leak Audit"
+              price="$97"
+              text="A focused review of missed leads, response delays, and follow-up gaps."
+            />
+            <Service
+              name="KPI Dashboard Build"
+              price="$297"
+              text="A simple dashboard to track leads, response speed, workflow issues, and health."
+            />
+            <Service
+              name="Operations Improvement Plan"
+              price="$497+"
+              text="A practical action plan for improving workflows, customer experience, and performance."
+            />
           </div>
         </div>
       </section>
@@ -433,38 +350,17 @@ export default function Home() {
 
             <div className="mt-8 rounded-3xl bg-white/10 p-5 text-sm text-white/70">
               This tool provides an estimate based on the information entered.
-              Results are for planning purposes and may vary depending on actual
-              lead quality, sales process, and conversion rates.
+              Results are for planning purposes and may vary.
             </div>
           </div>
 
           <div className="rounded-[2rem] bg-white p-6 text-black">
             <div className="grid gap-4">
-              <NumberInput
-                label="Monthly Leads"
-                value={monthlyLeads}
-                onChange={setMonthlyLeads}
-              />
-              <NumberInput
-                label="Missed Lead Percentage"
-                value={missRate}
-                onChange={setMissRate}
-              />
-              <NumberInput
-                label="Average Lead Value"
-                value={leadValue}
-                onChange={setLeadValue}
-              />
-              <NumberInput
-                label="Average Response Delay in Hours"
-                value={responseDelay}
-                onChange={setResponseDelay}
-              />
-              <NumberInput
-                label="Team Size"
-                value={teamSize}
-                onChange={setTeamSize}
-              />
+              <NumberInput label="Monthly Leads" value={monthlyLeads} onChange={setMonthlyLeads} />
+              <NumberInput label="Missed Lead Percentage" value={missRate} onChange={setMissRate} />
+              <NumberInput label="Average Lead Value" value={leadValue} onChange={setLeadValue} />
+              <NumberInput label="Average Response Delay in Hours" value={responseDelay} onChange={setResponseDelay} />
+              <NumberInput label="Team Size" value={teamSize} onChange={setTeamSize} />
             </div>
 
             <div className="mt-6 rounded-3xl bg-[#f7f2ea] p-5">
@@ -477,6 +373,7 @@ export default function Home() {
                 <Result label="Missed Leads" value={`${scan.missedLeads}`} />
                 <Result label="Risk Level" value={scan.riskLevel} />
               </div>
+
               <div className="mt-4 rounded-2xl bg-black p-4 text-white">
                 <p className="text-sm font-bold text-white/50">
                   Recommended Action
@@ -491,7 +388,7 @@ export default function Home() {
       </section>
 
       <section id="contact" className="px-6 pb-24">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-black/10 bg-white/75 p-8 text-center shadow-sm md:p-12">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-black/10 bg-white/75 p-8 text-center md:p-12">
           <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white">
             <Mail size={24} />
           </div>
@@ -499,9 +396,10 @@ export default function Home() {
             Ready to review your operations?
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-black/60">
-            Send a message to request a PulseIQ Operations review, dashboard,
-            or revenue leak audit.
+            Send a message to request a PulseIQ Operations review, dashboard, or
+            revenue leak audit.
           </p>
+
           <a
             href={mailtoLink}
             className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-black px-8 py-4 font-bold text-white"
@@ -510,8 +408,7 @@ export default function Home() {
           </a>
 
           <p className="mt-6 text-sm text-black/45">
-            Your information is used only to respond to your request. We do not
-            sell your information.
+            Your information is used only to respond to your request.
           </p>
         </div>
       </section>
@@ -521,8 +418,7 @@ export default function Home() {
           <div>
             <h3 className="text-2xl font-black">PulseIQ Operations</h3>
             <p className="mt-2 text-black/55">
-              Operations Analytics | Revenue Leak Detection | Workflow
-              Improvement
+              Operations Analytics | Revenue Leak Detection | Workflow Improvement
             </p>
             <p className="mt-2 text-black/55">Contact: {emailAddress}</p>
           </div>
@@ -543,6 +439,79 @@ export default function Home() {
   );
 }
 
+function Metric({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-black/10 bg-[#faf7f1] p-4">
+      <p className="text-xs font-bold uppercase text-black/45">{label}</p>
+      <p className="mt-2 text-2xl font-black">{value}</p>
+      <p className="mt-1 text-sm font-bold text-emerald-600">{note}</p>
+    </div>
+  );
+}
+
+function Feature({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-[2rem] border border-black/10 bg-white/70 p-7 shadow-sm">
+      <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
+        {icon}
+      </div>
+      <h3 className="text-xl font-black">{title}</h3>
+      <p className="mt-4 leading-7 text-black/60">{text}</p>
+    </div>
+  );
+}
+
+function Status({ title, status }: { title: string; status: string }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/10 p-5">
+      <p className="text-sm font-bold text-white/45">{title}</p>
+      <p className="mt-3 inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-black text-white">
+        {status}
+      </p>
+    </div>
+  );
+}
+
+function Service({
+  name,
+  price,
+  text,
+}: {
+  name: string;
+  price: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-[2rem] border border-black/10 bg-white/75 p-8 shadow-sm">
+      <h3 className="text-2xl font-black">{name}</h3>
+      <p className="mt-4 text-black/60">{text}</p>
+      <p className="mt-8 text-4xl font-black">{price}</p>
+      <a
+        href="#contact"
+        className="mt-8 block rounded-full bg-black px-6 py-4 text-center font-bold text-white"
+      >
+        Start Here
+      </a>
+    </div>
+  );
+}
+
 function NumberInput({
   label,
   value,
@@ -560,7 +529,7 @@ function NumberInput({
         min="0"
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="mt-2 w-full rounded-2xl border border-black/10 bg-[#f7f2ea] px-4 py-3 outline-none focus:border-black/30"
+        className="mt-2 w-full rounded-2xl border border-black/10 bg-[#f7f2ea] px-4 py-3 outline-none"
       />
     </div>
   );

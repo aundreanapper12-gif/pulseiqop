@@ -1,12 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
-  Brain,
   CheckCircle2,
-  LineChart,
+  Mail,
   Radar,
   ShieldCheck,
   Sparkles,
@@ -27,12 +26,14 @@ import {
   YAxis,
 } from "recharts";
 
+const emailAddress = "aundreanapper12@gmail.com";
+
 const trendData = [
-  { month: "Jan", efficiency: 62, revenueRisk: 42 },
-  { month: "Feb", efficiency: 68, revenueRisk: 36 },
-  { month: "Mar", efficiency: 74, revenueRisk: 28 },
-  { month: "Apr", efficiency: 81, revenueRisk: 21 },
-  { month: "May", efficiency: 88, revenueRisk: 14 },
+  { month: "Jan", efficiency: 62, risk: 42 },
+  { month: "Feb", efficiency: 68, risk: 36 },
+  { month: "Mar", efficiency: 74, risk: 29 },
+  { month: "Apr", efficiency: 81, risk: 22 },
+  { month: "May", efficiency: 88, risk: 15 },
 ];
 
 const leakData = [
@@ -46,43 +47,104 @@ const features = [
   {
     icon: TrendingUp,
     title: "Revenue Leak Detection",
-    desc: "Find where missed calls, slow replies, and broken workflows are costing you money.",
+    desc: "Estimate how much revenue may be lost through missed calls, slow replies, and weak follow-up.",
   },
   {
     icon: Workflow,
     title: "Workflow Intelligence",
-    desc: "Identify bottlenecks across intake, scheduling, follow-up, and customer experience.",
+    desc: "Find bottlenecks across intake, scheduling, customer communication, and daily operations.",
   },
   {
-    icon: Brain,
-    title: "AI Recommendations",
-    desc: "Receive practical next steps based on your business patterns and operational risks.",
+    icon: BarChart3,
+    title: "KPI Dashboarding",
+    desc: "Turn scattered business activity into simple metrics leaders can understand and act on.",
   },
   {
     icon: Radar,
-    title: "Operational Health Scoring",
-    desc: "Turn scattered business activity into a clear score your team can actually act on.",
+    title: "Operational Health Score",
+    desc: "Get a quick snapshot of risk level, efficiency, and recommended improvement areas.",
+  },
+];
+
+const services = [
+  {
+    name: "Revenue Leak Audit",
+    price: "$97",
+    desc: "A focused review of missed leads, slow response times, and customer follow-up gaps.",
+  },
+  {
+    name: "KPI Dashboard Build",
+    price: "$297",
+    desc: "A simple dashboard to track leads, response speed, workflow issues, and operational health.",
+  },
+  {
+    name: "Operations Improvement Plan",
+    price: "$497+",
+    desc: "A practical action plan for improving workflows, customer experience, and team performance.",
   },
 ];
 
 export default function Home() {
+  const [monthlyLeads, setMonthlyLeads] = useState(220);
+  const [missRate, setMissRate] = useState(12);
+  const [leadValue, setLeadValue] = useState(150);
+  const [responseDelay, setResponseDelay] = useState(8);
+  const [teamSize, setTeamSize] = useState(4);
+
+  const scan = useMemo(() => {
+    const missedLeads = Math.round(monthlyLeads * (missRate / 100));
+    const monthlyLoss = missedLeads * leadValue;
+    const annualLoss = monthlyLoss * 12;
+
+    let score = 100;
+    score -= missRate * 2;
+    score -= Math.min(responseDelay * 3, 30);
+    if (teamSize <= 2) score -= 8;
+    if (monthlyLeads > 200 && teamSize <= 4) score -= 7;
+
+    const healthScore = Math.max(12, Math.min(100, Math.round(score)));
+
+    const riskLevel =
+      healthScore >= 80 ? "Low" : healthScore >= 55 ? "Moderate" : "High";
+
+    const recommendation =
+      riskLevel === "Low"
+        ? "Keep monitoring lead response time and maintain consistent follow-up."
+        : riskLevel === "Moderate"
+        ? "Create a same-day follow-up process and assign ownership for missed leads."
+        : "Fix missed-lead handling immediately with faster response windows, backup coverage, and automated follow-up.";
+
+    return {
+      missedLeads,
+      monthlyLoss,
+      annualLoss,
+      healthScore,
+      riskLevel,
+      recommendation,
+    };
+  }, [monthlyLeads, missRate, leadValue, responseDelay, teamSize]);
+
+  const mailtoLink = `mailto:${emailAddress}?subject=PulseIQ Operations Inquiry&body=Hi Aundrea,%0D%0A%0D%0AI am interested in a PulseIQ Operations review for my business.`;
+
   return (
     <main className="min-h-screen bg-[#f7f2ea] text-[#111111]">
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f2ea]/80 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f2ea]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-2">
+          <a href="#home" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-white">
               <Sparkles size={18} />
             </div>
-            <span className="text-xl font-black tracking-tight">PulseIQ</span>
-          </div>
+            <span className="text-xl font-black tracking-tight">
+              PulseIQ Operations
+            </span>
+          </a>
 
           <div className="hidden items-center gap-8 text-sm font-semibold text-black/70 md:flex">
             <a href="#features">Features</a>
             <a href="#dashboard">Dashboard</a>
-            <a href="#scan">Free Scan</a>
             <a href="#services">Services</a>
+            <a href="#scan">Free Scan</a>
+            <a href="#contact">Contact</a>
           </div>
 
           <a
@@ -94,31 +156,26 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden px-6 py-24">
+      <section id="home" className="relative overflow-hidden px-6 py-24">
         <div className="absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-rose-200/40 blur-3xl" />
         <div className="absolute right-20 top-40 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
+          <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm font-bold shadow-sm">
               <Zap size={16} />
               AI-Powered Operational Intelligence
             </div>
 
             <h1 className="text-5xl font-black leading-tight tracking-tight md:text-7xl">
-              Your business is losing revenue every day.{" "}
-              <span className="text-black/50">PulseIQ shows you where.</span>
+              Find where your business is losing revenue before it becomes a
+              bigger problem.
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-black/65">
-              PulseIQ helps service businesses uncover missed leads, workflow
-              gaps, staffing risks, and customer experience issues using AI,
-              analytics, and operational intelligence.
+              PulseIQ Operations helps service businesses identify missed leads,
+              slow response times, workflow gaps, and customer experience risks
+              using simple operational analytics.
             </p>
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -126,24 +183,18 @@ export default function Home() {
                 href="#scan"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-bold text-white shadow-xl transition hover:scale-105"
               >
-                Get Free Business Scan <ArrowRight size={18} />
+                Run Free Business Scan <ArrowRight size={18} />
               </a>
               <a
-                href="#dashboard"
+                href="#services"
                 className="inline-flex items-center justify-center rounded-full border border-black/15 bg-white/70 px-7 py-4 font-bold text-black shadow-sm transition hover:scale-105"
               >
-                View Dashboard
+                View Services
               </a>
             </div>
-          </motion.div>
+          </div>
 
-          {/* HERO DASHBOARD */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="rounded-[2rem] border border-black/10 bg-white/75 p-5 shadow-2xl backdrop-blur-xl"
-          >
+          <div className="rounded-[2rem] border border-black/10 bg-white/75 p-5 shadow-2xl backdrop-blur-xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-black/50">
@@ -152,16 +203,16 @@ export default function Home() {
                 <h3 className="text-2xl font-black">Operational Snapshot</h3>
               </div>
               <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-black text-emerald-700">
-                LIVE
+                DEMO
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
               {[
-                ["Efficiency Score", "88%", "+14%"],
-                ["Revenue at Risk", "$18.4K", "-32%"],
-                ["Missed Leads", "42", "-21%"],
-              ].map(([label, value, change]) => (
+                ["Health Score", `${scan.healthScore}/100`, scan.riskLevel],
+                ["Monthly Leak", `$${scan.monthlyLoss.toLocaleString()}`, "Est."],
+                ["Missed Leads", `${scan.missedLeads}`, "Monthly"],
+              ].map(([label, value, note]) => (
                 <div
                   key={label}
                   className="rounded-3xl border border-black/10 bg-[#faf7f1] p-4"
@@ -171,7 +222,7 @@ export default function Home() {
                   </p>
                   <p className="mt-2 text-2xl font-black">{value}</p>
                   <p className="mt-1 text-sm font-bold text-emerald-600">
-                    {change}
+                    {note}
                   </p>
                 </div>
               ))}
@@ -204,15 +255,14 @@ export default function Home() {
             <div className="mt-5 rounded-3xl bg-black p-5 text-white">
               <p className="text-sm font-bold text-white/50">AI Insight</p>
               <p className="mt-2 text-lg font-semibold leading-7">
-                Missed lead risk spikes after 3 PM. Add a follow-up workflow and
-                backup coverage window to recover an estimated $4.2K/month.
+                Missed lead risk increases when response delays, unclear
+                ownership, and inconsistent follow-up happen at the same time.
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* LOGO / TRUST STRIP */}
       <section className="border-y border-black/10 bg-white/55 px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 text-sm font-black uppercase tracking-[0.2em] text-black/35">
           <span>Revenue Intelligence</span>
@@ -222,7 +272,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section id="features" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 max-w-2xl">
@@ -238,10 +287,9 @@ export default function Home() {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <motion.div
+                <div
                   key={feature.title}
-                  whileHover={{ y: -8 }}
-                  className="rounded-[2rem] border border-black/10 bg-white/70 p-7 shadow-sm"
+                  className="rounded-[2rem] border border-black/10 bg-white/70 p-7 shadow-sm transition hover:-translate-y-2"
                 >
                   <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
                     <Icon size={22} />
@@ -250,26 +298,25 @@ export default function Home() {
                   <p className="mt-4 leading-7 text-black/60">
                     {feature.desc}
                   </p>
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* DASHBOARD */}
       <section id="dashboard" className="bg-black px-6 py-24 text-white">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <p className="mb-3 font-black uppercase tracking-[0.25em] text-white/40">
-              Live Intelligence Layer
+              Intelligence Layer
             </p>
             <h2 className="text-4xl font-black tracking-tight md:text-6xl">
               See the hidden patterns behind lost revenue.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
               PulseIQ converts missed calls, late follow-ups, inconsistent
-              staffing, and customer friction into clear executive-level action.
+              staffing, and customer friction into clear action steps.
             </p>
 
             <div className="mt-8 space-y-4">
@@ -277,7 +324,7 @@ export default function Home() {
                 "Operational health score",
                 "Revenue leak estimate",
                 "Workflow bottleneck alerts",
-                "AI-generated next steps",
+                "Recommended next steps",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <CheckCircle2 className="text-emerald-400" size={20} />
@@ -314,7 +361,9 @@ export default function Home() {
                     className="rounded-3xl border border-white/10 bg-white/10 p-5"
                   >
                     <p className="text-sm font-bold text-white/45">{title}</p>
-                    <p className={`mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black ${color}`}>
+                    <p
+                      className={`mt-3 inline-flex rounded-full px-4 py-2 text-sm font-black ${color}`}
+                    >
                       {status}
                     </p>
                   </div>
@@ -335,7 +384,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES */}
       <section id="services" className="px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
@@ -348,23 +396,7 @@ export default function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                name: "AI Revenue Leak Audit",
-                price: "$97",
-                desc: "A focused audit identifying missed revenue and operational gaps.",
-              },
-              {
-                name: "KPI Dashboard Build",
-                price: "$297",
-                desc: "A custom dashboard for tracking leads, calls, follow-up, and efficiency.",
-              },
-              {
-                name: "Operations Intelligence Plan",
-                price: "$497+",
-                desc: "A complete workflow improvement plan with AI recommendations.",
-              },
-            ].map((service) => (
+            {services.map((service) => (
               <div
                 key={service.name}
                 className="rounded-[2rem] border border-black/10 bg-white/75 p-8 shadow-sm"
@@ -372,16 +404,18 @@ export default function Home() {
                 <h3 className="text-2xl font-black">{service.name}</h3>
                 <p className="mt-4 text-black/60">{service.desc}</p>
                 <p className="mt-8 text-4xl font-black">{service.price}</p>
-                <button className="mt-8 w-full rounded-full bg-black px-6 py-4 font-bold text-white">
+                <a
+                  href="#contact"
+                  className="mt-8 block rounded-full bg-black px-6 py-4 text-center font-bold text-white"
+                >
                   Start Here
-                </button>
+                </a>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SCAN FORM */}
       <section id="scan" className="px-6 pb-24">
         <div className="mx-auto grid max-w-7xl gap-8 rounded-[2.5rem] bg-[#111] p-8 text-white md:p-12 lg:grid-cols-2">
           <div>
@@ -390,63 +424,153 @@ export default function Home() {
               Free Business Scan
             </div>
             <h2 className="text-4xl font-black md:text-5xl">
-              Find your biggest operational leak in under 3 minutes.
+              Estimate your missed-lead revenue leak.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
-              Enter a few quick details and receive a starter view of your
-              operational risk, revenue leak potential, and workflow improvement
-              opportunities.
+              Enter a few quick numbers to estimate monthly loss, annual loss,
+              operational health, and recommended next steps.
             </p>
+
+            <div className="mt-8 rounded-3xl bg-white/10 p-5 text-sm text-white/70">
+              This tool provides an estimate based on the information entered.
+              Results are for planning purposes and may vary depending on actual
+              lead quality, sales process, and conversion rates.
+            </div>
           </div>
 
-          <form className="rounded-[2rem] bg-white p-6 text-black">
+          <div className="rounded-[2rem] bg-white p-6 text-black">
             <div className="grid gap-4">
-              {[
-                "Business Name",
-                "Monthly Leads",
-                "Missed Call %",
-                "Average Response Time",
-                "Review Score",
-                "Biggest Workflow Problem",
-              ].map((label) => (
-                <div key={label}>
-                  <label className="text-sm font-black text-black/50">
-                    {label}
-                  </label>
-                  <input
-                    className="mt-2 w-full rounded-2xl border border-black/10 bg-[#f7f2ea] px-4 py-3 outline-none"
-                    placeholder={label}
-                  />
-                </div>
-              ))}
-              <button
-                type="button"
-                className="mt-2 rounded-full bg-black px-6 py-4 font-black text-white"
-              >
-                Generate My Scan
-              </button>
+              <NumberInput
+                label="Monthly Leads"
+                value={monthlyLeads}
+                onChange={setMonthlyLeads}
+              />
+              <NumberInput
+                label="Missed Lead Percentage"
+                value={missRate}
+                onChange={setMissRate}
+              />
+              <NumberInput
+                label="Average Lead Value"
+                value={leadValue}
+                onChange={setLeadValue}
+              />
+              <NumberInput
+                label="Average Response Delay in Hours"
+                value={responseDelay}
+                onChange={setResponseDelay}
+              />
+              <NumberInput
+                label="Team Size"
+                value={teamSize}
+                onChange={setTeamSize}
+              />
             </div>
-          </form>
+
+            <div className="mt-6 rounded-3xl bg-[#f7f2ea] p-5">
+              <p className="text-sm font-black uppercase text-black/45">
+                Scan Results
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <Result label="Monthly Loss" value={`$${scan.monthlyLoss.toLocaleString()}`} />
+                <Result label="Annual Loss" value={`$${scan.annualLoss.toLocaleString()}`} />
+                <Result label="Missed Leads" value={`${scan.missedLeads}`} />
+                <Result label="Risk Level" value={scan.riskLevel} />
+              </div>
+              <div className="mt-4 rounded-2xl bg-black p-4 text-white">
+                <p className="text-sm font-bold text-white/50">
+                  Recommended Action
+                </p>
+                <p className="mt-2 font-semibold leading-7">
+                  {scan.recommendation}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* FOOTER */}
+      <section id="contact" className="px-6 pb-24">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-black/10 bg-white/75 p-8 text-center shadow-sm md:p-12">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white">
+            <Mail size={24} />
+          </div>
+          <h2 className="text-4xl font-black md:text-5xl">
+            Ready to review your operations?
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-black/60">
+            Send a message to request a PulseIQ Operations review, dashboard,
+            or revenue leak audit.
+          </p>
+          <a
+            href={mailtoLink}
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-black px-8 py-4 font-bold text-white"
+          >
+            Contact PulseIQ <ArrowRight size={18} />
+          </a>
+
+          <p className="mt-6 text-sm text-black/45">
+            Your information is used only to respond to your request. We do not
+            sell your information.
+          </p>
+        </div>
+      </section>
+
       <footer className="border-t border-black/10 px-6 py-10">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 md:flex-row md:items-center">
           <div>
             <h3 className="text-2xl font-black">PulseIQ Operations</h3>
             <p className="mt-2 text-black/55">
-              AI-powered operational intelligence for service businesses.
+              Operations Analytics | Revenue Leak Detection | Workflow
+              Improvement
             </p>
+            <p className="mt-2 text-black/55">Contact: {emailAddress}</p>
           </div>
 
-          <div className="flex gap-5 text-sm font-bold text-black/55">
+          <div className="flex flex-wrap gap-5 text-sm font-bold text-black/55">
             <a href="#features">Features</a>
             <a href="#dashboard">Dashboard</a>
+            <a href="#services">Services</a>
             <a href="#scan">Scan</a>
           </div>
         </div>
+
+        <p className="mx-auto mt-8 max-w-7xl text-sm text-black/40">
+          © 2026 PulseIQ Operations. Estimates are for planning purposes only.
+        </p>
       </footer>
     </main>
+  );
+}
+
+function NumberInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div>
+      <label className="text-sm font-black text-black/50">{label}</label>
+      <input
+        type="number"
+        min="0"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="mt-2 w-full rounded-2xl border border-black/10 bg-[#f7f2ea] px-4 py-3 outline-none focus:border-black/30"
+      />
+    </div>
+  );
+}
+
+function Result({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white p-4">
+      <p className="text-xs font-black uppercase text-black/40">{label}</p>
+      <p className="mt-2 text-2xl font-black">{value}</p>
+    </div>
   );
 }

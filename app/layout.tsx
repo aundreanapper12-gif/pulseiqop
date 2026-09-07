@@ -12,13 +12,86 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://www.pulseiqoperations.online";
+
 export const metadata: Metadata = {
-  title: "PulseIQ Operations | AI-Powered Operational Intelligence",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    template: "%s | PulseIQ Operations",
+  },
   description:
-    "PulseIQ helps small businesses identify revenue leaks, workflow inefficiencies, missed leads, and customer experience risks using operational analytics and AI-style insights.",
+    "PulseIQ Operations helps growing service businesses identify costly gaps in labor, expenses, missed leads, customer experience, and daily operations—then prioritize what to fix first.",
+  applicationName: "PulseIQ Operations",
+  keywords: [
+    "business operations analytics",
+    "profit leak analysis",
+    "small business analytics",
+    "operational intelligence",
+    "labor cost analysis",
+    "missed lead analysis",
+    "business performance dashboard",
+    "operations consulting",
+  ],
+  authors: [{ name: "PulseIQ Operations" }],
+  creator: "PulseIQ Operations",
+  publisher: "PulseIQ Operations",
+  category: "Business Analytics",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "PulseIQ Operations",
+    title: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    description:
+      "Turn business numbers into prioritized operational decisions. Identify profit leaks, model financial impact, and see what deserves attention first.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    description:
+      "Identify costly operational gaps, estimate financial impact, and prioritize what to fix first.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   verification: {
     google: "VwlG8w2T82XWnxuSVl8RnMHezQMB1gfMts5OTen1RYc",
   },
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "PulseIQ Operations",
+  url: siteUrl,
+  description:
+    "Operational profit intelligence for growing service businesses.",
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "PulseIQ Operations Profit Leak Analysis",
+  provider: {
+    "@type": "Organization",
+    name: "PulseIQ Operations",
+    url: siteUrl,
+  },
+  serviceType: "Business operations analytics and profit leak analysis",
+  areaServed: "US",
+  description:
+    "Operational analysis that helps businesses identify costly gaps in labor, expenses, missed leads, customer experience, and daily operations.",
 };
 
 export default function RootLayout({
@@ -32,6 +105,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+        />
         {children}
       </body>
     </html>

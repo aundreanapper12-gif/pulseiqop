@@ -58,6 +58,17 @@ textarea::placeholder {
   color: rgba(16, 16, 16, 0.32);
 }
 
+.site-cta {
+  max-width: calc(100vw - 2.5rem);
+}
+
+@media (max-width: 640px) {
+  .site-cta {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -77,7 +88,9 @@ textarea::placeholder {
   nav,
   footer,
   button,
-  input[type="file"] {
+  input[type="file"],
+  .site-utility,
+  .site-cta {
     display: none !important;
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, Copy, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Copy, CreditCard, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 type ServiceKey = "quick" | "complete" | "monthly" | "unsure";
 
@@ -53,7 +53,13 @@ export default function RequestPage() {
   const [status, setStatus] = useState("");
 
   const contactEmail = process.env.NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL || "";
+  const paymentLinks: Partial<Record<ServiceKey, string>> = {
+    quick: process.env.NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL || "",
+    complete: process.env.NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL || "",
+    monthly: process.env.NEXT_PUBLIC_PULSEIQ_MONTHLY_PAY_URL || "",
+  };
   const selected = services[data.service];
+  const paymentUrl = paymentLinks[data.service] || "";
 
   const requestText = useMemo(() => {
     return [
@@ -75,7 +81,19 @@ export default function RequestPage() {
     ].join("\n");
   }, [data, selected]);
 
+  const requiredComplete =
+    data.name.trim() && data.email.trim() && data.businessName.trim() && data.question.trim();
+
+  const validate = () => {
+    if (!requiredComplete) {
+      setStatus("Please complete your name, business email, business name, and business question first.");
+      return false;
+    }
+    return true;
+  };
+
   const copyRequest = async () => {
+    if (!validate()) return;
     try {
       await navigator.clipboard.writeText(requestText);
       setStatus("Request copied to your clipboard.");
@@ -85,6 +103,7 @@ export default function RequestPage() {
   };
 
   const downloadRequest = () => {
+    if (!validate()) return;
     const blob = new Blob([requestText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -97,10 +116,7 @@ export default function RequestPage() {
 
   const emailRequest = (event: FormEvent) => {
     event.preventDefault();
-    if (!data.name.trim() || !data.email.trim() || !data.businessName.trim() || !data.question.trim()) {
-      setStatus("Please complete your name, business email, business name, and business question first.");
-      return;
-    }
+    if (!validate()) return;
 
     if (!contactEmail) {
       setStatus("Direct email intake is not configured yet. Copy or download your request so none of your information is lost.");
@@ -110,6 +126,22 @@ export default function RequestPage() {
     const subject = encodeURIComponent(`PulseIQ Analysis Request — ${data.businessName}`);
     const body = encodeURIComponent(requestText);
     window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const openCheckout = async () => {
+    if (!validate()) return;
+    if (!paymentUrl) {
+      setStatus("Online checkout is not configured for this service yet. Prepare your request first.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(requestText);
+    } catch {
+      // Checkout can continue even if clipboard permission is unavailable.
+    }
+    window.open(paymentUrl, "_blank", "noopener,noreferrer");
+    setStatus("Checkout opened in a new tab. Your analysis-request details were copied when browser permissions allowed it.");
   };
 
   return (
@@ -212,10 +244,15 @@ export default function RequestPage() {
                 <p className="mt-2 text-sm leading-6 text-black/50">{selected.detail}</p>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className={`mt-6 grid gap-3 ${paymentUrl ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
                 <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
                   <Mail size={17} /> {contactEmail ? "Email PulseIQ" : "Prepare Request"}
                 </button>
+                {paymentUrl ? (
+                  <button type="button" onClick={openCheckout} className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
+                    <CreditCard size={17} /> Secure Checkout
+                  </button>
+                ) : null}
                 <button type="button" onClick={copyRequest} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-5 py-4 font-black hover:bg-black hover:text-white">
                   <Copy size={17} /> Copy Request
                 </button>
@@ -231,7 +268,7 @@ export default function RequestPage() {
               ) : null}
 
               <p className="mt-5 text-xs leading-5 text-black/38">
-                This page prepares your request in your browser. Direct email delivery is enabled only when PulseIQ's business contact address is configured. No payment is collected on this page.
+                This page prepares your request in your browser. Direct email delivery and checkout appear only when PulseIQ's business contact and payment links are configured. Payment-card details are handled by the configured external checkout provider, not this form.
               </p>
             </form>
           </div>

@@ -75,8 +75,16 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "PulseIQ Operations",
   url: siteUrl,
+  description: "Operational profit intelligence for growing service businesses.",
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "PulseIQ Operations",
+  url: siteUrl,
   description:
-    "Operational profit intelligence for growing service businesses.",
+    "Business operations analytics focused on profit leakage, labor, missed leads, customer experience, and operational decision support.",
 };
 
 const serviceSchema = {
@@ -92,7 +100,56 @@ const serviceSchema = {
   areaServed: "US",
   description:
     "Operational analysis that helps businesses identify costly gaps in labor, expenses, missed leads, customer experience, and daily operations.",
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "PulseIQ Analysis Services",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: "149",
+        itemOffered: {
+          "@type": "Service",
+          name: "Quick Leak Check",
+          description: "Focused review of one operational question and one dataset.",
+        },
+      },
+      {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: "399",
+        itemOffered: {
+          "@type": "Service",
+          name: "Profit Leak Analysis",
+          description: "Broader operational analysis using up to four data sources.",
+        },
+      },
+      {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: "199",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: "199",
+          priceCurrency: "USD",
+          unitText: "MONTH",
+        },
+        itemOffered: {
+          "@type": "Service",
+          name: "Monthly Pulse",
+          description: "Recurring monthly performance review and action prioritization.",
+        },
+      },
+    ],
+  },
 };
+
+const utilityLinks = [
+  ["FAQ", "/faq"],
+  ["Methodology", "/methodology"],
+  ["Privacy", "/privacy"],
+  ["Terms", "/terms"],
+] as const;
 
 export default function RootLayout({
   children,
@@ -111,9 +168,32 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
         />
         {children}
+
+        <div className="site-utility border-t border-black/10 bg-[#eee7dc] px-5 py-6 text-[#101010] md:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm md:flex-row md:items-center md:justify-between">
+            <p className="font-semibold text-black/45">© 2026 PulseIQ Operations · Clear data. Better decisions.</p>
+            <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-black text-black/55">
+              {utilityLinks.map(([label, href]) => (
+                <a key={href} href={href} className="hover:text-black">{label}</a>
+              ))}
+              <a href="/request" className="text-black">Request analysis</a>
+            </nav>
+          </div>
+        </div>
+
+        <a
+          href="/request"
+          className="site-cta fixed bottom-5 right-5 z-[60] rounded-full bg-black px-5 py-3 text-sm font-black text-white shadow-2xl hover:-translate-y-0.5 hover:shadow-xl"
+        >
+          Request analysis
+        </a>
       </body>
     </html>
   );

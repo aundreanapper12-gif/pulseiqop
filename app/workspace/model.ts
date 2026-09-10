@@ -291,40 +291,33 @@ export const money = (value: number) =>
   }).format(Number.isFinite(value) ? value : 0);
 
 export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
-  const directLeaks: LeakFinding[] = costCategories
-    .map((category) => {
-      const actual = Number(inputs[category.actual]) || 0;
-      const target = Number(inputs[category.target]) || 0;
-      const amount = target > 0 ? Math.max(actual - target, 0) : 0;
-      if (amount <= 0) return null;
+  const directLeaks = costCategories.reduce<LeakFinding[]>((findings, category) => {
+    const actual = Number(inputs[category.actual]) || 0;
+    const target = Number(inputs[category.target]) || 0;
+    const amount = target > 0 ? Math.max(actual - target, 0) : 0;
+    if (amount <= 0) return findings;
 
-      return {
-        id: category.id,
-        name: category.name,
-        amount,
-        annual: amount * 12,
-        type: "direct" as const,
-        confidence: "High" as const,
-        severity: severityFromRatio(amount, target),
-        signal: `${category.name} is ${money(amount)} above the target entered for this period.`,
-        whyItMatters:
-          "This is a direct actual-versus-target variance. It identifies dollars worth investigating, but it does not prove the entire variance is waste.",
-        investigate: category.investigate,
-        firstMove: category.firstMove,
-        measure: category.measure,
-      };
-    })
-    .filter((item): item is LeakFinding => Boolean(item));
+    findings.push({
+      id: category.id,
+      name: category.name,
+      amount,
+      annual: amount * 12,
+      type: "direct",
+      confidence: "High",
+      severity: severityFromRatio(amount, target),
+      signal: `${category.name} is ${money(amount)} above the target entered for this period.`,
+      whyItMatters:
+        "This is a direct actual-versus-target variance. It identifies dollars worth investigating, but it does not prove the entire variance is waste.",
+      investigate: category.investigate,
+      firstMove: category.firstMove,
+      measure: category.measure,
+    });
+    return findings;
+  }, []);
 
   const missedLeadOpportunity =
-    inputs.monthlyLeads > 0 &&
-    inputs.missedContactPct > 0 &&
-    inputs.conversionRate > 0 &&
-    inputs.avgCustomerValue > 0
-      ? inputs.monthlyLeads *
-        (inputs.missedContactPct / 100) *
-        (inputs.conversionRate / 100) *
-        inputs.avgCustomerValue
+    inputs.monthlyLeads > 0 && inputs.missedContactPct > 0 && inputs.conversionRate > 0 && inputs.avgCustomerValue > 0
+      ? inputs.monthlyLeads * (inputs.missedContactPct / 100) * (inputs.conversionRate / 100) * inputs.avgCustomerValue
       : 0;
 
   const reworkOpportunity =
@@ -333,7 +326,6 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
       : 0;
 
   const modeledLeaks: LeakFinding[] = [];
-
   if (missedLeadOpportunity > 0) {
     modeledLeaks.push({
       id: "missed-leads",
@@ -342,12 +334,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
       annual: missedLeadOpportunity * 12,
       type: "modeled",
       confidence: "Medium",
-      severity:
-        inputs.missedContactPct >= 15
-          ? "Critical"
-          : inputs.missedContactPct >= 8
-            ? "High"
-            : "Moderate",
+      severity: inputs.missedContactPct >= 15 ? "Critical" : inputs.missedContactPct >= 8 ? "High" : "Moderate",
       signal: `${inputs.missedContactPct}% of ${Math.round(inputs.monthlyLeads)} monthly leads are entered as missed or unanswered.`,
       whyItMatters:
         "PulseIQ models the possible value of those contacts using the conversion rate and average customer value you entered. Recovered callbacks, duplicate leads, capacity limits, and lead quality can reduce the recoverable amount.",
@@ -369,8 +356,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
       annual: reworkOpportunity * 12,
       type: "modeled",
       confidence: "Medium",
-      severity:
-        inputs.reworkPct >= 12 ? "Critical" : inputs.reworkPct >= 6 ? "High" : "Moderate",
+      severity: inputs.reworkPct >= 12 ? "Critical" : inputs.reworkPct >= 6 ? "High" : "Moderate",
       signal: `${inputs.reworkPct}% of ${Math.round(inputs.completedJobs)} completed jobs are entered as requiring rework.`,
       whyItMatters:
         "This estimate applies the direct rework cost per job you entered. It is intended to expose avoidable repeat effort, not to estimate every downstream customer-experience cost.",
@@ -385,20 +371,12 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
   }
 
   const leaks = [...directLeaks, ...modeledLeaks].sort((a, b) => b.amount - a.amount);
-
-  const totalExpenses = costCategories.reduce(
-    (sum, category) => sum + (Number(inputs[category.actual]) || 0),
-    0,
-  );
-  const targetExpenses = costCategories.reduce(
-    (sum, category) => sum + (Number(inputs[category.target]) || 0),
-    0,
-  );
+  const totalExpenses = costCategories.reduce((sum, category) => sum + (Number(inputs[category.actual]) || 0), 0);
+  const targetExpenses = costCategories.reduce((sum, category) => sum + (Number(inputs[category.target]) || 0), 0);
   const directLeakTotal = directLeaks.reduce((sum, leak) => sum + leak.amount, 0);
   const modeledOpportunityTotal = modeledLeaks.reduce((sum, leak) => sum + leak.amount, 0);
   const totalOpportunity = directLeakTotal + modeledOpportunityTotal;
-  const revenueGap =
-    inputs.revenueTarget > 0 ? Math.max(inputs.revenueTarget - inputs.revenue, 0) : 0;
+  const revenueGap = inputs.revenueTarget > 0 ? Math.max(inputs.revenueTarget - inputs.revenue, 0) : 0;
   const operatingProfit = inputs.revenue - totalExpenses;
   const operatingMargin = inputs.revenue > 0 ? (operatingProfit / inputs.revenue) * 100 : 0;
 
@@ -406,20 +384,15 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
     (category) => Number(inputs[category.actual]) > 0 && Number(inputs[category.target]) > 0,
   ).length;
   const leadComplete =
-    inputs.monthlyLeads > 0 &&
-    inputs.missedContactPct > 0 &&
-    inputs.conversionRate > 0 &&
-    inputs.avgCustomerValue > 0;
-  const reworkComplete =
-    inputs.completedJobs > 0 && inputs.reworkPct > 0 && inputs.reworkCostPerJob > 0;
+    inputs.monthlyLeads > 0 && inputs.missedContactPct > 0 && inputs.conversionRate > 0 && inputs.avgCustomerValue > 0;
+  const reworkComplete = inputs.completedJobs > 0 && inputs.reworkPct > 0 && inputs.reworkCostPerJob > 0;
   const completeness = Math.min(
     100,
     Math.round((costPairs / costCategories.length) * 75 + (leadComplete ? 15 : 0) + (reworkComplete ? 10 : 0)),
   );
 
   const leakageRate = inputs.revenue > 0 ? totalOpportunity / inputs.revenue : 0;
-  const revenueGapRate =
-    inputs.revenueTarget > 0 ? revenueGap / inputs.revenueTarget : 0;
+  const revenueGapRate = inputs.revenueTarget > 0 ? revenueGap / inputs.revenueTarget : 0;
   const marginPenalty = operatingMargin < 0 ? 24 : operatingMargin < 5 ? 16 : operatingMargin < 10 ? 8 : 0;
   const completenessPenalty = completeness < 25 ? 10 : completeness < 50 ? 5 : 0;
   const score =
@@ -429,11 +402,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
           Math.min(
             98,
             Math.round(
-              100 -
-                Math.min(48, leakageRate * 210) -
-                Math.min(18, revenueGapRate * 45) -
-                marginPenalty -
-                completenessPenalty,
+              100 - Math.min(48, leakageRate * 210) - Math.min(18, revenueGapRate * 45) - marginPenalty - completenessPenalty,
             ),
           ),
         )
@@ -453,12 +422,8 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
     warnings.push(`${missingTargetCount} cost categor${missingTargetCount === 1 ? "y has" : "ies have"} actual spending but no target, so those dollars are not evaluated for overrun.`);
   if (inputs.revenue > 0 && totalExpenses > inputs.revenue)
     warnings.push("The operating-cost categories entered exceed revenue. Confirm the reporting period and that amounts are not duplicated.");
-  const leadPartiallyFilled = [
-    inputs.monthlyLeads,
-    inputs.missedContactPct,
-    inputs.conversionRate,
-    inputs.avgCustomerValue,
-  ].some((value) => value > 0) && !leadComplete;
+
+  const leadPartiallyFilled = [inputs.monthlyLeads, inputs.missedContactPct, inputs.conversionRate, inputs.avgCustomerValue].some((value) => value > 0) && !leadComplete;
   if (leadPartiallyFilled)
     warnings.push("The missed-lead model is only partially filled, so PulseIQ is excluding it from the opportunity estimate.");
   const reworkPartiallyFilled = [inputs.completedJobs, inputs.reworkPct, inputs.reworkCostPerJob].some((value) => value > 0) && !reworkComplete;

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Copy, CreditCard, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 type ServiceKey = "quick" | "complete" | "monthly" | "unsure";
@@ -48,9 +48,19 @@ const initialData: RequestData = {
   dataAvailable: "",
 };
 
+const isServiceKey = (value: string | null): value is ServiceKey =>
+  Boolean(value && Object.prototype.hasOwnProperty.call(services, value));
+
 export default function RequestPage() {
   const [data, setData] = useState<RequestData>(initialData);
   const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    const requestedService = new URLSearchParams(window.location.search).get("service");
+    if (isServiceKey(requestedService)) {
+      setData((current) => ({ ...current, service: requestedService }));
+    }
+  }, []);
 
   const contactEmail = process.env.NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL || "";
   const paymentLinks: Partial<Record<ServiceKey, string>> = {
@@ -152,8 +162,8 @@ export default function RequestPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white"><Sparkles size={18} /></span>
             <span>PulseIQ Operations</span>
           </a>
-          <a href="/" className="inline-flex items-center gap-2 text-sm font-black text-black/55 hover:text-black">
-            <ArrowLeft size={16} /> Back to diagnostic
+          <a href="/workspace" className="inline-flex items-center gap-2 text-sm font-black text-black/55 hover:text-black">
+            <ArrowLeft size={16} /> Back to workspace
           </a>
         </div>
       </header>
@@ -268,7 +278,7 @@ export default function RequestPage() {
               ) : null}
 
               <p className="mt-5 text-xs leading-5 text-black/38">
-                This page prepares your request in your browser. Direct email delivery and checkout appear only when PulseIQ's business contact and payment links are configured. Payment-card details are handled by the configured external checkout provider, not this form.
+                This page prepares your request in your browser. Direct email delivery and checkout appear only when PulseIQ&apos;s business contact and payment links are configured. Payment-card details are handled by the configured external checkout provider, not this form.
               </p>
             </form>
           </div>

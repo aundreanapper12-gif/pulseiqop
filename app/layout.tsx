@@ -2,16 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const siteUrl = "https://www.pulseiqoperations.online";
 
 export const metadata: Metadata = {
@@ -21,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s | PulseIQ Operations",
   },
   description:
-    "PulseIQ Operations helps growing service businesses identify costly gaps in labor, expenses, missed leads, customer experience, and daily operations—then prioritize what to fix first.",
+    "PulseIQ helps growing businesses identify costly gaps in labor, expenses, missed leads, rework, and daily operations—then prioritize what to fix first.",
   applicationName: "PulseIQ Operations",
   keywords: [
     "business operations analytics",
@@ -31,22 +23,21 @@ export const metadata: Metadata = {
     "labor cost analysis",
     "missed lead analysis",
     "business performance dashboard",
+    "profit improvement",
     "operations consulting",
   ],
   authors: [{ name: "PulseIQ Operations" }],
   creator: "PulseIQ Operations",
   publisher: "PulseIQ Operations",
   category: "Business Analytics",
-  alternates: {
-    canonical: "/",
-  },
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: siteUrl,
     siteName: "PulseIQ Operations",
     title: "PulseIQ Operations | Find Profit Leaks in Your Business",
     description:
-      "Turn business numbers into prioritized operational decisions. Identify profit leaks, model financial impact, and see what deserves attention first.",
+      "Put your business numbers in. See where money may be leaking, what to investigate first, and what the financial opportunity could be.",
   },
   twitter: {
     card: "summary_large_image",
@@ -75,7 +66,7 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "PulseIQ Operations",
   url: siteUrl,
-  description: "Operational profit intelligence for growing service businesses.",
+  description: "Operational profit intelligence for growing businesses.",
 };
 
 const organizationSchema = {
@@ -84,7 +75,23 @@ const organizationSchema = {
   name: "PulseIQ Operations",
   url: siteUrl,
   description:
-    "Business operations analytics focused on profit leakage, labor, missed leads, customer experience, and operational decision support.",
+    "Business operations analytics focused on profit leakage, labor, missed leads, rework, customer experience, and operational decision support.",
+};
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "PulseIQ Business Workspace",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  url: `${siteUrl}/workspace`,
+  description:
+    "A browser-based business diagnostic that compares actuals with targets, ranks potential money leaks, models recovery scenarios, and creates a prioritized action plan.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
 };
 
 const serviceSchema = {
@@ -99,7 +106,7 @@ const serviceSchema = {
   serviceType: "Business operations analytics and profit leak analysis",
   areaServed: "US",
   description:
-    "Operational analysis that helps businesses identify costly gaps in labor, expenses, missed leads, customer experience, and daily operations.",
+    "Operational analysis that helps businesses identify costly gaps and connect financial signals to root-cause questions and prioritized actions.",
   hasOfferCatalog: {
     "@type": "OfferCatalog",
     name: "PulseIQ Analysis Services",
@@ -145,35 +152,22 @@ const serviceSchema = {
 };
 
 const utilityLinks = [
+  ["Workspace", "/workspace"],
+  ["Pricing", "/pricing"],
   ["FAQ", "/faq"],
   ["Methodology", "/methodology"],
   ["Privacy", "/privacy"],
   ["Terms", "/terms"],
 ] as const;
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
         {children}
 
         <div className="site-utility border-t border-black/10 bg-[#eee7dc] px-5 py-6 text-[#101010] md:px-8">
@@ -189,10 +183,10 @@ export default function RootLayout({
         </div>
 
         <a
-          href="/request"
+          href="/workspace"
           className="site-cta fixed bottom-5 right-5 z-[60] rounded-full bg-black px-5 py-3 text-sm font-black text-white shadow-2xl hover:-translate-y-0.5 hover:shadow-xl"
         >
-          Request analysis
+          Analyze my business
         </a>
       </body>
     </html>

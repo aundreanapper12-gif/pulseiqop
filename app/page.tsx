@@ -48,16 +48,19 @@ const plans = [
     name: "Quick Leak Check",
     price: "$149",
     body: "One expensive question, one focused dataset, and three prioritized recommendations.",
+    href: "/request?service=quick",
   },
   {
     name: "Profit Leak Analysis",
     price: "$399",
     body: "A broader review of up to four relevant data sources with financial-impact estimates and root-cause analysis.",
+    href: "/request?service=complete",
   },
   {
     name: "Monthly Pulse",
     price: "$199/mo",
     body: "Recurring KPI review, risk flags, updated priorities, and a decision-focused monthly scorecard.",
+    href: "/request?service=monthly",
   },
 ];
 
@@ -191,7 +194,7 @@ export default function Home() {
           <div className="text-center"><p className="text-xs font-black uppercase tracking-[0.22em] text-black/35">When the free answer is not enough</p><h2 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">Software finds the signal. Deeper analysis tests the cause.</h2><p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-black/55">Use the free workspace first. Pay when the size of the question justifies going into the underlying schedules, transactions, calls, refunds, vendors, sales, or workflow data.</p></div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {plans.map((plan, index) => (
-              <article key={plan.name} className={`rounded-[2rem] border p-8 ${index === 1 ? "border-black bg-black text-white shadow-2xl" : "border-black/10 bg-white/75"}`}><p className={`text-xs font-black uppercase tracking-[0.18em] ${index === 1 ? "text-white/35" : "text-black/35"}`}>{index === 1 ? "Most complete" : index === 0 ? "Focused" : "Ongoing"}</p><h3 className="mt-5 text-2xl font-black">{plan.name}</h3><p className={`mt-4 leading-7 ${index === 1 ? "text-white/55" : "text-black/55"}`}>{plan.body}</p><p className="mt-8 text-4xl font-black">{plan.price}</p><a href="/request" className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 font-black ${index === 1 ? "bg-white text-black" : "bg-black text-white"}`}>Choose this analysis <ArrowRight size={16} /></a></article>
+              <article key={plan.name} className={`rounded-[2rem] border p-8 ${index === 1 ? "border-black bg-black text-white shadow-2xl" : "border-black/10 bg-white/75"}`}><p className={`text-xs font-black uppercase tracking-[0.18em] ${index === 1 ? "text-white/35" : "text-black/35"}`}>{index === 1 ? "Most complete" : index === 0 ? "Focused" : "Ongoing"}</p><h3 className="mt-5 text-2xl font-black">{plan.name}</h3><p className={`mt-4 leading-7 ${index === 1 ? "text-white/55" : "text-black/55"}`}>{plan.body}</p><p className="mt-8 text-4xl font-black">{plan.price}</p><a href={plan.href} className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 font-black ${index === 1 ? "bg-white text-black" : "bg-black text-white"}`}>Choose this analysis <ArrowRight size={16} /></a></article>
             ))}
           </div>
           <div className="mt-8 text-center"><a href="/pricing" className="inline-flex items-center gap-2 font-black underline decoration-black/20 underline-offset-4">Compare everything included <ArrowRight size={16} /></a></div>

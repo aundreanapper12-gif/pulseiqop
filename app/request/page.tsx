@@ -64,9 +64,8 @@ export default function RequestPage() {
 
   const contactEmail = process.env.NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL || "";
   const paymentLinks: Partial<Record<ServiceKey, string>> = {
-    quick: process.env.NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL || "",
-    complete: process.env.NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL || "",
-    monthly: process.env.NEXT_PUBLIC_PULSEIQ_MONTHLY_PAY_URL || "",
+    quick: process.env.NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL || "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
+    complete: process.env.NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL || "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
   };
   const selected = services[data.service];
   const paymentUrl = paymentLinks[data.service] || "";
@@ -138,20 +137,13 @@ export default function RequestPage() {
     window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
   };
 
-  const openCheckout = async () => {
-    if (!validate()) return;
+  const openCheckout = () => {
     if (!paymentUrl) {
-      setStatus("Online checkout is not configured for this service yet. Prepare your request first.");
+      setStatus("Online checkout is not available for this service yet.");
       return;
     }
-
-    try {
-      await navigator.clipboard.writeText(requestText);
-    } catch {
-      // Checkout can continue even if clipboard permission is unavailable.
-    }
     window.open(paymentUrl, "_blank", "noopener,noreferrer");
-    setStatus("Checkout opened in a new tab. Your analysis-request details were copied when browser permissions allowed it.");
+    setStatus("Checkout opened in a new tab. Enter your business name, email, and short question there. This page does not send your request details to PulseIQ.");
   };
 
   return (
@@ -216,6 +208,18 @@ export default function RequestPage() {
             </aside>
 
             <form onSubmit={emailRequest} className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-xl md:p-8">
+              {paymentUrl ? (
+                <div className="mb-8 rounded-[1.6rem] bg-emerald-50 p-5">
+                  <p className="text-lg font-black">Ready for {selected.name}?</p>
+                  <p className="mt-2 text-sm leading-6 text-black/65">Stripe checkout collects your name, business name, email, and a short question. After payment, PulseIQ will contact you at that email to arrange the data for your analysis. No business files are uploaded on this page.</p>
+                  <button type="button" onClick={openCheckout} className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
+                    <CreditCard size={17} /> Secure Checkout — {selected.price}
+                  </button>
+                </div>
+              ) : data.service === "monthly" ? (
+                <p className="mb-8 rounded-[1.6rem] bg-amber-50 p-5 text-sm font-semibold leading-6 text-black/65">Monthly Pulse checkout is paused while self-service subscription management is being set up. You will not be charged on this page.</p>
+              ) : null}
+              <p className="mb-5 text-sm font-semibold leading-6 text-black/55">The fields below prepare a detailed request in your browser. They do not submit it to PulseIQ. For paid services, enter your contact details and short question again at checkout.</p>
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-sm font-black text-black/60">Your name *</span>
@@ -254,15 +258,10 @@ export default function RequestPage() {
                 <p className="mt-2 text-sm leading-6 text-black/50">{selected.detail}</p>
               </div>
 
-              <div className={`mt-6 grid gap-3 ${paymentUrl ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
                   <Mail size={17} /> {contactEmail ? "Email PulseIQ" : "Prepare Request"}
                 </button>
-                {paymentUrl ? (
-                  <button type="button" onClick={openCheckout} className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
-                    <CreditCard size={17} /> Secure Checkout
-                  </button>
-                ) : null}
                 <button type="button" onClick={copyRequest} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-5 py-4 font-black hover:bg-black hover:text-white">
                   <Copy size={17} /> Copy Request
                 </button>
@@ -278,7 +277,7 @@ export default function RequestPage() {
               ) : null}
 
               <p className="mt-5 text-xs leading-5 text-black/38">
-                This page prepares your request in your browser. Direct email delivery and checkout appear only when PulseIQ&apos;s business contact and payment links are configured. Payment-card details are handled by the configured external checkout provider, not this form.
+                This page prepares a request in your browser; it does not submit your form. Direct email delivery requires a configured business inbox. Secure checkout is hosted by Stripe, which collects payment-card details separately from this page.
               </p>
             </form>
           </div>

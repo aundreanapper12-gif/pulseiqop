@@ -12,6 +12,7 @@ export type ExpenseEntry = {
 };
 
 export const MAX_EXPENSES = 500;
+export const UNDATED_PERIOD = "undated";
 
 export const expenseCategoryAliases: Record<string, string> = {
   payroll: "payroll", wages: "payroll", salary: "payroll",
@@ -57,15 +58,73 @@ export function summarizeExpenses(entries: ExpenseEntry[]) {
     name: category.name,
     amount: cents(entries.filter((entry) => entry.category === category.id).reduce((sum, entry) => sum + entry.amount, 0)),
   })).filter((category) => category.amount > 0).sort((a, b) => b.amount - a.amount);
-  const vendors = new Map<string, number>();
+  const vendors = new Map<string, { name: string; amount: number }>();
   entries.forEach((entry) => {
     const vendor = entry.vendor.trim() || "Unspecified vendor";
-    vendors.set(vendor, (vendors.get(vendor) || 0) + entry.amount);
+    const key = vendor.replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+    const previous = vendors.get(key);
+    vendors.set(key, { name: previous?.name || vendor, amount: (previous?.amount || 0) + entry.amount });
   });
-  const vendorTotals = [...vendors].map(([name, amount]) => ({ name, amount: cents(amount) })).sort((a, b) => b.amount - a.amount);
+  const vendorTotals = [...vendors.values()].map(({ name, amount }) => ({ name, amount: cents(amount) })).sort((a, b) => b.amount - a.amount);
   const total = cents(entries.reduce((sum, entry) => sum + entry.amount, 0));
   const months = new Set(entries.map((entry) => entry.date.slice(0, 7)).filter((month) => /^\d{4}-\d{2}$/.test(month)));
   return { total, categoryTotals, vendorTotals, mixedMonths: months.size > 1 };
+}
+
+export function expensePeriod(entry: ExpenseEntry): string {
+  const month = entry.date.slice(0, 7);
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month : UNDATED_PERIOD;
+}
+
+export function expensePeriods(entries: ExpenseEntry[]): string[] {
+  const unique = [...new Set(entries.map(expensePeriod))];
+  return unique.sort((a, b) => a === UNDATED_PERIOD ? 1 : b === UNDATED_PERIOD ? -1 : b.localeCompare(a));
+}
+
+export function expensesInPeriod(entries: ExpenseEntry[], period: string): ExpenseEntry[] {
+  return entries.filter((entry) => expensePeriod(entry) === period);
+}
+
+export function formatExpensePeriod(period: string): string {
+  if (!period) return "No expense month";
+  if (period === UNDATED_PERIOD) return "No date";
+  const [year, month] = period.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+export function compareExpensePeriods(entries: ExpenseEntry[], currentPeriod: string) {
+  const previousPeriod = expensePeriods(entries).find((period) => period !== UNDATED_PERIOD && period < currentPeriod);
+  if (!previousPeriod || currentPeriod === UNDATED_PERIOD) return null;
+  const current = summarizeExpenses(expensesInPeriod(entries, currentPeriod));
+  const previous = summarizeExpenses(expensesInPeriod(entries, previousPeriod));
+  const categories = costCategories.map(({ id, name }) => {
+    const currentAmount = current.categoryTotals.find((category) => category.id === id)?.amount || 0;
+    const previousAmount = previous.categoryTotals.find((category) => category.id === id)?.amount || 0;
+    return { id, name, current: currentAmount, previous: previousAmount, change: cents(currentAmount - previousAmount) };
+  }).filter((category) => category.current || category.previous).sort((a, b) => b.change - a.change);
+  return { currentPeriod, previousPeriod, currentTotal: current.total, previousTotal: previous.total, change: cents(current.total - previous.total), categories };
+}
+
+// These are review prompts, not confirmed duplicate charges or savings.
+export function reviewExpensePatterns(entries: ExpenseEntry[]) {
+  const duplicateGroups = new Map<string, ExpenseEntry[]>();
+  const recurringGroups = new Map<string, ExpenseEntry[]>();
+  for (const entry of entries) {
+    if (expensePeriod(entry) === UNDATED_PERIOD || !entry.vendor.trim()) continue;
+    const vendor = entry.vendor.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+    const duplicateKey = [entry.date, vendor, entry.category, entry.amount.toFixed(2), entry.description.trim().toLocaleLowerCase("en-US")].join("|");
+    duplicateGroups.set(duplicateKey, [...(duplicateGroups.get(duplicateKey) || []), entry]);
+    const recurringKey = [vendor, entry.category, entry.amount.toFixed(2)].join("|");
+    recurringGroups.set(recurringKey, [...(recurringGroups.get(recurringKey) || []), entry]);
+  }
+  const possibleDuplicates = [...duplicateGroups.values()].filter((group) => group.length > 1)
+    .map((group) => ({ vendor: group[0].vendor, date: group[0].date, amount: group[0].amount, count: group.length, entryIds: group.map((entry) => entry.id) }));
+  const recurringCharges = [...recurringGroups.values()].map((group) => ({
+    vendor: group[0].vendor,
+    amount: group[0].amount,
+    months: [...new Set(group.map(expensePeriod))].sort(),
+  })).filter((group) => group.months.length > 1).sort((a, b) => b.amount - a.amount);
+  return { possibleDuplicates, recurringCharges };
 }
 
 // Selecting itemized expenses replaces ALL monthly actuals; targets remain user-entered.

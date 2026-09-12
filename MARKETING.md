@@ -1,6 +1,6 @@
 # PulseIQ Customer Acquisition Playbook
 
-> Launch status (2026-09-12): The production homepage and /request respond, but /workspace and /pricing currently return 404. The main-branch Vercel checks show build-rate-limit failures, and paid checkout has not been verified in live mode. Keep campaign links to the new workspace and pricing pages on hold until the production release, intake, and payment paths pass an end-to-end check. The ready-to-publish campaign copy is maintained in the separate PulseIQ Solutions launch campaign artifact.
+> Launch status (2026-09-12): A fresh production release now serves the homepage, /workspace, /pricing, and /request with HTTP 200, and all associated Vercel checks passed. The free interactive scan and request delivery still need end-to-end verification; live paid checkout has not been configured or verified. Keep link-driven promotion in draft until the free flow is tested, and keep paid promotion on hold until business inbox and payment paths work. Ready-to-publish copy is maintained in the separate PulseIQ Solutions launch campaign artifact.
 
 ## Core positioning
 

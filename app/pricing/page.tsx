@@ -47,9 +47,9 @@ const plans = [
     price: "$199",
     cadence: "per month",
     description: "For teams that want recurring review after the key metrics and business context are understood.",
-    features: ["Monthly KPI review", "Trend and risk flags", "Updated action priorities", "Monthly scorecard", "Progress against prior findings", "Decision-focused management summary"],
+    features: ["Monthly KPI review", "Trend and risk flags", "Updated action priorities", "Monthly scorecard", "Progress against prior findings", "Cancel in Stripe, effective at period end"],
     href: "/request?service=monthly",
-    cta: "Request Monthly Pulse",
+    cta: "Start Monthly Pulse",
     featured: false,
   },
 ];

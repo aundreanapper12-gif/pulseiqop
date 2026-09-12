@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Copy, CreditCard, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { contactEmail } from "../site-config";
 
 type ServiceKey = "quick" | "complete" | "monthly" | "unsure";
 
@@ -62,7 +63,6 @@ export default function RequestPage() {
     }
   }, []);
 
-  const contactEmail = process.env.NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL || "";
   const paymentLinks: Partial<Record<ServiceKey, string>> = {
     quick: process.env.NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL || "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
     complete: process.env.NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL || "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
@@ -127,13 +127,9 @@ export default function RequestPage() {
     event.preventDefault();
     if (!validate()) return;
 
-    if (!contactEmail) {
-      setStatus("Direct email intake is not configured yet. Copy or download your request so none of your information is lost.");
-      return;
-    }
-
     const subject = encodeURIComponent(`PulseIQ Analysis Request — ${data.businessName}`);
     const body = encodeURIComponent(requestText);
+    setStatus("Your email app should open a draft addressed to PulseIQ. Press Send there to deliver it; opening a draft does not submit this form.");
     window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
   };
 
@@ -219,7 +215,7 @@ export default function RequestPage() {
               ) : data.service === "monthly" ? (
                 <p className="mb-8 rounded-[1.6rem] bg-amber-50 p-5 text-sm font-semibold leading-6 text-black/65">Monthly Pulse checkout is paused while self-service subscription management is being set up. You will not be charged on this page.</p>
               ) : null}
-              <p className="mb-5 text-sm font-semibold leading-6 text-black/55">The fields below prepare a detailed request in your browser. They do not submit it to PulseIQ. For paid services, enter your contact details and short question again at checkout.</p>
+              <p className="mb-5 text-sm font-semibold leading-6 text-black/55">The fields below prepare a detailed request in your browser. Email PulseIQ opens a draft in your email app; press Send there to deliver it. For paid services, enter your contact details and short question again at checkout.</p>
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-sm font-black text-black/60">Your name *</span>
@@ -260,7 +256,7 @@ export default function RequestPage() {
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
-                  <Mail size={17} /> {contactEmail ? "Email PulseIQ" : "Prepare Request"}
+                  <Mail size={17} /> Email PulseIQ
                 </button>
                 <button type="button" onClick={copyRequest} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-5 py-4 font-black hover:bg-black hover:text-white">
                   <Copy size={17} /> Copy Request
@@ -277,7 +273,7 @@ export default function RequestPage() {
               ) : null}
 
               <p className="mt-5 text-xs leading-5 text-black/38">
-                This page prepares a request in your browser; it does not submit your form. Direct email delivery requires a configured business inbox. Secure checkout is hosted by Stripe, which collects payment-card details separately from this page.
+                This page prepares a request in your browser; it opens a draft addressed to {contactEmail} but does not send it automatically. If your device has no email app, copy or download the request and email it yourself. Secure checkout is hosted by Stripe, which collects payment-card details separately from this page.
               </p>
             </form>
           </div>

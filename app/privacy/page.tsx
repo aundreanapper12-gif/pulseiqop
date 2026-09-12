@@ -1,4 +1,5 @@
 import { ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
+import { contactEmail } from "../site-config";
 
 export default function PrivacyPage() {
   return (
@@ -15,7 +16,7 @@ export default function PrivacyPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white"><ShieldCheck size={21} /></div>
           <p className="mt-8 text-sm font-black uppercase tracking-[0.22em] text-black/35">Privacy</p>
           <h1 className="mt-3 text-5xl font-black tracking-tight md:text-6xl">Privacy Policy</h1>
-          <p className="mt-5 text-sm font-semibold text-black/40">Effective September 10, 2026</p>
+          <p className="mt-5 text-sm font-semibold text-black/40">Effective September 12, 2026</p>
 
           <div className="mt-10 space-y-10 text-[17px] leading-8 text-black/62">
             <section><h2 className="text-2xl font-black text-black">The short version</h2><p className="mt-3">The free PulseIQ Business Workspace is designed to keep the business figures you enter in your browser. Core calculations run in the browser, selected CSV files are read in the browser, and optional saved snapshots use browser local storage rather than a PulseIQ cloud account.</p></section>
@@ -29,6 +30,8 @@ export default function PrivacyPage() {
             <section><h2 className="text-2xl font-black text-black">Website hosting and technical data</h2><p className="mt-3">Like most websites, hosting, security, and delivery infrastructure may process technical information needed to serve pages and protect the service, such as IP address, browser or device information, requested URLs, timestamps, and security or error logs. This technical processing is separate from the financial figures entered into the browser-based workspace.</p></section>
 
             <section><h2 className="text-2xl font-black text-black">Paid client analysis</h2><p className="mt-3">If you become a paid client and provide files for a deeper analysis, information needed for the agreed business question may be reviewed to produce the requested findings. PulseIQ&apos;s goal is to minimize the information collected, use it for the requested work, and avoid requesting unrelated sensitive information.</p></section>
+
+            <section><h2 className="text-2xl font-black text-black">Email requests</h2><p className="mt-3">Selecting Email PulseIQ opens a draft in your own email app addressed to {contactEmail}. The website does not automatically send it. If you choose to send the draft, your email provider and PulseIQ&apos;s email provider process the message and any information you include. Do not attach unnecessary sensitive personal information.</p></section>
 
             <section><h2 className="text-2xl font-black text-black">Payments</h2><p className="mt-3">PulseIQ may use a third-party payment processor such as Stripe for checkout. Payment-card information is handled by the payment processor and should not be entered into PulseIQ&apos;s business diagnostic or analysis-request fields. The processor&apos;s privacy policy and security practices apply to information it handles during payment.</p></section>
 

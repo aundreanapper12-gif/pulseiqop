@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { contactEmail } from "./site-config";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -78,6 +79,7 @@ const organizationSchema = {
   "@type": "Organization",
   name: "PulseIQ Operations",
   url: siteUrl,
+  email: contactEmail,
   description:
     "Business operations analytics focused on profit leakage, labor, missed leads, rework, customer experience, and operational decision support.",
 };
@@ -182,6 +184,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <a key={href} href={href} className="hover:text-black">{label}</a>
               ))}
               <a href="/request" className="text-black">Request analysis</a>
+              <a href={`mailto:${contactEmail}`} className="text-black">{contactEmail}</a>
             </nav>
           </div>
         </div>

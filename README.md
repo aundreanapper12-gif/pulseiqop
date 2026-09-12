@@ -74,17 +74,17 @@ Do not expand the free diagnostic to collect passwords, bank credentials, paymen
 
 ## Client intake configuration
 
-The request page supports a public business inbox through this Production environment variable:
+The request page and footer use `anapperk12@gmail.com` as the public PulseIQ contact address. To override it, set this Production environment variable:
 
 ```text
 NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL=your-business-inbox@example.com
 ```
 
-When configured, the page can create a prefilled email request to the business inbox. Without it, the prospect can still copy or download the request and the site clearly states that direct delivery is not configured.
+The Email PulseIQ button opens a prefilled draft in the visitor's email app. The visitor must press Send there; the website does not submit or deliver the request itself. Copy and download remain available if no email app is configured.
 
 ## Stripe / payment-link configuration
 
-PulseIQ is designed to send checkout to the payment processor rather than collect card data in the application. Create one-time payment links for Quick Leak Check and Profit Leak Analysis and a recurring subscription payment link for Monthly Pulse, then configure:
+PulseIQ sends checkout to Stripe rather than collecting card data in the application. Verified live one-time links are the defaults for Quick Leak Check and Profit Leak Analysis. Monthly Pulse checkout is intentionally paused until self-service subscription management is ready. Public checkout URLs can be overridden through:
 
 ```text
 NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL=https://your-stripe-payment-link
@@ -132,8 +132,8 @@ Before paid traffic or a broad public launch:
 
 1. Confirm `www.pulseiqoperations.online` resolves to the intended current production deployment.
 2. Confirm the deployed build is from the current `main` commit and GitHub CI is green.
-3. Configure a real PulseIQ business inbox with `NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL` if direct email intake is desired.
-4. Configure and test all three Stripe payment links before showing Secure Checkout to prospects.
+3. Confirm the public contact address and send a test request from an email app; a `mailto:` draft alone does not prove delivery.
+4. Verify both one-time Stripe checkout links and keep Monthly Pulse checkout paused until customers can manage subscriptions through a configured Stripe customer portal.
 5. Test `/workspace` in a clean desktop and mobile browser session.
 6. Test demo data, manual entry, CSV template download, CSV import, local snapshot save/load/delete, and current-draft restoration.
 7. Test a zero/incomplete dataset and confirm the data-quality warnings are understandable.

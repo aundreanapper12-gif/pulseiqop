@@ -1,5 +1,7 @@
 # PulseIQ Customer Acquisition Playbook
 
+> Launch status (2026-09-12): The production homepage and /request respond, but /workspace and /pricing currently return 404. The main-branch Vercel checks show build-rate-limit failures, and paid checkout has not been verified in live mode. Keep campaign links to the new workspace and pricing pages on hold until the production release, intake, and payment paths pass an end-to-end check. The ready-to-publish campaign copy is maintained in the separate PulseIQ Solutions launch campaign artifact.
+
 ## Core positioning
 
 PulseIQ is not sold as “AI analytics software.” The customer-facing problem is simpler:

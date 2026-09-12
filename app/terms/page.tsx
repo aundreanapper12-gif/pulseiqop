@@ -32,6 +32,8 @@ export default function TermsPage() {
 
             <section><h2 className="text-2xl font-black text-black">Payments</h2><p className="mt-3">When checkout is offered, payment may be processed by a third-party payment provider such as Stripe. The payment provider&apos;s terms apply to the payment transaction. Do not enter payment-card details into PulseIQ diagnostic or analysis-request fields.</p></section>
 
+            <section><h2 className="text-2xl font-black text-black">Monthly Pulse subscription</h2><p className="mt-3">Monthly Pulse is billed at $199 each month until canceled. You can manage your payment method and cancel through the Stripe customer portal linked in the site footer. Cancellation takes effect at the end of the current billing period. For service or refund questions, contact PulseIQ at the email address in the footer.</p></section>
+
             <section><h2 className="text-2xl font-black text-black">Responsible use</h2><p className="mt-3">Do not use PulseIQ to submit malicious code, unlawfully obtained information, credentials, payment-card details, or unnecessary sensitive personal data. Do not attempt to interfere with the website, misrepresent ownership of submitted data, or use diagnostic outputs as if they were certified financial statements or guaranteed results.</p></section>
 
             <section><h2 className="text-2xl font-black text-black">Availability and changes</h2><p className="mt-3">The website, calculations, packages, and features may be improved, changed, or temporarily unavailable. PulseIQ may revise calculations as the methodology evolves. Material methodology or data-handling changes should be reflected on the relevant Methodology or Privacy pages.</p></section>

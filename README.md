@@ -84,12 +84,13 @@ The Email PulseIQ button opens a prefilled draft in the visitor's email app. The
 
 ## Stripe / payment-link configuration
 
-PulseIQ sends checkout to Stripe rather than collecting card data in the application. Verified live one-time links are the defaults for Quick Leak Check and Profit Leak Analysis. Monthly Pulse checkout is intentionally paused until self-service subscription management is ready. Public checkout URLs can be overridden through:
+PulseIQ sends checkout to Stripe rather than collecting card data in the application. Verified live payment links are the defaults for Quick Leak Check, Profit Leak Analysis, and Monthly Pulse. The active Stripe customer portal lets Monthly Pulse subscribers update payment details and cancel at the end of their current billing period. Public checkout and portal URLs can be overridden through:
 
 ```text
 NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL=https://your-stripe-payment-link
 NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL=https://your-stripe-payment-link
 NEXT_PUBLIC_PULSEIQ_MONTHLY_PAY_URL=https://your-stripe-payment-link
+NEXT_PUBLIC_PULSEIQ_BILLING_PORTAL_URL=https://your-stripe-customer-portal-login-link
 ```
 
 Only public checkout URLs belong in `NEXT_PUBLIC_*` variables. Never place Stripe secret keys, webhook secrets, bank credentials, or other private credentials in public environment variables or source control.
@@ -133,7 +134,7 @@ Before paid traffic or a broad public launch:
 1. Confirm `www.pulseiqoperations.online` resolves to the intended current production deployment.
 2. Confirm the deployed build is from the current `main` commit and GitHub CI is green.
 3. Confirm the public contact address and send a test request from an email app; a `mailto:` draft alone does not prove delivery.
-4. Verify both one-time Stripe checkout links and keep Monthly Pulse checkout paused until customers can manage subscriptions through a configured Stripe customer portal.
+4. Verify all three Stripe checkout links and the customer portal login. Confirm subscribers can manage payment details and cancel at period end.
 5. Test `/workspace` in a clean desktop and mobile browser session.
 6. Test demo data, manual entry, CSV template download, CSV import, local snapshot save/load/delete, and current-draft restoration.
 7. Test a zero/incomplete dataset and confirm the data-quality warnings are understandable.

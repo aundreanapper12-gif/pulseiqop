@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Copy, CreditCard, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
-import { contactEmail } from "../site-config";
+import { billingPortalUrl, contactEmail } from "../site-config";
 
 type ServiceKey = "quick" | "complete" | "monthly" | "unsure";
 
@@ -66,6 +66,7 @@ export default function RequestPage() {
   const paymentLinks: Partial<Record<ServiceKey, string>> = {
     quick: process.env.NEXT_PUBLIC_PULSEIQ_QUICK_PAY_URL || "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
     complete: process.env.NEXT_PUBLIC_PULSEIQ_COMPLETE_PAY_URL || "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
+    monthly: process.env.NEXT_PUBLIC_PULSEIQ_MONTHLY_PAY_URL || "https://buy.stripe.com/dRm7sNckifJ78UWdbm7ok05",
   };
   const selected = services[data.service];
   const paymentUrl = paymentLinks[data.service] || "";
@@ -211,9 +212,12 @@ export default function RequestPage() {
                   <button type="button" onClick={openCheckout} className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
                     <CreditCard size={17} /> Secure Checkout — {selected.price}
                   </button>
+                  {data.service === "monthly" ? (
+                    <p className="mt-4 text-sm leading-6 text-black/65">
+                      $199 is charged each month until canceled. You can <a href={billingPortalUrl} className="font-bold underline underline-offset-2">manage or cancel your subscription in Stripe</a>. Cancellation takes effect at the end of the current billing period.
+                    </p>
+                  ) : null}
                 </div>
-              ) : data.service === "monthly" ? (
-                <p className="mb-8 rounded-[1.6rem] bg-amber-50 p-5 text-sm font-semibold leading-6 text-black/65">Monthly Pulse checkout is paused while self-service subscription management is being set up. You will not be charged on this page.</p>
               ) : null}
               <p className="mb-5 text-sm font-semibold leading-6 text-black/55">The fields below prepare a detailed request in your browser. Email PulseIQ opens a draft in your email app; press Send there to deliver it. For paid services, enter your contact details and short question again at checkout.</p>
               <div className="grid gap-5 sm:grid-cols-2">

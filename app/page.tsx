@@ -13,7 +13,6 @@ import {
   Target,
   TrendingDown,
   TrendingUp,
-  Upload,
   Wrench,
 } from "lucide-react";
 
@@ -21,7 +20,7 @@ const steps = [
   {
     number: "01",
     title: "Add the business numbers",
-    body: "Enter monthly revenue, actual costs, your own targets, and optional operating metrics. You can also import the cost template by CSV.",
+    body: "Enter monthly revenue and costs, or list individual expenses and import a CSV. PulseIQ shows what each category and vendor costs before comparing your spending with your own targets.",
   },
   {
     number: "02",

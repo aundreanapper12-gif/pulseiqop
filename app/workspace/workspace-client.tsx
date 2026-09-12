@@ -15,6 +15,7 @@ import {
   History,
   Lightbulb,
   LockKeyhole,
+  Pencil,
   RotateCcw,
   Save,
   ShieldCheck,
@@ -36,15 +37,38 @@ import {
   money,
   NumericKey,
 } from "./model";
+import {
+  applyExpensesToInputs,
+  exactMoney,
+  ExpenseEntry,
+  MAX_EXPENSES,
+  normalizeExpenseEntries,
+  parseExpenseCsv,
+  summarizeExpenses,
+} from "./expenses";
 
 type Snapshot = {
   id: string;
   createdAt: string;
   inputs: BusinessInputs;
+  expenses?: ExpenseEntry[];
+  useItemizedExpenses?: boolean;
 };
 
 const SNAPSHOT_KEY = "pulseiq:snapshots:v1";
 const DRAFT_KEY = "pulseiq:draft:v1";
+const EXPENSE_DRAFT_KEY = "pulseiq:expense-draft:v1";
+
+const emptyExpense = { date: "", vendor: "", description: "", category: "other", amount: 0 };
+
+const demoExpenses: ExpenseEntry[] = costCategories.map((category) => ({
+  id: `demo-${category.id}`,
+  date: "2026-08-15",
+  vendor: `Sample ${category.name} expense`,
+  description: "Fictional monthly total for demonstration",
+  category: category.id,
+  amount: Number(demoInputs[category.actual]),
+}));
 
 const categoryAliases: Record<string, [NumericKey, NumericKey]> = {
   payroll: ["payroll", "payrollTarget"],
@@ -144,18 +168,39 @@ function SectionHeading({ eyebrow, title, body }: { eyebrow: string; title: stri
 
 export default function WorkspaceClient() {
   const [inputs, setInputs] = useState<BusinessInputs>(defaultInputs);
+  const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
+  const [useItemizedExpenses, setUseItemizedExpenses] = useState(false);
+  const [expenseDraft, setExpenseDraft] = useState<Omit<ExpenseEntry, "id">>(emptyExpense);
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [visibleExpenseCount, setVisibleExpenseCount] = useState(25);
   const [recoveryPct, setRecoveryPct] = useState(50);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [status, setStatus] = useState("");
   const [hydrated, setHydrated] = useState(false);
 
-  const analysis = useMemo(() => analyzeBusiness(inputs, recoveryPct), [inputs, recoveryPct]);
+  const expenseSummary = useMemo(() => summarizeExpenses(expenses), [expenses]);
+  const analyzedInputs = useMemo(
+    () => useItemizedExpenses ? applyExpensesToInputs(inputs, expenses) : inputs,
+    [inputs, expenses, useItemizedExpenses],
+  );
+  const analysis = useMemo(() => analyzeBusiness(analyzedInputs, recoveryPct), [analyzedInputs, recoveryPct]);
+  const spendingByCategory = useMemo(() => costCategories
+    .map((category) => ({ ...category, amount: Number(analyzedInputs[category.actual]) || 0 }))
+    .filter((category) => category.amount > 0)
+    .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
 
   useEffect(() => {
     try {
       const savedDraft = window.localStorage.getItem(DRAFT_KEY);
+      const savedExpenses = window.localStorage.getItem(EXPENSE_DRAFT_KEY);
       const savedSnapshots = window.localStorage.getItem(SNAPSHOT_KEY);
       if (savedDraft) setInputs({ ...defaultInputs, ...JSON.parse(savedDraft) });
+      if (savedExpenses) {
+        const parsed = JSON.parse(savedExpenses);
+        const restored = normalizeExpenseEntries(parsed?.expenses);
+        setExpenses(restored);
+        setUseItemizedExpenses(Boolean(parsed?.useItemizedExpenses && restored.length));
+      }
       if (savedSnapshots) setSnapshots(JSON.parse(savedSnapshots));
     } catch {
       // A blocked or cleared browser store should never break the diagnostic.
@@ -173,6 +218,15 @@ export default function WorkspaceClient() {
     }
   }, [inputs, hydrated]);
 
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(EXPENSE_DRAFT_KEY, JSON.stringify({ expenses, useItemizedExpenses }));
+    } catch {
+      setStatus("This browser could not save the expense list. Download a report before leaving this page.");
+    }
+  }, [expenses, useItemizedExpenses, hydrated]);
+
   const setValue = <K extends keyof BusinessInputs>(key: K, value: BusinessInputs[K]) => {
     setInputs((current) => ({ ...current, [key]: value }));
   };
@@ -187,14 +241,16 @@ export default function WorkspaceClient() {
   };
 
   const saveSnapshot = () => {
-    if (!inputs.businessName.trim() || inputs.revenue <= 0) {
-      setStatus("Add a business name and monthly revenue before saving a snapshot.");
+    if (!inputs.businessName.trim() || (inputs.revenue <= 0 && analysis.totalExpenses <= 0)) {
+      setStatus("Add a business name and either revenue or expenses before saving a snapshot.");
       return;
     }
     const snapshot: Snapshot = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       createdAt: new Date().toISOString(),
       inputs,
+      expenses,
+      useItemizedExpenses,
     };
     const next = [snapshot, ...snapshots].slice(0, 12);
     saveSnapshots(next);
@@ -203,6 +259,12 @@ export default function WorkspaceClient() {
 
   const loadSnapshot = (snapshot: Snapshot) => {
     setInputs({ ...defaultInputs, ...snapshot.inputs });
+    const restored = normalizeExpenseEntries(snapshot.expenses);
+    setExpenses(restored);
+    setUseItemizedExpenses(Boolean(snapshot.useItemizedExpenses && restored.length));
+    setExpenseDraft(emptyExpense);
+    setEditingExpenseId(null);
+    setVisibleExpenseCount(25);
     setStatus(`Loaded ${snapshot.inputs.businessName} — ${snapshot.inputs.reportingPeriod}.`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -214,6 +276,11 @@ export default function WorkspaceClient() {
 
   const loadDemo = () => {
     setInputs(demoInputs);
+    setExpenses(demoExpenses);
+    setUseItemizedExpenses(true);
+    setExpenseDraft(emptyExpense);
+    setEditingExpenseId(null);
+    setVisibleExpenseCount(25);
     setRecoveryPct(50);
     setStatus("Demo business loaded. Every number is fictional and safe to explore.");
     setTimeout(() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }), 50);
@@ -221,8 +288,63 @@ export default function WorkspaceClient() {
 
   const resetWorkspace = () => {
     setInputs(defaultInputs);
+    setExpenses([]);
+    setUseItemizedExpenses(false);
+    setExpenseDraft(emptyExpense);
+    setEditingExpenseId(null);
+    setVisibleExpenseCount(25);
     setRecoveryPct(50);
     setStatus("Current workspace cleared. Saved snapshots were left alone.");
+  };
+
+  const saveExpense = () => {
+    const vendor = expenseDraft.vendor.trim();
+    const amount = Math.round(Number(expenseDraft.amount) * 100) / 100;
+    if (!vendor || !Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000) {
+      setStatus("Enter an expense name or vendor and a positive amount before saving.");
+      return;
+    }
+    if (!editingExpenseId && expenses.length >= MAX_EXPENSES) {
+      setStatus(`This browser workspace supports up to ${MAX_EXPENSES} expenses. Save a report and start a new period.`);
+      return;
+    }
+    const entry = { ...expenseDraft, vendor, amount, id: editingExpenseId || crypto.randomUUID() };
+    setExpenses((current) => editingExpenseId
+      ? current.map((item) => item.id === editingExpenseId ? entry : item)
+      : [...current, entry]);
+    setExpenseDraft(emptyExpense);
+    setEditingExpenseId(null);
+    setStatus("Expense saved. Choose itemized totals below to use this list in the diagnostic.");
+  };
+
+  const downloadExpenseTemplate = () => {
+    const csv = "date,vendor,description,category,amount\n2026-08-15,Sample Supply Co,Work materials,supplies,125.50\n";
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "pulseiq-itemized-expenses.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExpenseCsv = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > 2 * 1024 * 1024) {
+        setStatus("This expense CSV is over 2 MB. Split it into smaller files with up to 500 expenses per reporting period.");
+        return;
+      }
+      const { entries, skipped } = parseExpenseCsv(await file.text());
+      const available = MAX_EXPENSES - expenses.length;
+      const accepted = entries.slice(0, available);
+      if (accepted.length) {
+        setExpenses((current) => [...current, ...accepted]);
+        setStatus(`Added ${accepted.length} expenses. ${skipped + entries.length - accepted.length} rows were skipped. Imports append; review for duplicates, then choose itemized totals to include the list in the diagnostic.`);
+      } else setStatus(`No expenses added. ${skipped} rows were skipped. Check the template, categories, and amounts.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Could not read the expense CSV. Download the template and try again.");
+    } finally { event.target.value = ""; }
   };
 
   const downloadTemplate = () => {
@@ -282,6 +404,7 @@ export default function WorkspaceClient() {
       });
 
       setInputs((current) => ({ ...current, ...patch }));
+      if (matched > 0) setUseItemizedExpenses(false);
       setStatus(
         matched > 0
           ? `Imported ${matched} cost categories from ${file.name}. Add revenue and operating metrics to complete the picture.`
@@ -314,6 +437,22 @@ export default function WorkspaceClient() {
       `Estimated operating profit: ${money(analysis.operatingProfit)}`,
       `Estimated operating margin: ${analysis.operatingMargin.toFixed(1)}%`,
       "",
+      "WHERE THE MONEY WENT",
+      `Expense source: ${useItemizedExpenses ? "Itemized expense list" : "Monthly category totals"}`,
+      `Total included operating costs: ${exactMoney(analysis.totalExpenses)}`,
+      ...(useItemizedExpenses ? [
+        `Itemized expenses: ${expenses.length} entries`,
+        ...expenseSummary.categoryTotals.map((category) => `${category.name}: ${exactMoney(category.amount)} (${expenseSummary.total ? ((category.amount / expenseSummary.total) * 100).toFixed(1) : "0"}%)`),
+        "Top vendors:",
+        ...expenseSummary.vendorTotals.slice(0, 5).map((vendor) => `${vendor.name}: ${exactMoney(vendor.amount)}`),
+      ] : costCategories.filter((category) => analyzedInputs[category.actual] > 0).map((category) => `${category.name}: ${exactMoney(analyzedInputs[category.actual])}`)),
+      "",
+      ...(analysis.warnings.length || (useItemizedExpenses && expenseSummary.mixedMonths) ? [
+        "DATA QUALITY",
+        ...analysis.warnings,
+        ...(useItemizedExpenses && expenseSummary.mixedMonths ? ["Itemized expense dates cover multiple months. Confirm that all entries belong in the reporting period."] : []),
+        "",
+      ] : []),
       "PRIORITY FINDINGS",
       ...analysis.leaks.flatMap((leak, index) => [
         `${index + 1}. ${leak.name} — ${money(leak.amount)}/month — ${leak.severity} — ${leak.confidence} confidence`,
@@ -331,7 +470,7 @@ export default function WorkspaceClient() {
       "PulseIQ identifies financial and operational signals from the data entered. A variance is not proof of waste or causation. Modeled opportunities are planning estimates, not guaranteed savings or revenue.",
     ];
     return lines.join("\n");
-  }, [analysis, inputs, recoveryPct]);
+  }, [analysis, inputs, analyzedInputs, expenses.length, expenseSummary, useItemizedExpenses, recoveryPct]);
 
   const copyReport = async () => {
     try {
@@ -354,7 +493,6 @@ export default function WorkspaceClient() {
   };
 
   const highestAmount = Math.max(1, ...analysis.leaks.map((leak) => leak.amount));
-  const ready = inputs.revenue > 0 && costCategories.some((category) => Number(inputs[category.actual]) > 0);
 
   return (
     <main className="min-h-screen bg-[#f4efe7] text-[#101010]">
@@ -454,7 +592,9 @@ export default function WorkspaceClient() {
                       <p className="font-black">{category.name}</p>
                       <p className="mt-1 text-xs font-semibold text-black/35">Monthly amount</p>
                     </div>
-                    <NumericInput label="Actual" value={Number(inputs[category.actual])} onChange={(value) => setValue(category.actual, value)} prefix="$" />
+                    {useItemizedExpenses ? (
+                      <div><p className="text-sm font-black text-black/65">Actual · from expense list</p><p className="mt-2 rounded-2xl border border-black/10 bg-white px-4 py-3 font-black">{exactMoney(analyzedInputs[category.actual])}</p></div>
+                    ) : <NumericInput label="Actual" value={Number(inputs[category.actual])} onChange={(value) => setValue(category.actual, value)} prefix="$" />}
                     <NumericInput label="Target" value={Number(inputs[category.target])} onChange={(value) => setValue(category.target, value)} prefix="$" />
                   </div>
                 ))}
@@ -462,7 +602,51 @@ export default function WorkspaceClient() {
             </section>
 
             <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
-              <SectionHeading eyebrow="3 · Operational opportunity" title="Catch money that never reaches the P&L cleanly." body="These optional models estimate missed opportunity and repeat-work cost. PulseIQ labels them as modeled—not as guaranteed lost revenue." />
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <SectionHeading eyebrow="3 · Work expenses" title="See exactly where the money went." body="Add bills one at a time or import an expense CSV. PulseIQ groups the spending by category and vendor, shows the dollar amounts and shares, and compares it with the targets you entered above." />
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-black px-4 py-3 text-sm font-black text-white"><Upload size={16} /> Import expenses<input type="file" accept=".csv,text/csv" onChange={handleExpenseCsv} className="hidden" /></label>
+                  <button type="button" onClick={downloadExpenseTemplate} className="inline-flex items-center gap-2 rounded-full border border-black/15 px-4 py-3 text-sm font-black"><Download size={16} /> Expense template</button>
+                </div>
+              </div>
+              <p className="mt-5 rounded-2xl bg-[#f4efe7] p-4 text-sm leading-6 text-black/60">Include expenses from one reporting period only. Amounts are entered as positive spending. If reported revenue is already net of refunds, check that entering refunds as a cost will not count them twice. Everything stays in this browser; no bank connection or server upload is used.</p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <label className="block"><span className="text-sm font-black text-black/65">Date (optional)</span><input type="date" value={expenseDraft.date} onChange={(event) => setExpenseDraft((current) => ({ ...current, date: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" /></label>
+                <label className="block"><span className="text-sm font-black text-black/65">Vendor or expense name *</span><input value={expenseDraft.vendor} maxLength={100} onChange={(event) => setExpenseDraft((current) => ({ ...current, vendor: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" placeholder="Example: Electric bill" /></label>
+                <label className="block"><span className="text-sm font-black text-black/65">Category</span><select value={expenseDraft.category} onChange={(event) => setExpenseDraft((current) => ({ ...current, category: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold">{costCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+                <NumericInput label="Amount *" value={expenseDraft.amount} onChange={(value) => setExpenseDraft((current) => ({ ...current, amount: value }))} prefix="$" />
+                <label className="block sm:col-span-2"><span className="text-sm font-black text-black/65">Description (optional)</span><input value={expenseDraft.description} maxLength={180} onChange={(event) => setExpenseDraft((current) => ({ ...current, description: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" placeholder="Example: Office electricity for August" /></label>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2"><button type="button" onClick={saveExpense} className="rounded-full bg-black px-5 py-3 font-black text-white">{editingExpenseId ? "Save changes" : "Add expense"}</button>{editingExpenseId ? <button type="button" onClick={() => { setEditingExpenseId(null); setExpenseDraft(emptyExpense); }} className="rounded-full border border-black/15 px-5 py-3 font-black">Cancel edit</button> : null}</div>
+
+              <div className="mt-7 rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5">
+                <h3 className="text-xl font-black">Which numbers should the diagnostic use?</h3>
+                <p className="mt-2 text-sm leading-6 text-black/50">Choose one source. Itemized totals replace every monthly actual above; they are never added on top of them. Targets stay the same. If you have only entered some of the month’s bills, keep using monthly category totals until the list is complete.</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => setUseItemizedExpenses(false)} aria-pressed={!useItemizedExpenses} className={`rounded-full px-4 py-3 text-sm font-black ${!useItemizedExpenses ? "bg-black text-white" : "border border-black/15 bg-white"}`}>Use monthly totals</button>
+                  <button type="button" onClick={() => expenses.length ? setUseItemizedExpenses(true) : setStatus("Add at least one expense before choosing itemized totals.")} aria-pressed={useItemizedExpenses} className={`rounded-full px-4 py-3 text-sm font-black ${useItemizedExpenses ? "bg-black text-white" : "border border-black/15 bg-white"}`}>Use itemized expenses</button>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-black/55">Currently included in the diagnostic: <strong className="text-black">{useItemizedExpenses ? `${exactMoney(expenseSummary.total)} from ${expenses.length} expense entries` : `${exactMoney(analysis.totalExpenses)} in monthly category totals`}</strong></p>
+              </div>
+
+              <div className="mt-7 grid gap-5 lg:grid-cols-2">
+                <div className="rounded-[1.7rem] bg-black p-5 text-white">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Expense list · {expenses.length} entries</p>
+                  <p className="mt-2 text-3xl font-black">{exactMoney(expenseSummary.total)}</p>
+                  <p className="mt-1 text-sm text-white/50">{inputs.revenue > 0 ? `${((expenseSummary.total / inputs.revenue) * 100).toFixed(1)}% of entered revenue` : "Add revenue above to see the share"}</p>
+                  <div className="mt-5 space-y-3">{expenseSummary.categoryTotals.length ? expenseSummary.categoryTotals.map((category) => <div key={category.id}><div className="flex justify-between gap-3 text-sm font-bold"><span>{category.name}</span><span>{exactMoney(category.amount)} · {((category.amount / expenseSummary.total) * 100).toFixed(1)}%</span></div><div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-emerald-300" style={{ width: `${(category.amount / expenseSummary.total) * 100}%` }} /></div></div>) : <p className="text-sm text-white/50">Add an expense to see where money is going.</p>}</div>
+                </div>
+                <div className="rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-black/35">Who is getting paid?</p><h3 className="mt-2 text-xl font-black">Top vendors and expense names</h3>
+                  <div className="mt-5 space-y-3">{expenseSummary.vendorTotals.slice(0, 5).map((vendor) => <div key={vendor.name} className="flex justify-between gap-3 border-b border-black/10 pb-3 text-sm"><span className="font-semibold">{vendor.name}</span><span className="shrink-0 font-black">{exactMoney(vendor.amount)}</span></div>)}{expenses.length === 0 ? <p className="text-sm text-black/50">Your five largest vendors will show here.</p> : null}</div>
+                </div>
+              </div>
+              {expenseSummary.mixedMonths ? <p className="mt-5 rounded-2xl bg-amber-100 p-4 text-sm font-bold text-amber-900">Expense dates cover more than one month. Check the reporting period before using monthly comparisons.</p> : null}
+              {expenses.length ? <div className="mt-6 space-y-2"><h3 className="text-lg font-black">Expense entries</h3>{[...expenses].reverse().slice(0, visibleExpenseCount).map((entry) => <div key={entry.id} className="flex flex-col gap-2 rounded-2xl border border-black/10 bg-[#faf8f4] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="font-black">{entry.vendor} <span className="text-black/40">· {exactMoney(entry.amount)}</span></p><p className="mt-1 text-xs font-semibold text-black/45">{entry.date || "No date"} · {costCategories.find((category) => category.id === entry.category)?.name}{entry.description ? ` · ${entry.description}` : ""}</p></div><div className="flex shrink-0 gap-2"><button type="button" onClick={() => { setEditingExpenseId(entry.id); setExpenseDraft({ date: entry.date, vendor: entry.vendor, description: entry.description, category: entry.category, amount: entry.amount }); }} className="inline-flex items-center gap-1 rounded-full border border-black/15 px-3 py-2 text-xs font-black"><Pencil size={13} /> Edit</button><button type="button" onClick={() => { setExpenses((current) => current.filter((item) => item.id !== entry.id)); if (expenses.length === 1) setUseItemizedExpenses(false); if (editingExpenseId === entry.id) { setEditingExpenseId(null); setExpenseDraft(emptyExpense); } }} className="inline-flex items-center gap-1 rounded-full border border-black/15 px-3 py-2 text-xs font-black"><Trash2 size={13} /> Remove</button></div></div>)}{visibleExpenseCount < expenses.length ? <button type="button" onClick={() => setVisibleExpenseCount((count) => count + 25)} className="mt-3 rounded-full border border-black/15 px-5 py-3 text-sm font-black">Show 25 more of {expenses.length} expenses</button> : null}</div> : null}
+            </section>
+
+            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
+              <SectionHeading eyebrow="4 · Operational opportunity" title="Catch money that never reaches the P&L cleanly." body="These optional models estimate missed opportunity and repeat-work cost. PulseIQ labels them as modeled—not as guaranteed lost revenue." />
               <div className="mt-7 grid gap-5 lg:grid-cols-2">
                 <div className="rounded-[1.8rem] border border-black/10 bg-[#f4efe7] p-5">
                   <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white"><TrendingDown size={18} /></span><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/35">Revenue capture</p><h3 className="text-xl font-black">Missed leads</h3></div></div>
@@ -488,7 +672,7 @@ export default function WorkspaceClient() {
             <section id="results" className="rounded-[2.2rem] bg-[#111] p-6 text-white shadow-2xl md:p-8">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-3xl">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">4 · PulseIQ executive diagnostic</p>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/35">5 · PulseIQ executive diagnostic</p>
                   <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">{inputs.businessName || "Your business"}: where to look first.</h2>
                   <p className="mt-4 leading-7 text-white/58">{analysis.executiveSummary}</p>
                 </div>
@@ -502,6 +686,14 @@ export default function WorkspaceClient() {
                 <StatCard dark label="Direct Overruns" value={money(analysis.directLeakTotal)} note="Actual spending above entered targets" />
                 <StatCard dark label="Modeled Opportunity" value={money(analysis.modeledOpportunityTotal)} note="Completed lead + rework models" />
                 <StatCard dark label="Annualized Impact" value={money(analysis.annualOpportunity)} note="If this monthly pattern persists" />
+              </div>
+
+              <div className="mt-6 rounded-[1.7rem] border border-white/10 bg-white/[0.06] p-5 md:p-6">
+                <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Money out · {useItemizedExpenses ? "itemized expenses" : "monthly totals"}</p><h3 className="mt-2 text-2xl font-black">Where the spending goes</h3></div><p className="text-2xl font-black">{exactMoney(analysis.totalExpenses)}</p></div>
+                <p className="mt-2 text-sm text-white/55">Actual spending by category. A large category is not automatically a waste or an overrun.</p>
+                {spendingByCategory.length ? <div className="mt-5 grid gap-x-8 gap-y-4 md:grid-cols-2">{spendingByCategory.map((category) => <div key={category.id}><div className="flex justify-between gap-2 text-sm font-bold"><span>{category.name}</span><span className="shrink-0">{exactMoney(category.amount)} · {((category.amount / analysis.totalExpenses) * 100).toFixed(1)}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-emerald-300" style={{ width: `${(category.amount / analysis.totalExpenses) * 100}%` }} /></div></div>)}</div> : <p className="mt-5 text-sm text-white/45">Enter category totals above or add itemized expenses to see this breakdown.</p>}
+                {spendingByCategory[0] ? <div className="mt-6 rounded-2xl bg-black/25 p-4 text-sm leading-6 text-white/65"><strong className="text-white">Largest category: {spendingByCategory[0].name} at {exactMoney(spendingByCategory[0].amount)}.</strong> Start by checking its underlying bills and activity. {spendingByCategory[0].investigate[0]}</div> : null}
+                {useItemizedExpenses && expenseSummary.vendorTotals[0] ? <p className="mt-3 text-sm text-white/55">Largest vendor or expense name: {expenseSummary.vendorTotals[0].name} · {exactMoney(expenseSummary.vendorTotals[0].amount)}. Review its invoices, usage, or contract before assuming the spend can be reduced.</p> : null}
               </div>
 
               {analysis.warnings.length > 0 ? (
@@ -559,7 +751,7 @@ export default function WorkspaceClient() {
 
                   <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.06] p-5">
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-white/35">Operating picture</p>
-                    <div className="mt-4 space-y-3 text-sm font-bold"><div className="flex justify-between gap-3"><span className="text-white/45">Revenue</span><span>{money(inputs.revenue)}</span></div><div className="flex justify-between gap-3"><span className="text-white/45">Entered operating costs</span><span>{money(analysis.totalExpenses)}</span></div><div className="flex justify-between gap-3"><span className="text-white/45">Estimated operating profit</span><span>{money(analysis.operatingProfit)}</span></div><div className="flex justify-between gap-3 border-t border-white/10 pt-3"><span className="text-white/45">Operating margin</span><span>{analysis.operatingMargin.toFixed(1)}%</span></div>{analysis.revenueGap > 0 ? <div className="flex justify-between gap-3"><span className="text-white/45">Revenue target gap</span><span>{money(analysis.revenueGap)}</span></div> : null}<div className="flex justify-between gap-3"><span className="text-white/45">Diagnostic completeness</span><span>{analysis.completeness}%</span></div></div>
+                  <div className="mt-4 space-y-3 text-sm font-bold"><div className="flex justify-between gap-3"><span className="text-white/45">Revenue</span><span>{money(inputs.revenue)}</span></div><div className="flex justify-between gap-3"><span className="text-white/45">Operating costs · {useItemizedExpenses ? "itemized" : "monthly totals"}</span><span>{exactMoney(analysis.totalExpenses)}</span></div><div className="flex justify-between gap-3"><span className="text-white/45">Estimated operating profit</span><span>{money(analysis.operatingProfit)}</span></div><div className="flex justify-between gap-3 border-t border-white/10 pt-3"><span className="text-white/45">Operating margin</span><span>{analysis.operatingMargin.toFixed(1)}%</span></div>{analysis.revenueGap > 0 ? <div className="flex justify-between gap-3"><span className="text-white/45">Revenue target gap</span><span>{money(analysis.revenueGap)}</span></div> : null}<div className="flex justify-between gap-3"><span className="text-white/45">Diagnostic completeness</span><span>{analysis.completeness}%</span></div></div>
                   </div>
                 </div>
               </div>
@@ -591,7 +783,8 @@ export default function WorkspaceClient() {
               <div className="flex items-center gap-3"><History size={18} /><div><p className="text-xs font-black uppercase tracking-[0.18em] text-black/35">Local history</p><h2 className="text-xl font-black">Saved snapshots</h2></div></div>
               <div className="mt-4 space-y-3">
                 {snapshots.length ? snapshots.map((snapshot) => {
-                  const result = analyzeBusiness(snapshot.inputs, 50);
+                  const savedExpenses = normalizeExpenseEntries(snapshot.expenses);
+                  const result = analyzeBusiness(snapshot.useItemizedExpenses && savedExpenses.length ? applyExpensesToInputs(snapshot.inputs, savedExpenses) : snapshot.inputs, 50);
                   return (
                     <div key={snapshot.id} className="rounded-2xl border border-black/10 bg-[#faf8f4] p-4">
                       <button type="button" onClick={() => loadSnapshot(snapshot)} className="w-full text-left"><p className="font-black">{snapshot.inputs.businessName}</p><p className="mt-1 text-xs font-semibold text-black/40">{snapshot.inputs.reportingPeriod} · {new Date(snapshot.createdAt).toLocaleDateString()}</p><div className="mt-3 flex items-center justify-between text-sm"><span className="text-black/45">Opportunity</span><span className="font-black">{money(result.totalOpportunity)}</span></div></button>

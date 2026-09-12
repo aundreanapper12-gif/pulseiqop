@@ -26,8 +26,8 @@ const plans = [
     cadence: "one-time",
     description: "For one expensive question that needs a sharper answer than a monthly total can provide.",
     features: ["One operational question", "One focused dataset", "Pattern and risk review", "Three prioritized recommendations", "Concise action brief", "Assumptions and limitations stated"],
-    href: "/request?service=quick",
-    cta: "Request a Quick Leak Check",
+    href: "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
+    cta: "Start Quick Leak Check — $149",
     featured: false,
   },
   {
@@ -37,8 +37,8 @@ const plans = [
     cadence: "one-time",
     description: "For a business that needs the financial signal connected to the likely operational cause.",
     features: ["Up to four relevant data sources", "Operational health view", "Financial-impact estimates", "Segmented root-cause analysis", "Visual findings report", "30-minute results call"],
-    href: "/request?service=complete",
-    cta: "Start my full analysis",
+    href: "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
+    cta: "Get My Profit Leak Analysis — $399",
     featured: true,
   },
   {
@@ -48,8 +48,8 @@ const plans = [
     cadence: "per month",
     description: "For teams that want recurring review after the key metrics and business context are understood.",
     features: ["Monthly KPI review", "Trend and risk flags", "Updated action priorities", "Monthly scorecard", "Progress against prior findings", "Cancel in Stripe, effective at period end"],
-    href: "/request?service=monthly",
-    cta: "Start Monthly Pulse",
+    href: "https://buy.stripe.com/dRm7sNckifJ78UWdbm7ok05",
+    cta: "Start Monthly Pulse — $199/mo",
     featured: false,
   },
 ];

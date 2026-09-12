@@ -204,8 +204,7 @@ export default function WorkspaceClient() {
     .map((category) => ({ ...category, amount: Number(analyzedInputs[category.actual]) || 0 }))
     .filter((category) => category.amount > 0)
     .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
-  const currentPeriodLabel = useItemizedExpenses && activeExpensePeriod && activeExpensePeriod !== UNDATED_PERIOD
-    ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
+  const currentPeriodLabel = useItemizedExpenses ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
   const visibleActions = useMemo(() => recoveryActions.filter((action) => action.business === businessKey(inputs.businessName)), [recoveryActions, inputs.businessName]);
 
   useEffect(() => {
@@ -340,6 +339,10 @@ export default function WorkspaceClient() {
       setStatus("Add a business name before tracking a fix, so the action stays with the right business.");
       return;
     }
+    if (useItemizedExpenses && activeExpensePeriod === UNDATED_PERIOD) {
+      setStatus("Date the itemized expenses and choose a month before tracking a cost fix.");
+      return;
+    }
     if (!currentPeriodLabel.trim() || currentPeriodLabel === "Current month") {
       setStatus("Enter a specific reporting period before starting a recovery action.");
       return;
@@ -372,6 +375,10 @@ export default function WorkspaceClient() {
   };
 
   const recordCurrentPeriod = (action: RecoveryAction) => {
+    if (useItemizedExpenses && activeExpensePeriod === UNDATED_PERIOD) {
+      setStatus("Choose a dated expense month before recording a follow-up.");
+      return;
+    }
     if (!currentPeriodLabel.trim() || currentPeriodLabel === action.baselinePeriod) {
       setStatus("Select or enter a different reporting period to compare with this action's baseline.");
       return;

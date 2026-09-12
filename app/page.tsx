@@ -15,6 +15,12 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
+import { analyzeBusiness, demoInputs, money } from "./workspace/model";
+
+const demoAnalysis = analyzeBusiness(demoInputs);
+const compactMoney = (amount: number) => new Intl.NumberFormat("en-US", {
+  style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1,
+}).format(amount);
 
 const steps = [
   {
@@ -111,28 +117,24 @@ export default function Home() {
 
           <div id="sample" className="rounded-[2.25rem] border border-black/10 bg-[#111] p-5 text-white shadow-2xl md:p-7">
             <div className="flex items-center justify-between gap-4">
-              <div><p className="text-xs font-black uppercase tracking-[0.2em] text-white/35">Sample · fictional business</p><h2 className="mt-1 text-2xl font-black">BrightPath Home Services</h2></div>
-              <span className="rounded-full bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-200">MODERATE RISK</span>
+              <div><p className="text-xs font-black uppercase tracking-[0.2em] text-white/35">Sample · fictional business</p><h2 className="mt-1 text-2xl font-black">{demoInputs.businessName}</h2></div>
+              <span className="rounded-full bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-200">{demoAnalysis.risk.toUpperCase()} RISK</span>
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Monthly opportunity</p><p className="mt-2 text-3xl font-black">$10.2K</p><p className="mt-1 text-xs text-white/40">Illustrative only</p></div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Operating margin</p><p className="mt-2 text-3xl font-black">9.8%</p><p className="mt-1 text-xs text-white/40">Entered-cost estimate</p></div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Annualized</p><p className="mt-2 text-3xl font-black">$122K</p><p className="mt-1 text-xs text-white/40">If pattern persists</p></div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Monthly opportunity</p><p className="mt-2 text-3xl font-black">{compactMoney(demoAnalysis.totalOpportunity)}</p><p className="mt-1 text-xs text-white/40">Illustrative only</p></div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Operating margin</p><p className="mt-2 text-3xl font-black">{demoAnalysis.operatingMargin.toFixed(1)}%</p><p className="mt-1 text-xs text-white/40">Entered-cost estimate</p></div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35">Annualized</p><p className="mt-2 text-3xl font-black">{compactMoney(demoAnalysis.annualOpportunity)}</p><p className="mt-1 text-xs text-white/40">If pattern persists</p></div>
             </div>
             <div className="mt-5 space-y-3">
-              {[
-                ["1", "Overtime", "$3,200/mo", "Direct variance"],
-                ["2", "Payroll", "$3,000/mo", "Direct variance"],
-                ["3", "Missed leads", "$1,937/mo", "Modeled opportunity"],
-              ].map(([rank, name, amount, type]) => (
-                <div key={name} className="flex items-center justify-between gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-4">
-                  <div className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-sm font-black">{rank}</span><div><p className="font-black">{name}</p><p className="mt-0.5 text-xs font-semibold text-white/35">{type}</p></div></div>
-                  <p className="font-black">{amount}</p>
+              {demoAnalysis.leaks.slice(0, 3).map((leak, index) => (
+                <div key={leak.id} className="flex items-center justify-between gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-4">
+                  <div className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-sm font-black">{index + 1}</span><div><p className="font-black">{leak.name}</p><p className="mt-0.5 text-xs font-semibold text-white/35">{leak.type === "direct" ? "Direct variance" : "Modeled opportunity"}</p></div></div>
+                  <p className="shrink-0 font-black">{money(leak.amount)}/mo</p>
                 </div>
               ))}
             </div>
             <div className="mt-5 rounded-[1.6rem] bg-white p-5 text-black">
-              <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black text-white"><Lightbulb size={17} /></span><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/35">Fix this first</p><p className="mt-2 font-bold leading-6">Pull four weeks of overtime by employee and shift. Isolate repeat patterns before changing staffing.</p></div></div>
+              <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black text-white"><Lightbulb size={17} /></span><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/35">Fix this first</p><p className="mt-2 font-bold leading-6">{demoAnalysis.priorityPlan[0]?.firstMove}</p></div></div>
             </div>
             <p className="mt-4 text-xs leading-5 text-white/32">Sample numbers are fictional. PulseIQ diagnostics identify signals and planning opportunities, not guaranteed savings.</p>
           </div>

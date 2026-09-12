@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description:
     "PulseIQ helps growing businesses identify costly gaps in labor, expenses, missed leads, rework, and daily operations—then prioritize what to fix first.",
   applicationName: "PulseIQ Operations",
+  icons: {
+    icon: [{ url: "/pulseiq-solutions-icon.png", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/pulseiq-solutions-icon.png", type: "image/png", sizes: "512x512" }],
+  },
   keywords: [
     "business operations analytics",
     "profit leak analysis",

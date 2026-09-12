@@ -29,6 +29,9 @@ The free workspace intentionally avoids claiming that a variance proves waste or
 - Monthly actual revenue and revenue target
 - Actual-versus-target entry for payroll, overtime, marketing, refunds/returns, software/subscriptions, shipping/fulfillment, inventory/supplies, facilities, contractors/outsourcing, and other operating costs
 - CSV template download and browser-side CSV import
+- Itemized work expenses with date, vendor, description, category, and exact dollar amount; optional expense CSV import
+- Spending breakdown by category, percentage of expense total, and top vendors
+- Explicit monthly-total or itemized-expense selection: itemized entries replace category actuals without double-counting; existing targets remain in place
 - Optional missed-lead opportunity model
 - Optional rework / repeat-service cost model
 - Direct cost overruns kept separate from modeled opportunities
@@ -41,6 +44,7 @@ The free workspace intentionally avoids claiming that a variance proves waste or
 - Copyable and downloadable executive report
 - Browser Print / Save PDF support
 - Auto-saved browser draft and up to 12 optional local snapshots
+- Expense entries and the selected expense source persist in the browser draft and saved snapshots
 - Demo business using fictional data
 
 ### Paid analysis funnel

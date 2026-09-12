@@ -434,7 +434,9 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
   const second = leaks[1];
   const executiveSummary =
     inputs.revenue <= 0
-      ? "Add revenue plus actual and target costs to generate a decision-ready executive summary."
+      ? totalExpenses > 0
+        ? `${inputs.businessName || "This business"} has ${money(totalExpenses)} in entered operating costs for the selected period. The spending breakdown below shows where those dollars went. Add revenue to estimate margin, and enter category targets to evaluate possible overruns.`
+        : "Add revenue and actual costs or itemized expenses to generate a decision-ready executive summary."
       : leaks.length === 0
         ? `${inputs.businessName || "This business"} is at or below the targets entered across the analyzed categories. PulseIQ did not detect a target-based cost overrun or completed modeled opportunity from the data provided.`
         : `${inputs.businessName || "This business"} shows ${money(totalOpportunity)} in monthly improvement opportunity across the completed models. ${top.name} is the largest signal at ${money(top.amount)} per month${second ? `, followed by ${second.name} at ${money(second.amount)}` : ""}. Estimated operating margin is ${operatingMargin.toFixed(1)}%. A ${recoveryPct}% recovery scenario would improve monthly operating profit by about ${money(recoverableAtScenario)}.`;

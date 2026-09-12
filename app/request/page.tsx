@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Copy, CreditCard, Download, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { billingPortalUrl, contactEmail } from "../site-config";
 
@@ -55,6 +55,8 @@ const isServiceKey = (value: string | null): value is ServiceKey =>
 export default function RequestPage() {
   const [data, setData] = useState<RequestData>(initialData);
   const [status, setStatus] = useState("");
+  const [requestId, setRequestId] = useState("");
+  const requestIds = useRef<Partial<Record<ServiceKey, string>>>({});
 
   useEffect(() => {
     const requestedService = new URLSearchParams(window.location.search).get("service");
@@ -71,9 +73,31 @@ export default function RequestPage() {
   const selected = services[data.service];
   const paymentUrl = paymentLinks[data.service] || "";
 
-  const requestText = useMemo(() => {
-    return [
+  const ensureRequestId = () => {
+    let id = requestIds.current[data.service];
+    const storageKey = `pulseiq-request-reference-${data.service}`;
+    if (!id) {
+      try {
+        id = window.sessionStorage.getItem(storageKey) || undefined;
+      } catch {
+        // Checkout still works when session storage is unavailable.
+      }
+    }
+    if (!id || !/^[0-9a-f-]{36}$/.test(id)) id = window.crypto.randomUUID();
+    requestIds.current[data.service] = id;
+    try {
+      window.sessionStorage.setItem(storageKey, id);
+    } catch {
+      // A private browser may block storage; keep the ID for this page load.
+    }
+    setRequestId(id);
+    return id;
+  };
+
+  const buildRequestText = (id: string) =>
+    [
       "PULSEIQ ANALYSIS REQUEST",
+      `Request reference: ${id}`,
       "",
       `Name: ${data.name || "Not provided"}`,
       `Business email: ${data.email || "Not provided"}`,
@@ -89,7 +113,6 @@ export default function RequestPage() {
       "",
       "Prepared through PulseIQ Operations.",
     ].join("\n");
-  }, [data, selected]);
 
   const requiredComplete =
     data.name.trim() && data.email.trim() && data.businessName.trim() && data.question.trim();
@@ -104,9 +127,10 @@ export default function RequestPage() {
 
   const copyRequest = async () => {
     if (!validate()) return;
+    const id = ensureRequestId();
     try {
-      await navigator.clipboard.writeText(requestText);
-      setStatus("Request copied to your clipboard.");
+      await navigator.clipboard.writeText(buildRequestText(id));
+      setStatus(`Request ${id} copied to your clipboard. You still need to send it to PulseIQ.`);
     } catch {
       setStatus("Your browser blocked clipboard access. Use Download Request instead.");
     }
@@ -114,22 +138,24 @@ export default function RequestPage() {
 
   const downloadRequest = () => {
     if (!validate()) return;
-    const blob = new Blob([requestText], { type: "text/plain;charset=utf-8" });
+    const id = ensureRequestId();
+    const blob = new Blob([buildRequestText(id)], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `pulseiq-analysis-request-${(data.businessName || "business").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.txt`;
     link.click();
     URL.revokeObjectURL(url);
-    setStatus("Request downloaded.");
+    setStatus(`Request ${id} downloaded. The download does not send it to PulseIQ.`);
   };
 
   const emailRequest = (event: FormEvent) => {
     event.preventDefault();
     if (!validate()) return;
 
-    const subject = encodeURIComponent(`PulseIQ Analysis Request — ${data.businessName}`);
-    const body = encodeURIComponent(requestText);
+    const id = ensureRequestId();
+    const subject = encodeURIComponent(`PulseIQ Analysis Request ${id} — ${data.businessName}`);
+    const body = encodeURIComponent(buildRequestText(id));
     setStatus("Your email app should open a draft addressed to PulseIQ. Press Send there to deliver it; opening a draft does not submit this form.");
     window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
   };
@@ -139,8 +165,18 @@ export default function RequestPage() {
       setStatus("Online checkout is not available for this service yet.");
       return;
     }
-    window.open(paymentUrl, "_blank", "noopener,noreferrer");
-    setStatus("Checkout opened in a new tab. Enter your business name, email, and short question there. This page does not send your request details to PulseIQ.");
+    const id = ensureRequestId();
+    let checkoutUrl: URL;
+    try {
+      checkoutUrl = new URL(paymentUrl);
+      if (checkoutUrl.protocol !== "https:") throw new Error("Checkout must use HTTPS");
+    } catch {
+      setStatus("The checkout link is unavailable. Please contact PulseIQ before paying.");
+      return;
+    }
+    checkoutUrl.searchParams.set("client_reference_id", id);
+    window.open(checkoutUrl.toString(), "_blank", "noopener,noreferrer");
+    setStatus(`Checkout requested in a new tab with reference ${id}. Enter your business name, email, and short question there. If you also email the detailed request below, the same reference will help PulseIQ match it to your payment. Checkout alone does not send the fields on this page.`);
   };
 
   return (
@@ -178,7 +214,7 @@ export default function RequestPage() {
                   <button
                     type="button"
                     key={key}
-                    onClick={() => setData((current) => ({ ...current, service: key }))}
+                    onClick={() => { setData((current) => ({ ...current, service: key })); setRequestId(requestIds.current[key] || ""); setStatus(""); }}
                     className={`w-full rounded-[1.8rem] border p-5 text-left transition ${active ? "border-black bg-black text-white shadow-xl" : "border-black/10 bg-white/70 hover:-translate-y-0.5 hover:bg-white"}`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -208,10 +244,11 @@ export default function RequestPage() {
               {paymentUrl ? (
                 <div className="mb-8 rounded-[1.6rem] bg-emerald-50 p-5">
                   <p className="text-lg font-black">Ready for {selected.name}?</p>
-                  <p className="mt-2 text-sm leading-6 text-black/65">Stripe checkout collects your name, business name, email, and a short question. After payment, PulseIQ will contact you at that email to arrange the data for your analysis. No business files are uploaded on this page.</p>
+                  <p className="mt-2 text-sm leading-6 text-black/65">Stripe checkout collects your name, business name, email, and a short question. After payment, PulseIQ will contact you at that email to arrange the data for your analysis. No business files are uploaded on this page. If you also email the detailed request below, a shared reference helps match it to checkout.</p>
                   <button type="button" onClick={openCheckout} className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-5 py-4 font-black text-white shadow-lg hover:-translate-y-0.5">
                     <CreditCard size={17} /> Secure Checkout — {selected.price}
                   </button>
+                  {requestId ? <p className="mt-3 break-all text-xs font-semibold text-black/55">Your request reference: {requestId}</p> : null}
                   {data.service === "monthly" ? (
                     <p className="mt-4 text-sm leading-6 text-black/65">
                       $199 is charged each month until canceled. You can <a href={billingPortalUrl} className="font-bold underline underline-offset-2">manage or cancel your subscription in Stripe</a>. Cancellation takes effect at the end of the current billing period.

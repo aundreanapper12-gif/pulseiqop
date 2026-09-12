@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": ".test-build",
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["app/workspace/model.ts", "app/workspace/expenses.ts", "app/workspace/recovery.ts", "tests/workspace.test.ts"]
+}

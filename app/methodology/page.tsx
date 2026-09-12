@@ -25,6 +25,14 @@ const blocks = [
     title: "6. Recovery scenarios",
     body: "Scenario modeling applies a user-selected recovery percentage to the identified monthly opportunity. For example, a 50% scenario asks what estimated operating profit could look like if half of the modeled opportunity were recovered. It is a planning scenario, not a forecast or promise.",
   },
+  {
+    title: "7. Expense comparisons and review prompts",
+    body: "When you enter itemized expenses for multiple dates, the diagnostic analyzes one selected month at a time; undated expenses have their own group. Month-to-month changes are differences among the entries supplied, not automatically improvements or losses. Matching vendor, date, category, amount, and description create a possible-duplicate review prompt. Identical vendor, category, and amount in different months create a repeat-charge prompt. Neither proves a billing error.",
+  },
+  {
+    title: "8. Follow-up and confirmed recovery",
+    body: "A tracked cost action records a starting amount, target, planned fix, and a later amount. PulseIQ subtracts the later spending from the starting spending to show the observed difference and shows how the gap above the original target changed. Lower spending alone does not prove your action caused savings: volume, timing, service mix, or cost shifting can matter. An owner can separately record an amount supported by their own evidence; PulseIQ does not independently verify it.",
+  },
 ];
 
 export default function MethodologyPage() {

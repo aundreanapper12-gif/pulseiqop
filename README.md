@@ -31,6 +31,7 @@ The free workspace intentionally avoids claiming that a variance proves waste or
 - CSV template download and browser-side CSV import
 - Itemized work expenses with date, vendor, description, category, and exact dollar amount; optional expense CSV import
 - Spending breakdown by category, percentage of expense total, and top vendors
+- Selected-month expense analysis, prior recorded month comparison, source-entry drilldown, and possible-duplicate / recurring-charge review prompts
 - Explicit monthly-total or itemized-expense selection: itemized entries replace category actuals without double-counting; existing targets remain in place
 - Optional missed-lead opportunity model
 - Optional rework / repeat-service cost model
@@ -41,10 +42,11 @@ The free workspace intentionally avoids claiming that a variance proves waste or
 - Confidence labels, why-it-matters explanation, root-cause questions, first move, and metric to track for every finding
 - 25% / 50% / 75% / 100% recovery scenario modeling
 - Top-three Fix This First plan
+- Browser-local action tracker for baseline, follow-up, owner, evidence, observed spending difference, and separately owner-confirmed improvement
 - Copyable and downloadable executive report
 - Browser Print / Save PDF support
 - Auto-saved browser draft and up to 12 optional local snapshots
-- Expense entries and the selected expense source persist in the browser draft and saved snapshots
+- Expense entries, selected expense source and month persist in the browser draft and saved snapshots; follow-up actions are saved separately in the same browser
 - Demo business using fictional data
 
 ### Paid analysis funnel
@@ -53,6 +55,7 @@ The free workspace intentionally avoids claiming that a variance proves waste or
 - Profit Leak Analysis — **$399 one-time**
 - Monthly Pulse — **$199/month**
 - Analysis request builder with business question and available-data fields
+- Random session reference shared between the Stripe checkout URL and an optional emailed, copied, or downloaded detailed request, to assist manual order matching
 - Safe fallback when email or checkout is not configured: the page never pretends a request or payment was submitted
 - Optional external payment links so card data remains with the payment processor
 
@@ -68,7 +71,7 @@ The health score is a prioritization signal based on completed inputs, not a cre
 
 ## Browser data handling
 
-The free workspace performs its core calculations in the browser. Selected CSV files are read with browser-side code. The current draft and optional saved snapshots use browser local storage and are not a permanent cloud backup or customer account.
+The free workspace performs its core calculations in the browser. Selected CSV files are read with browser-side code. The current draft, up to 12 snapshots, and up to 30 action follow-ups use browser local storage and are not a permanent cloud backup or customer account. A selected expense month replaces monthly category actuals when itemized totals are chosen. Comparing months requires comparable revenue, category coverage, and targets; a spending decline alone does not prove savings. An action's owner-confirmed amount is the owner's statement, not an independent PulseIQ verification.
 
 Do not expand the free diagnostic to collect passwords, bank credentials, payment-card details, Social Security numbers, medical records, or unrelated sensitive personal information.
 
@@ -80,7 +83,7 @@ The request page and footer use `anapperk12@gmail.com` as the public PulseIQ con
 NEXT_PUBLIC_PULSEIQ_CONTACT_EMAIL=your-business-inbox@example.com
 ```
 
-The Email PulseIQ button opens a prefilled draft in the visitor's email app. The visitor must press Send there; the website does not submit or deliver the request itself. Copy and download remain available if no email app is configured.
+The Email PulseIQ button opens a prefilled draft in the visitor's email app. The visitor must press Send there; the website does not submit or deliver the request itself. Copy and download remain available if no email app is configured. Each service gets a non-sensitive random reference kept in session storage. Stripe Payment Links receive it as `client_reference_id`, and the optional detailed email includes the same reference in its subject and body. This assists manual matching in Stripe and the inbox; it is not automatic fulfillment, proof of payment, or a file upload. Checkout itself collects the client's short question.
 
 ## Stripe / payment-link configuration
 
@@ -108,6 +111,7 @@ Validation before merge or deployment:
 
 ```bash
 npx tsc --noEmit
+npm run test
 npm run lint
 npm run build
 ```

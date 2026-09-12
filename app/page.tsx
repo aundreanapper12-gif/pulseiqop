@@ -30,7 +30,7 @@ const steps = [
   {
     number: "03",
     title: "Fix the biggest signal first",
-    body: "Each finding includes what to investigate, the first practical move, and the metric that should prove whether the change worked.",
+    body: "Each finding includes a first move. Track the next period's spending against the baseline, then record the evidence for any savings you can actually confirm.",
   },
 ];
 

@@ -3,6 +3,9 @@
 :root {
   --background: #f4efe7;
   --foreground: #101010;
+  --surface: #fffdf9;
+  --muted: #e9e1d5;
+  --ink-soft: rgba(16, 16, 16, 0.58);
 }
 
 @theme inline {
@@ -23,10 +26,30 @@ html {
 
 body {
   margin: 0;
-  background: var(--background);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% -10%, rgba(255, 255, 255, 0.95), transparent 30rem),
+    radial-gradient(circle at 90% 5%, rgba(222, 198, 169, 0.2), transparent 28rem),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+main {
+  isolation: isolate;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
@@ -44,8 +67,19 @@ textarea {
 
 button,
 a {
-  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
-  transition-duration: 180ms;
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow, filter;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+a:hover,
+button:hover {
+  filter: saturate(1.04);
+}
+
+button:active,
+a:active {
+  transform: translateY(1px);
 }
 
 :focus-visible {
@@ -53,13 +87,53 @@ a {
   outline-offset: 3px;
 }
 
+input,
+select,
+textarea {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 4px rgba(16, 16, 16, 0.06);
+}
+
 input::placeholder,
 textarea::placeholder {
   color: rgba(16, 16, 16, 0.32);
 }
 
+.site-utility {
+  backdrop-filter: blur(18px);
+}
+
 .site-cta {
   max-width: calc(100vw - 2.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.22);
+}
+
+.site-cta:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eee7dc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 16, 16, 0.28);
+  border: 2px solid #eee7dc;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 16, 16, 0.45);
 }
 
 @media (max-width: 640px) {

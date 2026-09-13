@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4efe7;
-  --foreground: #101010;
-  --surface: #fffdf9;
-  --muted: #e9e1d5;
-  --ink-soft: rgba(16, 16, 16, 0.58);
+  --background: #f3f6fb;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --muted: #e8eef7;
+  --ink-soft: #475569;
 }
 
 @theme inline {
@@ -24,7 +24,7 @@ body {
   min-height: 100vh;
   background:
     radial-gradient(circle at 10% -10%, rgba(255, 255, 255, 0.95), transparent 30rem),
-    radial-gradient(circle at 90% 5%, rgba(222, 198, 169, 0.2), transparent 28rem),
+    radial-gradient(circle at 90% 5%, rgba(37, 99, 235, 0.04), transparent 28rem),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
@@ -43,9 +43,9 @@ h3 {
   letter-spacing: -0.035em;
 }
 
-h1 { line-height: 0.98; }
-h2 { line-height: 1.03; }
-h3 { line-height: 1.08; }
+h1 { line-height: 1.12; }
+h2 { line-height: 1.2; }
+h3 { line-height: 1.3; }
 
 p { text-wrap: pretty; }
 
@@ -95,7 +95,7 @@ select:focus,
 textarea:focus { box-shadow: 0 0 0 4px rgba(16, 16, 16, 0.06); }
 
 input::placeholder,
-textarea::placeholder { color: rgba(16, 16, 16, 0.32); }
+textarea::placeholder { color: #64748b; }
 
 .site-utility { backdrop-filter: blur(18px); }
 
@@ -154,4 +154,34 @@ article a { text-align: center; }
   #results .grid > * { min-width: 0; }
   #results .flex { flex-wrap: wrap; }
   #results p, #results h3, #results h4, #results summary { overflow-wrap: anywhere; }
+}
+
+/* Shared PulseIQ business interface. */
+[hidden] { display: none !important; }
+body { line-height: 1.65; }
+h1, h2, h3 { letter-spacing: -0.025em; }
+button, summary, nav a { letter-spacing: 0; }
+input, select, textarea { border-radius: 0.75rem; border-color: #cbd5e1; background-color: #fff; min-height: 2.75rem; }
+input:focus, select:focus, textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgb(37 99 235 / 12%); }
+:focus-visible { outline-color: #2563eb; }
+section[id] { scroll-margin-top: 7rem; }
+#results :focus-visible { outline-color: #93c5fd; }
+#results h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.25; }
+#results .text-2xl { font-variant-numeric: tabular-nums; }
+#results .text-sm { line-height: 1.65; }
+#planning { max-width: none; }
+#planning h2 { font-size: 1.875rem; }
+#planning #panel-predict > .grid > div:first-child > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#planning table th, #planning table td { padding: 1rem; font-variant-numeric: tabular-nums; }
+#planning table tbody tr:nth-child(even) { background: #f8fafc; }
+.workspace-navigation { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.workspace-navigation a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+@media (max-width: 640px) {
+  .workspace-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-navigation a { justify-content: center; text-align: center; padding: 0.75rem; }
+  #planning #panel-predict > .grid > div:first-child > .grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media print {
+  [hidden] { display: block !important; }
+  .workspace-navigation, aside { display: none !important; }
 }

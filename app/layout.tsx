@@ -176,16 +176,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
         {children}
 
-        <div className="site-utility border-t border-black/10 bg-[#eee7dc] px-5 py-6 text-[#101010] md:px-8">
+        <div className="site-utility border-t border-slate-900/10 bg-[#eee7dc] px-5 py-6 text-[#0f172a] md:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm md:flex-row md:items-center md:justify-between">
-            <p className="font-semibold text-black/65">© 2026 PulseIQ Operations · Clear Data. Better Decisions. Stronger Operations.</p>
-            <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-black text-black/65">
+            <p className="font-semibold text-slate-600">© 2026 PulseIQ Operations · Clear Data. Better Decisions. Stronger Operations.</p>
+            <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-slate-600">
               {utilityLinks.map(([label, href]) => (
-                <a key={href} href={href} className="hover:text-black">{label}</a>
+                <a key={href} href={href} className="hover:text-slate-900">{label}</a>
               ))}
-              <a href="/request" className="text-black">Request Analysis</a>
-              <a href={billingPortalUrl} className="hover:text-black">Manage Billing</a>
-              <a href={`mailto:${contactEmail}`} className="text-black">{contactEmail}</a>
+              <a href="/request" className="text-slate-900">Request Analysis</a>
+              <a href={billingPortalUrl} className="hover:text-slate-900">Manage Billing</a>
+              <a href={`mailto:${contactEmail}`} className="text-slate-900">{contactEmail}</a>
             </nav>
           </div>
         </div>

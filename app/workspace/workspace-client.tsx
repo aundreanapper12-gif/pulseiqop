@@ -122,10 +122,10 @@ function NumericInput({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-black text-black/65">{label}</span>
-      {hint ? <span className="ml-2 text-xs font-semibold text-black/65">{hint}</span> : null}
-      <div className="mt-2 flex items-center rounded-2xl border border-black/10 bg-[#faf8f4] px-4 focus-within:border-black/45 focus-within:bg-white">
-        {prefix ? <span className="font-black text-black/30">{prefix}</span> : null}
+      <span className="text-sm font-semibold text-slate-600">{label}</span>
+      {hint ? <span className="ml-2 text-sm font-semibold text-slate-600">{hint}</span> : null}
+      <div className="mt-2 flex items-center rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 focus-within:border-slate-900/45 focus-within:bg-white">
+        {prefix ? <span className="font-semibold text-slate-900/30">{prefix}</span> : null}
         <input
           type="number"
           min="0"
@@ -135,7 +135,7 @@ function NumericInput({
           className="w-full bg-transparent px-2 py-3 font-bold outline-none"
           placeholder="0"
         />
-        {suffix ? <span className="font-black text-black/30">{suffix}</span> : null}
+        {suffix ? <span className="font-semibold text-slate-900/30">{suffix}</span> : null}
       </div>
     </label>
   );
@@ -154,15 +154,15 @@ function StatCard({
 }) {
   return (
     <div
-      className={`rounded-[1.6rem] border p-5 ${
-        dark ? "border-white/10 bg-white/[0.07] text-white" : "border-black/10 bg-white text-black"
+      className={`rounded-xl border p-5 ${
+        dark ? "border-white/10 bg-white/[0.07] text-white" : "border-slate-900/10 bg-white text-slate-900"
       }`}
     >
-      <p className={`text-[11px] font-black uppercase tracking-[0.18em] ${dark ? "text-white/70" : "text-black/65"}`}>
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-white/80" : "text-slate-600"}`}>
         {label}
       </p>
-      <p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
-      <p className={`mt-2 text-sm leading-6 ${dark ? "text-white/70" : "text-black/48"}`}>{note}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-tight">{value}</p>
+      <p className={`mt-2 text-sm leading-6 ${dark ? "text-white/80" : "text-slate-600"}`}>{note}</p>
     </div>
   );
 }
@@ -170,14 +170,15 @@ function StatCard({
 function SectionHeading({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
     <div className="max-w-3xl">
-      <p className="text-xs font-black uppercase tracking-[0.22em] text-black/65">{eyebrow}</p>
-      <h2 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">{title}</h2>
-      <p className="mt-3 leading-7 text-black/65">{body}</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-600">{eyebrow}</p>
+      <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{title}</h2>
+      <p className="mt-3 leading-7 text-slate-600">{body}</p>
     </div>
   );
 }
 
 export default function WorkspaceClient() {
+  const [activeStage, setActiveStage] = useState("setup");
   const [inputs, setInputs] = useState<BusinessInputs>(defaultInputs);
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
   const [selectedExpensePeriod, setSelectedExpensePeriod] = useState("");
@@ -209,6 +210,16 @@ export default function WorkspaceClient() {
     .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
   const currentPeriodLabel = useItemizedExpenses ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
   const visibleActions = useMemo(() => recoveryActions.filter((action) => action.business === businessKey(inputs.businessName)), [recoveryActions, inputs.businessName]);
+
+  useEffect(() => {
+    const syncStage = () => {
+      const hash = window.location.hash.slice(1);
+      setActiveStage(hash === "expense-entry" ? "expenses" : hash === "results" ? "results" : hash === "planning" ? "planning" : hash === "recovery-tracker" ? "actions" : "setup");
+    };
+    syncStage();
+    window.addEventListener("hashchange", syncStage);
+    return () => window.removeEventListener("hashchange", syncStage);
+  }, []);
 
   useEffect(() => {
     try {
@@ -310,6 +321,8 @@ export default function WorkspaceClient() {
   };
 
   const loadDemo = () => {
+    setActiveStage("results");
+    window.history.pushState(null, "", "#results");
     setInputs(demoInputs);
     setExpenses(demoExpenses);
     setSelectedExpensePeriod("2026-08");
@@ -323,6 +336,8 @@ export default function WorkspaceClient() {
   };
 
   const resetWorkspace = () => {
+    setActiveStage("setup");
+    window.history.pushState(null, "", "#setup");
     setInputs(defaultInputs);
     setExpenses([]);
     setSelectedExpensePeriod("");
@@ -352,7 +367,9 @@ export default function WorkspaceClient() {
     }
     if (recoveryActions.some((action) => action.business === businessKey(inputs.businessName) && action.categoryId === findingId && action.baselinePeriod === currentPeriodLabel)) {
       setStatus("This finding is already being tracked for this reporting period.");
-      document.getElementById("recovery-tracker")?.scrollIntoView({ behavior: "smooth" });
+      setActiveStage("actions");
+      window.history.pushState(null, "", "#recovery-tracker");
+      setTimeout(() => document.getElementById("recovery-tracker")?.scrollIntoView({ behavior: "smooth" }), 50);
       return;
     }
     if (recoveryActions.length >= MAX_RECOVERY_ACTIONS) {
@@ -369,6 +386,8 @@ export default function WorkspaceClient() {
       followupPeriod: "", followupActual: null, evidence: "", ownerConfirmedAmount: null,
     };
     setRecoveryActions((current) => [action, ...current]);
+    setActiveStage("actions");
+    window.history.pushState(null, "", "#recovery-tracker");
     setStatus(`Tracking ${category.name}. Record a later period after you make the change.`);
     setTimeout(() => document.getElementById("recovery-tracker")?.scrollIntoView({ behavior: "smooth" }), 50);
   };
@@ -608,19 +627,19 @@ export default function WorkspaceClient() {
   const highestAmount = Math.max(1, ...analysis.leaks.map((leak) => leak.amount));
 
   return (
-    <main className="min-h-screen bg-[#f4efe7] text-[#101010]">
-      <header className="sticky top-0 z-50 border-b border-black/10 bg-[#f4efe7]/90 px-5 py-4 backdrop-blur-xl md:px-8">
+    <main className="min-h-screen bg-[#f3f6fb] text-[#0f172a]">
+      <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-[#f3f6fb]/90 px-5 py-4 backdrop-blur-xl md:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <a href="/" className="flex items-center gap-3 font-black">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white shadow-lg"><Sparkles size={18} /></span>
+          <a href="/" className="flex items-center gap-3 font-semibold">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg"><Sparkles size={18} /></span>
             <span>
               <span className="block text-lg leading-none">PulseIQ</span>
-              <span className="mt-1 block text-xs uppercase tracking-[0.22em] text-black/65">Workspace</span>
+              <span className="mt-1 block text-sm uppercase tracking-[0.22em] text-slate-600">Workspace</span>
             </span>
           </a>
           <div className="flex items-center gap-2">
-            <a href="/" className="hidden items-center gap-2 rounded-full border border-black/10 bg-white/65 px-4 py-2.5 text-sm font-black sm:inline-flex"><ArrowLeft size={15} /> Home</a>
-            <a href="/request" className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-black text-white"><span className="hidden sm:inline">Get deeper analysis</span><span className="sm:hidden">Analysis</span> <ArrowRight size={15} /></a>
+            <a href="/" className="hidden items-center gap-2 rounded-xl border border-slate-900/10 bg-white/65 px-4 py-2.5 text-sm font-semibold sm:inline-flex"><ArrowLeft size={15} /> Home</a>
+            <a href="/request" className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white"><span className="hidden sm:inline">Get deeper analysis</span><span className="sm:hidden">Analysis</span> <ArrowRight size={15} /></a>
           </div>
         </div>
       </header>
@@ -629,52 +648,43 @@ export default function WorkspaceClient() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[1.12fr_.88fr] lg:items-end">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm font-black"><BriefcaseBusiness size={16} /> Your business workspace</div>
-              <h1 className="mt-4 max-w-5xl text-3xl font-black leading-[1.1] tracking-tight md:text-5xl">See where your business money goes.</h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-black/65">Enter your monthly numbers or expenses. Diagnose spending, forecast the next 3–12 months, and prioritize what to investigate first.</p>
+              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-900/10 bg-white/70 px-4 py-2 text-sm font-semibold"><BriefcaseBusiness size={16} /> PulseIQ intelligence workspace</div>
+              <h1 className="mt-4 max-w-5xl text-3xl font-semibold leading-[1.1] tracking-tight md:text-5xl">Your business, in focus.</h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">Start with your business and budget. Add expenses, review priorities, then test your next decision.</p>
             </div>
-            <div className="rounded-[2rem] bg-black p-6 text-white shadow-2xl">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-black"><ShieldCheck size={19} /></div>
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-white/70">Private-by-default workspace</p>
-                  <p className="mt-3 font-bold leading-7 text-white/75">Your draft and saved snapshots stay in this browser. The free workspace does not upload your financial data to a PulseIQ server.</p>
-                </div>
-              </div>
-              <div className="mt-5 flex flex-wrap gap-2 text-xs font-black text-white/70">
-                <span className="rounded-full border border-white/10 px-3 py-2">No bank login</span>
-                <span className="rounded-full border border-white/10 px-3 py-2">No card data</span>
-                <span className="rounded-full border border-white/10 px-3 py-2">No hidden benchmark</span>
-              </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="flex items-start gap-3"><ShieldCheck size={21} className="mt-1 shrink-0 text-teal-700" /><div><p className="font-bold">Your numbers stay private.</p><p className="mt-2 text-sm leading-6 text-slate-600">Drafts, plans, and snapshots stay in this browser. No bank login is required.</p></div></div>
             </div>
           </div>
 
           {status ? (
-            <div role="status" aria-live="polite" className="mt-7 flex items-start gap-3 rounded-2xl border border-black/10 bg-white/75 p-4 text-sm font-bold leading-6 text-black/65 shadow-sm">
+            <div role="status" aria-live="polite" className="mt-7 flex items-start gap-3 rounded-2xl border border-slate-900/10 bg-white/75 p-4 text-sm font-bold leading-6 text-slate-600 shadow-sm">
               <CheckCircle2 className="mt-0.5 shrink-0" size={18} /> {status}
             </div>
           ) : null}
         </div>
       </section>
 
-      <nav aria-label="Workspace sections" className="mx-auto mb-6 flex max-w-7xl flex-wrap gap-3 px-5 text-sm font-bold"><a href="#expense-entry" className="rounded-full border border-black/15 bg-white px-5 py-3">Enter expenses</a><a href="#results" className="rounded-full border border-black/15 bg-white px-5 py-3">Diagnose & optimize</a><a href="#planning" className="rounded-full bg-black px-5 py-3 text-white">Forecast & review data</a><a href="#recovery-tracker" className="rounded-full border border-black/15 bg-white px-5 py-3">Track actions</a></nav>
+      <nav aria-label="Workspace sections" className="workspace-navigation mx-auto mb-6 flex max-w-7xl flex-wrap gap-2 px-5 text-sm font-bold">
+        {[{id:"setup",hash:"setup",label:"1. Business & budget"},{id:"expenses",hash:"expense-entry",label:"2. Expenses"},{id:"results",hash:"results",label:"3. Results & priorities"},{id:"planning",hash:"planning",label:"4. Forecast"},{id:"actions",hash:"recovery-tracker",label:"5. Track actions"}].map(stage => <a key={stage.id} href={`#${stage.hash}`} aria-current={activeStage === stage.id ? "page" : undefined} onClick={() => setActiveStage(stage.id)} className={`rounded-xl border px-4 py-3 ${activeStage === stage.id ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"}`}>{stage.label}</a>)}
+      </nav>
       <section className="px-5 pb-12 md:px-8">
-        <div className="mx-auto grid grid-cols-1 max-w-7xl gap-7 xl:grid-cols-[1fr_380px]">
+        <div className="mx-auto grid grid-cols-1 max-w-7xl gap-7 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0 space-y-7">
-            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
-              <SectionHeading eyebrow="1 · Business profile" title="Give the numbers context." body="PulseIQ does not use a one-size-fits-all industry benchmark in the free workspace. Your targets, budgets, forecasts, and operating context are the baseline." />
+            <section id="setup" hidden={activeStage !== "setup"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
+              <SectionHeading eyebrow="Business profile" title="Business details" body="PulseIQ does not use a one-size-fits-all industry benchmark in the free workspace. Your targets, budgets, forecasts, and operating context are the baseline." />
               <div className="mt-7 grid gap-4 sm:grid-cols-2">
                 <label>
-                  <span className="text-sm font-black text-black/65">Business name</span>
-                  <input value={inputs.businessName} onChange={(event) => setValue("businessName", event.target.value)} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold outline-none focus:border-black/45" placeholder="Your business" />
+                  <span className="text-sm font-semibold text-slate-600">Business name</span>
+                  <input value={inputs.businessName} onChange={(event) => setValue("businessName", event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold outline-none focus:border-slate-900/45" placeholder="Your business" />
                 </label>
                 <label>
-                  <span className="text-sm font-black text-black/65">Industry</span>
-                  <input value={inputs.industry} onChange={(event) => setValue("industry", event.target.value)} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold outline-none focus:border-black/45" placeholder="Home services, agency, retail..." />
+                  <span className="text-sm font-semibold text-slate-600">Industry</span>
+                  <input value={inputs.industry} onChange={(event) => setValue("industry", event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold outline-none focus:border-slate-900/45" placeholder="Home services, agency, retail..." />
                 </label>
                 <label>
-                  <span className="text-sm font-black text-black/65">Reporting period</span>
-                  <input value={inputs.reportingPeriod} onChange={(event) => setValue("reportingPeriod", event.target.value)} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold outline-none focus:border-black/45" placeholder="August 2026" />
+                  <span className="text-sm font-semibold text-slate-600">Reporting period</span>
+                  <input value={inputs.reportingPeriod} onChange={(event) => setValue("reportingPeriod", event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold outline-none focus:border-slate-900/45" placeholder="August 2026" />
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <NumericInput label="Employees" value={inputs.employees} onChange={(value) => setValue("employees", value)} />
@@ -683,16 +693,16 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
+            <section hidden={activeStage !== "setup"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <SectionHeading eyebrow="2 · Financial baseline" title="Actual versus target, in dollars." body="A direct cost leak is only flagged when an entered actual is above an entered target. If you leave a target blank, PulseIQ does not invent one." />
+                <SectionHeading eyebrow="Monthly budget" title="Monthly revenue & budget" body="A direct cost leak is only flagged when an entered actual is above an entered target. If you leave a target blank, PulseIQ does not invent one." />
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-black px-4 py-3 text-sm font-black text-white"><Upload size={16} /> Import CSV<input type="file" accept=".csv,text/csv" onChange={handleCsv} className="hidden" /></label>
-                  <button type="button" onClick={downloadTemplate} className="inline-flex items-center gap-2 rounded-full border border-black/15 px-4 py-3 text-sm font-black"><Download size={16} /> Template</button>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"><Upload size={16} /> Import CSV<input type="file" accept=".csv,text/csv" onChange={handleCsv} className="hidden" /></label>
+                  <button type="button" onClick={downloadTemplate} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-4 py-3 text-sm font-semibold"><Download size={16} /> Template</button>
                 </div>
               </div>
 
-              <div className="mt-7 rounded-[1.8rem] bg-black p-5 text-white">
+              <div className="mt-7 rounded-2xl bg-slate-900 p-5 text-white">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <NumericInput label="Actual Revenue" value={inputs.revenue} onChange={(value) => setValue("revenue", value)} prefix="$" />
                   <NumericInput label="Revenue Target" value={inputs.revenueTarget} onChange={(value) => setValue("revenueTarget", value)} prefix="$" />
@@ -701,13 +711,13 @@ export default function WorkspaceClient() {
 
               <div className="mt-6 space-y-3">
                 {costCategories.map((category) => (
-                  <div key={category.id} className="grid gap-3 rounded-[1.5rem] border border-black/[0.07] bg-[#faf8f4] p-4 sm:grid-cols-[1.2fr_1fr_1fr] sm:items-center">
+                  <div key={category.id} className="grid gap-3 rounded-[1.5rem] border border-slate-900/[0.07] bg-[#f8fafc] p-4 sm:grid-cols-[1.2fr_1fr_1fr] sm:items-center">
                     <div>
-                      <p className="font-black">{category.name}</p>
-                      <p className="mt-1 text-xs font-semibold text-black/65">Monthly amount</p>
+                      <p className="font-semibold">{category.name}</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-600">Monthly amount</p>
                     </div>
                     {useItemizedExpenses ? (
-                      <div><p className="text-sm font-black text-black/65">Actual · from expense list</p><p className="mt-2 rounded-2xl border border-black/10 bg-white px-4 py-3 font-black">{exactMoney(analyzedInputs[category.actual])}</p></div>
+                      <div><p className="text-sm font-semibold text-slate-600">Actual · from expense list</p><p className="mt-2 rounded-2xl border border-slate-900/10 bg-white px-4 py-3 font-semibold">{exactMoney(analyzedInputs[category.actual])}</p></div>
                     ) : <NumericInput label="Actual" value={Number(inputs[category.actual])} onChange={(value) => setValue(category.actual, value)} prefix="$" />}
                     <NumericInput label="Target" value={Number(inputs[category.target])} onChange={(value) => setValue(category.target, value)} prefix="$" />
                   </div>
@@ -715,66 +725,66 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-            <section id="expense-entry" className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
+            <section hidden={activeStage !== "expenses"} id="expense-entry" className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <SectionHeading eyebrow="3 · Work expenses" title="See exactly where the money went." body="Add bills one at a time or import an expense CSV. PulseIQ groups the spending by category and vendor, shows the dollar amounts and shares, and compares it with the targets you entered above." />
+                <SectionHeading eyebrow="Work expenses" title="Expense records" body="Add bills one at a time or import an expense CSV. PulseIQ groups the spending by category and vendor, shows the dollar amounts and shares, and compares it with the targets you entered above." />
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-black px-4 py-3 text-sm font-black text-white"><Upload size={16} /> Import expenses<input type="file" accept=".csv,text/csv" onChange={handleExpenseCsv} className="hidden" /></label>
-                  <button type="button" onClick={downloadExpenseTemplate} className="inline-flex items-center gap-2 rounded-full border border-black/15 px-4 py-3 text-sm font-black"><Download size={16} /> Expense template</button>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"><Upload size={16} /> Import expenses<input type="file" accept=".csv,text/csv" onChange={handleExpenseCsv} className="hidden" /></label>
+                  <button type="button" onClick={downloadExpenseTemplate} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-4 py-3 text-sm font-semibold"><Download size={16} /> Expense template</button>
                 </div>
               </div>
-              <p className="mt-5 rounded-2xl bg-[#f4efe7] p-4 text-sm leading-6 text-black/65">Import multiple months to compare trends; PulseIQ includes only the selected month in a monthly diagnostic. Enter revenue and targets for that same month. Amounts are positive spending. If revenue is already net of refunds, check that entering refunds as a cost will not count them twice. Your entries stay in this browser.</p>
+              <p className="mt-5 rounded-2xl bg-[#f3f6fb] p-4 text-sm leading-6 text-slate-600">Import multiple months to compare trends; PulseIQ includes only the selected month in a monthly diagnostic. Enter revenue and targets for that same month. Amounts are positive spending. If revenue is already net of refunds, check that entering refunds as a cost will not count them twice. Your entries stay in this browser.</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <label className="block"><span className="text-sm font-black text-black/65">Date (optional)</span><input type="date" value={expenseDraft.date} onChange={(event) => setExpenseDraft((current) => ({ ...current, date: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" /></label>
-                <label className="block"><span className="text-sm font-black text-black/65">Vendor or expense name *</span><input value={expenseDraft.vendor} maxLength={100} onChange={(event) => setExpenseDraft((current) => ({ ...current, vendor: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" placeholder="Example: Electric bill" /></label>
-                <label className="block"><span className="text-sm font-black text-black/65">Category</span><select value={expenseDraft.category} onChange={(event) => setExpenseDraft((current) => ({ ...current, category: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold">{costCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+                <label className="block"><span className="text-sm font-semibold text-slate-600">Date (optional)</span><input type="date" value={expenseDraft.date} onChange={(event) => setExpenseDraft((current) => ({ ...current, date: event.target.value }))} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold" /></label>
+                <label className="block"><span className="text-sm font-semibold text-slate-600">Vendor or expense name *</span><input value={expenseDraft.vendor} maxLength={100} onChange={(event) => setExpenseDraft((current) => ({ ...current, vendor: event.target.value }))} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold" placeholder="Example: Electric bill" /></label>
+                <label className="block"><span className="text-sm font-semibold text-slate-600">Category</span><select value={expenseDraft.category} onChange={(event) => setExpenseDraft((current) => ({ ...current, category: event.target.value }))} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold">{costCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
                 <NumericInput label="Amount *" value={expenseDraft.amount} onChange={(value) => setExpenseDraft((current) => ({ ...current, amount: value }))} prefix="$" />
-                <label className="block sm:col-span-2"><span className="text-sm font-black text-black/65">Description (optional)</span><input value={expenseDraft.description} maxLength={180} onChange={(event) => setExpenseDraft((current) => ({ ...current, description: event.target.value }))} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold" placeholder="Example: Office electricity for August" /></label>
+                <label className="block sm:col-span-2"><span className="text-sm font-semibold text-slate-600">Description (optional)</span><input value={expenseDraft.description} maxLength={180} onChange={(event) => setExpenseDraft((current) => ({ ...current, description: event.target.value }))} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold" placeholder="Example: Office electricity for August" /></label>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2"><button type="button" onClick={saveExpense} className="rounded-full bg-black px-5 py-3 font-black text-white">{editingExpenseId ? "Save changes" : "Add expense"}</button>{editingExpenseId ? <button type="button" onClick={() => { setEditingExpenseId(null); setExpenseDraft(emptyExpense); }} className="rounded-full border border-black/15 px-5 py-3 font-black">Cancel edit</button> : null}</div>
+              <div className="mt-5 flex flex-wrap gap-2"><button type="button" onClick={saveExpense} className="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white">{editingExpenseId ? "Save changes" : "Add expense"}</button>{editingExpenseId ? <button type="button" onClick={() => { setEditingExpenseId(null); setExpenseDraft(emptyExpense); }} className="rounded-xl border border-slate-900/15 px-5 py-3 font-semibold">Cancel edit</button> : null}</div>
 
               {periods.length ? (
-                <div className="mt-7 rounded-[1.7rem] border border-black/10 bg-white p-5">
-                  <label className="block text-sm font-black text-black/65" htmlFor="expense-period">Month to analyze</label>
-                  <select id="expense-period" value={activeExpensePeriod} onChange={(event) => setSelectedExpensePeriod(event.target.value)} className="mt-2 w-full rounded-2xl border border-black/10 bg-[#faf8f4] px-4 py-3 font-bold sm:max-w-sm">
+                <div className="mt-7 rounded-xl border border-slate-900/10 bg-white p-5">
+                  <label className="block text-sm font-semibold text-slate-600" htmlFor="expense-period">Month to analyze</label>
+                  <select id="expense-period" value={activeExpensePeriod} onChange={(event) => setSelectedExpensePeriod(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold sm:max-w-sm">
                     {periods.map((period) => <option value={period} key={period}>{formatExpensePeriod(period)} · {expensesInPeriod(expenses, period).length} entries</option>)}
                   </select>
-                  <p className="mt-2 text-sm leading-6 text-black/65">Only {formatExpensePeriod(activeExpensePeriod)} entries will feed the itemized diagnostic. Update revenue and targets above when changing months. Undated entries are separate so they cannot silently inflate a dated month.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Only {formatExpensePeriod(activeExpensePeriod)} entries will feed the itemized diagnostic. Update revenue and targets above when changing months. Undated entries are separate so they cannot silently inflate a dated month.</p>
                 </div>
               ) : null}
 
-              <div className="mt-7 rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5">
-                <h3 className="text-xl font-black">Which numbers should the diagnostic use?</h3>
-                <p className="mt-2 text-sm leading-6 text-black/65">Choose one source. Itemized totals replace every monthly actual above; they are never added on top of them. Targets stay the same. If you have only entered some of the month’s bills, keep using monthly category totals until the list is complete.</p>
+              <div className="mt-7 rounded-xl border border-slate-900/10 bg-[#f8fafc] p-5">
+                <h3 className="text-xl font-semibold">Which numbers should the diagnostic use?</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Choose one source. Itemized totals replace every monthly actual above; they are never added on top of them. Targets stay the same. If you have only entered some of the month’s bills, keep using monthly category totals until the list is complete.</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setUseItemizedExpenses(false)} aria-pressed={!useItemizedExpenses} className={`rounded-full px-4 py-3 text-sm font-black ${!useItemizedExpenses ? "bg-black text-white" : "border border-black/15 bg-white"}`}>Use monthly totals</button>
-                  <button type="button" onClick={() => expenses.length ? setUseItemizedExpenses(true) : setStatus("Add at least one expense before choosing itemized totals.")} aria-pressed={useItemizedExpenses} className={`rounded-full px-4 py-3 text-sm font-black ${useItemizedExpenses ? "bg-black text-white" : "border border-black/15 bg-white"}`}>Use itemized expenses</button>
+                  <button type="button" onClick={() => setUseItemizedExpenses(false)} aria-pressed={!useItemizedExpenses} className={`rounded-xl px-4 py-3 text-sm font-semibold ${!useItemizedExpenses ? "bg-slate-900 text-white" : "border border-slate-900/15 bg-white"}`}>Use monthly totals</button>
+                  <button type="button" onClick={() => expenses.length ? setUseItemizedExpenses(true) : setStatus("Add at least one expense before choosing itemized totals.")} aria-pressed={useItemizedExpenses} className={`rounded-xl px-4 py-3 text-sm font-semibold ${useItemizedExpenses ? "bg-slate-900 text-white" : "border border-slate-900/15 bg-white"}`}>Use itemized expenses</button>
                 </div>
-                <p className="mt-4 text-sm font-semibold text-black/65">Currently included in the diagnostic: <strong className="text-black">{useItemizedExpenses ? `${exactMoney(expenseSummary.total)} from ${currentExpenses.length} ${formatExpensePeriod(activeExpensePeriod)} expense entries` : `${exactMoney(analysis.totalExpenses)} in monthly category totals`}</strong></p>
+                <p className="mt-4 text-sm font-semibold text-slate-600">Currently included in the diagnostic: <strong className="text-slate-900">{useItemizedExpenses ? `${exactMoney(expenseSummary.total)} from ${currentExpenses.length} ${formatExpensePeriod(activeExpensePeriod)} expense entries` : `${exactMoney(analysis.totalExpenses)} in monthly category totals`}</strong></p>
               </div>
 
               <div className="mt-7 grid gap-5 lg:grid-cols-2">
-                <div className="rounded-[1.7rem] bg-black p-5 text-white">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">{formatExpensePeriod(activeExpensePeriod)} · {currentExpenses.length} entries</p>
-                  <p className="mt-2 text-3xl font-black">{exactMoney(expenseSummary.total)}</p>
-                  <p className="mt-1 text-sm text-white/70">{inputs.revenue > 0 ? `${((expenseSummary.total / inputs.revenue) * 100).toFixed(1)}% of entered revenue` : "Add revenue above to see the share"}</p>
-                  <div className="mt-5 space-y-3">{expenseSummary.categoryTotals.length ? expenseSummary.categoryTotals.map((category) => <div key={category.id}><div className="flex justify-between gap-3 text-sm font-bold"><span>{category.name}</span><span>{exactMoney(category.amount)} · {((category.amount / expenseSummary.total) * 100).toFixed(1)}%</span></div><div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-emerald-300" style={{ width: `${(category.amount / expenseSummary.total) * 100}%` }} /></div><details className="mt-2 text-xs text-white/60"><summary className="cursor-pointer font-bold">Show source entries</summary><div className="mt-2 space-y-1">{currentExpenses.filter((entry) => entry.category === category.id).map((entry) => <p key={entry.id}>{entry.date || "No date"} · {entry.vendor} · {exactMoney(entry.amount)}{entry.description ? ` · ${entry.description}` : ""}</p>)}</div></details></div>) : <p className="text-sm text-white/70">Add an expense to see where money is going.</p>}</div>
+                <div className="rounded-xl bg-slate-900 p-5 text-white">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">{formatExpensePeriod(activeExpensePeriod)} · {currentExpenses.length} entries</p>
+                  <p className="mt-2 text-3xl font-semibold">{exactMoney(expenseSummary.total)}</p>
+                  <p className="mt-1 text-sm text-white/80">{inputs.revenue > 0 ? `${((expenseSummary.total / inputs.revenue) * 100).toFixed(1)}% of entered revenue` : "Add revenue above to see the share"}</p>
+                  <div className="mt-5 space-y-3">{expenseSummary.categoryTotals.length ? expenseSummary.categoryTotals.map((category) => <div key={category.id}><div className="flex justify-between gap-3 text-sm font-bold"><span>{category.name}</span><span>{exactMoney(category.amount)} · {((category.amount / expenseSummary.total) * 100).toFixed(1)}%</span></div><div className="mt-1.5 h-2 overflow-hidden rounded-xl bg-white/15"><div className="h-full rounded-xl bg-emerald-300" style={{ width: `${(category.amount / expenseSummary.total) * 100}%` }} /></div><details className="mt-2 text-sm text-white/80"><summary className="cursor-pointer font-bold">Show source entries</summary><div className="mt-2 space-y-1">{currentExpenses.filter((entry) => entry.category === category.id).map((entry) => <p key={entry.id}>{entry.date || "No date"} · {entry.vendor} · {exactMoney(entry.amount)}{entry.description ? ` · ${entry.description}` : ""}</p>)}</div></details></div>) : <p className="text-sm text-white/80">Add an expense to see where money is going.</p>}</div>
                 </div>
-                <div className="rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-black/65">Who is getting paid?</p><h3 className="mt-2 text-xl font-black">Top vendors and expense names</h3>
-                  <div className="mt-5 space-y-3">{expenseSummary.vendorTotals.slice(0, 5).map((vendor) => <div key={vendor.name} className="flex justify-between gap-3 border-b border-black/10 pb-3 text-sm"><span className="font-semibold">{vendor.name}</span><span className="shrink-0 font-black">{exactMoney(vendor.amount)}</span></div>)}{expenses.length === 0 ? <p className="text-sm text-black/65">Your five largest vendors will show here.</p> : null}</div>
+                <div className="rounded-xl border border-slate-900/10 bg-[#f8fafc] p-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">Who is getting paid?</p><h3 className="mt-2 text-xl font-semibold">Top vendors and expense names</h3>
+                  <div className="mt-5 space-y-3">{expenseSummary.vendorTotals.slice(0, 5).map((vendor) => <div key={vendor.name} className="flex justify-between gap-3 border-b border-slate-900/10 pb-3 text-sm"><span className="font-semibold">{vendor.name}</span><span className="shrink-0 font-semibold">{exactMoney(vendor.amount)}</span></div>)}{expenses.length === 0 ? <p className="text-sm text-slate-600">Your five largest vendors will show here.</p> : null}</div>
                 </div>
               </div>
-              {periodComparison ? <div className="mt-6 rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5"><h3 className="text-xl font-black">Change since {formatExpensePeriod(periodComparison.previousPeriod)}</h3><p className="mt-2 text-sm leading-6 text-black/65">{formatExpensePeriod(periodComparison.currentPeriod)} spending was {exactMoney(Math.abs(periodComparison.change))} {periodComparison.change >= 0 ? "higher" : "lower"} across the entries provided. Compare the same scope of spending in both months; a change alone does not prove savings or waste.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{periodComparison.categories.filter((category) => category.change !== 0).slice(0, 6).map((category) => <div key={category.id} className="rounded-2xl border border-black/10 bg-white p-3 text-sm"><p className="font-black">{category.name} · {category.change >= 0 ? "+" : "−"}{exactMoney(Math.abs(category.change))}</p><p className="mt-1 text-black/65">{exactMoney(category.previous)} → {exactMoney(category.current)}</p></div>)}</div></div> : null}
-              {(expensePatterns.possibleDuplicates.length || expensePatterns.recurringCharges.length) ? <div className="mt-6 rounded-[1.7rem] border border-amber-200 bg-amber-50 p-5"><h3 className="text-xl font-black">Charges to review</h3><p className="mt-2 text-sm text-black/65">Matching entries and repeat charges are review prompts. Neither is automatically a billing error or avoidable cost.</p>{expensePatterns.possibleDuplicates.slice(0, 5).map((group) => <p key={group.entryIds.join("-")} className="mt-3 text-sm"><strong>Possible duplicate:</strong> {group.count} matching entries · {group.vendor} · {group.date} · {exactMoney(group.amount)} each</p>)}{expensePatterns.recurringCharges.slice(0, 5).map((group) => <p key={`${group.vendor}-${group.amount}`} className="mt-3 text-sm"><strong>Repeated across months:</strong> {group.vendor} · {exactMoney(group.amount)} · {group.months.map(formatExpensePeriod).join(", ")}</p>)}</div> : null}
-              {expenses.length ? <div className="mt-6 space-y-2"><h3 className="text-lg font-black">All expense entries · {expenses.length}</h3>{[...expenses].reverse().slice(0, visibleExpenseCount).map((entry) => <div key={entry.id} className="flex flex-col gap-2 rounded-2xl border border-black/10 bg-[#faf8f4] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="font-black">{entry.vendor} <span className="text-black/65">· {exactMoney(entry.amount)}</span></p><p className="mt-1 text-xs font-semibold text-black/65">{entry.date || "No date"} · {costCategories.find((category) => category.id === entry.category)?.name}{entry.description ? ` · ${entry.description}` : ""}</p></div><div className="flex shrink-0 gap-2"><button type="button" onClick={() => { setEditingExpenseId(entry.id); setExpenseDraft({ date: entry.date, vendor: entry.vendor, description: entry.description, category: entry.category, amount: entry.amount }); }} className="inline-flex items-center gap-1 rounded-full border border-black/15 px-3 py-2 text-xs font-black"><Pencil size={13} /> Edit</button><button type="button" onClick={() => { setExpenses((current) => current.filter((item) => item.id !== entry.id)); if (expenses.length === 1) setUseItemizedExpenses(false); if (editingExpenseId === entry.id) { setEditingExpenseId(null); setExpenseDraft(emptyExpense); } }} className="inline-flex items-center gap-1 rounded-full border border-black/15 px-3 py-2 text-xs font-black"><Trash2 size={13} /> Remove</button></div></div>)}{visibleExpenseCount < expenses.length ? <button type="button" onClick={() => setVisibleExpenseCount((count) => count + 25)} className="mt-3 rounded-full border border-black/15 px-5 py-3 text-sm font-black">Show 25 more of {expenses.length} expenses</button> : null}</div> : null}
+              {periodComparison ? <div className="mt-6 rounded-xl border border-slate-900/10 bg-[#f8fafc] p-5"><h3 className="text-xl font-semibold">Change since {formatExpensePeriod(periodComparison.previousPeriod)}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{formatExpensePeriod(periodComparison.currentPeriod)} spending was {exactMoney(Math.abs(periodComparison.change))} {periodComparison.change >= 0 ? "higher" : "lower"} across the entries provided. Compare the same scope of spending in both months; a change alone does not prove savings or waste.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{periodComparison.categories.filter((category) => category.change !== 0).slice(0, 6).map((category) => <div key={category.id} className="rounded-2xl border border-slate-900/10 bg-white p-3 text-sm"><p className="font-semibold">{category.name} · {category.change >= 0 ? "+" : "−"}{exactMoney(Math.abs(category.change))}</p><p className="mt-1 text-slate-600">{exactMoney(category.previous)} → {exactMoney(category.current)}</p></div>)}</div></div> : null}
+              {(expensePatterns.possibleDuplicates.length || expensePatterns.recurringCharges.length) ? <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="text-xl font-semibold">Charges to review</h3><p className="mt-2 text-sm text-slate-600">Matching entries and repeat charges are review prompts. Neither is automatically a billing error or avoidable cost.</p>{expensePatterns.possibleDuplicates.slice(0, 5).map((group) => <p key={group.entryIds.join("-")} className="mt-3 text-sm"><strong>Possible duplicate:</strong> {group.count} matching entries · {group.vendor} · {group.date} · {exactMoney(group.amount)} each</p>)}{expensePatterns.recurringCharges.slice(0, 5).map((group) => <p key={`${group.vendor}-${group.amount}`} className="mt-3 text-sm"><strong>Repeated across months:</strong> {group.vendor} · {exactMoney(group.amount)} · {group.months.map(formatExpensePeriod).join(", ")}</p>)}</div> : null}
+              {expenses.length ? <div className="mt-6 space-y-2"><h3 className="text-lg font-semibold">All expense entries · {expenses.length}</h3>{[...expenses].reverse().slice(0, visibleExpenseCount).map((entry) => <div key={entry.id} className="flex flex-col gap-2 rounded-2xl border border-slate-900/10 bg-[#f8fafc] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="font-semibold">{entry.vendor} <span className="text-slate-600">· {exactMoney(entry.amount)}</span></p><p className="mt-1 text-sm font-semibold text-slate-600">{entry.date || "No date"} · {costCategories.find((category) => category.id === entry.category)?.name}{entry.description ? ` · ${entry.description}` : ""}</p></div><div className="flex shrink-0 gap-2"><button type="button" onClick={() => { setEditingExpenseId(entry.id); setExpenseDraft({ date: entry.date, vendor: entry.vendor, description: entry.description, category: entry.category, amount: entry.amount }); }} className="inline-flex items-center gap-1 rounded-xl border border-slate-900/15 px-3 py-2 text-sm font-semibold"><Pencil size={13} /> Edit</button><button type="button" onClick={() => { setExpenses((current) => current.filter((item) => item.id !== entry.id)); if (expenses.length === 1) setUseItemizedExpenses(false); if (editingExpenseId === entry.id) { setEditingExpenseId(null); setExpenseDraft(emptyExpense); } }} className="inline-flex items-center gap-1 rounded-xl border border-slate-900/15 px-3 py-2 text-sm font-semibold"><Trash2 size={13} /> Remove</button></div></div>)}{visibleExpenseCount < expenses.length ? <button type="button" onClick={() => setVisibleExpenseCount((count) => count + 25)} className="mt-3 rounded-xl border border-slate-900/15 px-5 py-3 text-sm font-semibold">Show 25 more of {expenses.length} expenses</button> : null}</div> : null}
             </section>
 
-            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
-              <SectionHeading eyebrow="4 · Operational opportunity" title="Catch money that never reaches the P&L cleanly." body="These optional models estimate missed opportunity and repeat-work cost. PulseIQ labels them as modeled—not as guaranteed lost revenue." />
+            <section hidden={activeStage !== "setup"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
+              <SectionHeading eyebrow="Optional models" title="Optional operating models" body="These optional models estimate missed opportunity and repeat-work cost. PulseIQ labels them as modeled—not as guaranteed lost revenue." />
               <div className="mt-7 grid gap-5 lg:grid-cols-2">
-                <div className="rounded-[1.8rem] border border-black/10 bg-[#f4efe7] p-5">
-                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white"><TrendingDown size={18} /></span><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/65">Revenue capture</p><h3 className="text-xl font-black">Missed leads</h3></div></div>
+                <div className="rounded-2xl border border-slate-900/10 bg-[#f3f6fb] p-5">
+                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white"><TrendingDown size={18} /></span><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">Revenue capture</p><h3 className="text-xl font-semibold">Missed leads</h3></div></div>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <NumericInput label="Monthly Leads" value={inputs.monthlyLeads} onChange={(value) => setValue("monthlyLeads", value)} />
                     <NumericInput label="Missed / Unanswered" value={inputs.missedContactPct} onChange={(value) => setValue("missedContactPct", Math.min(100, value))} suffix="%" />
@@ -783,8 +793,8 @@ export default function WorkspaceClient() {
                   </div>
                 </div>
 
-                <div className="rounded-[1.8rem] border border-black/10 bg-[#f4efe7] p-5">
-                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white"><Wrench size={18} /></span><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/65">Process quality</p><h3 className="text-xl font-black">Rework / repeat service</h3></div></div>
+                <div className="rounded-2xl border border-slate-900/10 bg-[#f3f6fb] p-5">
+                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white"><Wrench size={18} /></span><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">Process quality</p><h3 className="text-xl font-semibold">Rework / repeat service</h3></div></div>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <NumericInput label="Completed Jobs" value={inputs.completedJobs} onChange={(value) => setValue("completedJobs", value)} />
                     <NumericInput label="Rework Rate" value={inputs.reworkPct} onChange={(value) => setValue("reworkPct", Math.min(100, value))} suffix="%" />
@@ -794,15 +804,15 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-            {useItemizedExpenses && currentQualityFindings.length > 0 ? <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5"><p className="font-black">Review the data behind these results</p><p className="mt-2 text-sm leading-6">{currentQualityFindings.length} checks need review in the selected expense month. Missing dates, catch-all categories, vendor inconsistencies, or unusually large amounts may affect interpretation.</p><a href="#planning" className="mt-3 inline-block text-sm font-bold underline">Open data review</a></div> : null}
-            <section id="results" className="rounded-[2.2rem] bg-[#111] p-6 text-white shadow-2xl md:p-8">
+            {activeStage === "results" && useItemizedExpenses && currentQualityFindings.length > 0 ? <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5"><p className="font-semibold">Review the data behind these results</p><p className="mt-2 text-sm leading-6">{currentQualityFindings.length} checks need review in the selected expense month. Missing dates, catch-all categories, vendor inconsistencies, or unusually large amounts may affect interpretation.</p><a href="#planning" className="mt-3 inline-block text-sm font-bold underline">Open data review</a></div> : null}
+            <section hidden={activeStage !== "results"} id="results" className="rounded-2xl bg-[#0f172a] p-6 text-white shadow-2xl md:p-8">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-3xl">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-white/70">5 · PulseIQ executive diagnostic</p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">{inputs.businessName || "Your business"}: where to look first.</h2>
-                  <p className="mt-4 leading-7 text-white/70">{analysis.executiveSummary}</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">PulseIQ executive diagnostic</p>
+                  <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{inputs.businessName || "Your business"}: where to look first.</h2>
+                  <p className="mt-4 leading-7 text-white/80">{analysis.executiveSummary}</p>
                 </div>
-                <div className={`rounded-full px-4 py-2 text-sm font-black ${analysis.risk === "High" ? "bg-red-400/15 text-red-200" : analysis.risk === "Moderate" ? "bg-amber-300/15 text-amber-200" : analysis.risk === "Controlled" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/10 text-white/70"}`}>
+                <div className={`rounded-xl px-4 py-2 text-sm font-semibold ${analysis.risk === "High" ? "bg-red-400/15 text-red-200" : analysis.risk === "Moderate" ? "bg-amber-300/15 text-amber-200" : analysis.risk === "Controlled" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/10 text-white/80"}`}>
                   {analysis.risk} risk signal
                 </div>
               </div>
@@ -816,22 +826,22 @@ export default function WorkspaceClient() {
 
               <details className="mt-5 rounded-2xl border border-white/15 p-5">
                 <summary className="cursor-pointer text-base font-bold">What drives your PulseIQ Health Score?</summary>
-                <p className="mt-3 text-sm leading-6 text-white/70">Starts at 100, subtracts the signals below, rounds to a whole number, then limits the result to 10–98. Revenue is required. This prioritization score does not assess debt, actual cash flow, or creditworthiness.</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">{analysis.scoreDeductions.map(item => <div key={item.name} className="rounded-xl bg-white/[0.06] p-4"><p className="font-bold">{item.name} · {analysis.score ? `−${item.points.toFixed(1)} points` : "Awaiting revenue"}</p><p className="mt-2 text-sm leading-6 text-white/70">{item.detail}</p></div>)}</div>
-                <p className="mt-4 text-sm leading-6 text-white/70">The coverage measure counts completed target comparisons and operational models. Unentered costs and unevaluated categories can make results look better than they are. Review the data checks before acting.</p>
+                <p className="mt-3 text-sm leading-6 text-white/80">Starts at 100, subtracts the signals below, rounds to a whole number, then limits the result to 10–98. Revenue is required. This prioritization score does not assess debt, actual cash flow, or creditworthiness.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">{analysis.scoreDeductions.map(item => <div key={item.name} className="rounded-xl bg-white/[0.06] p-4"><p className="font-bold">{item.name} · {analysis.score ? `−${item.points.toFixed(1)} points` : "Awaiting revenue"}</p><p className="mt-2 text-sm leading-6 text-white/80">{item.detail}</p></div>)}</div>
+                <p className="mt-4 text-sm leading-6 text-white/80">The coverage measure counts completed target comparisons and operational models. Unentered costs and unevaluated categories can make results look better than they are. Review the data checks before acting.</p>
               </details>
 
-              <div className="mt-6 rounded-[1.7rem] border border-white/10 bg-white/[0.06] p-5 md:p-6">
-                <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Money out · {useItemizedExpenses ? "itemized expenses" : "monthly totals"}</p><h3 className="mt-2 text-2xl font-black">Where the spending goes</h3></div><p className="text-2xl font-black">{exactMoney(analysis.totalExpenses)}</p></div>
-                <p className="mt-2 text-sm text-white/70">Actual spending by category. A large category is not automatically a waste or an overrun.</p>
-                {spendingByCategory.length ? <div className="mt-5 grid gap-x-8 gap-y-4 md:grid-cols-2">{spendingByCategory.map((category) => <div key={category.id}><div className="flex justify-between gap-2 text-sm font-bold"><span>{category.name}</span><span className="shrink-0">{exactMoney(category.amount)} · {((category.amount / analysis.totalExpenses) * 100).toFixed(1)}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-emerald-300" style={{ width: `${(category.amount / analysis.totalExpenses) * 100}%` }} /></div></div>)}</div> : <p className="mt-5 text-sm text-white/70">Enter category totals above or add itemized expenses to see this breakdown.</p>}
-                {spendingByCategory[0] ? <div className="mt-6 rounded-2xl bg-black/25 p-4 text-sm leading-6 text-white/65"><strong className="text-white">Largest category: {spendingByCategory[0].name} at {exactMoney(spendingByCategory[0].amount)}.</strong> Start by checking its underlying bills and activity. {spendingByCategory[0].investigate[0]}</div> : null}
-                {useItemizedExpenses && expenseSummary.vendorTotals[0] ? <p className="mt-3 text-sm text-white/70">Largest vendor or expense name: {expenseSummary.vendorTotals[0].name} · {exactMoney(expenseSummary.vendorTotals[0].amount)}. Review its invoices, usage, or contract before assuming the spend can be reduced.</p> : null}
+              <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.06] p-5 md:p-6">
+                <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">Money out · {useItemizedExpenses ? "itemized expenses" : "monthly totals"}</p><h3 className="mt-2 text-2xl font-semibold">Where the spending goes</h3></div><p className="text-2xl font-semibold">{exactMoney(analysis.totalExpenses)}</p></div>
+                <p className="mt-2 text-sm text-white/80">Actual spending by category. A large category is not automatically a waste or an overrun.</p>
+                {spendingByCategory.length ? <div className="mt-5 grid gap-x-8 gap-y-4 md:grid-cols-2">{spendingByCategory.map((category) => <div key={category.id}><div className="flex justify-between gap-2 text-sm font-bold"><span>{category.name}</span><span className="shrink-0">{exactMoney(category.amount)} · {((category.amount / analysis.totalExpenses) * 100).toFixed(1)}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-xl bg-white/10"><div className="h-full rounded-xl bg-emerald-300" style={{ width: `${(category.amount / analysis.totalExpenses) * 100}%` }} /></div></div>)}</div> : <p className="mt-5 text-sm text-white/80">Enter category totals above or add itemized expenses to see this breakdown.</p>}
+                {spendingByCategory[0] ? <div className="mt-6 rounded-2xl bg-slate-900/25 p-4 text-sm leading-6 text-white/65"><strong className="text-white">Largest category: {spendingByCategory[0].name} at {exactMoney(spendingByCategory[0].amount)}.</strong> Start by checking its underlying bills and activity. {spendingByCategory[0].investigate[0]}</div> : null}
+                {useItemizedExpenses && expenseSummary.vendorTotals[0] ? <p className="mt-3 text-sm text-white/80">Largest vendor or expense name: {expenseSummary.vendorTotals[0].name} · {exactMoney(expenseSummary.vendorTotals[0].amount)}. Review its invoices, usage, or contract before assuming the spend can be reduced.</p> : null}
               </div>
 
               {analysis.warnings.length > 0 ? (
-                <div className="mt-5 rounded-[1.6rem] border border-amber-300/20 bg-amber-200/[0.08] p-5">
-                  <div className="flex items-center gap-2 font-black text-amber-100"><AlertTriangle size={18} /> Data-quality checks</div>
+                <div className="mt-5 rounded-xl border border-amber-300/20 bg-amber-200/[0.08] p-5">
+                  <div className="flex items-center gap-2 font-semibold text-amber-100"><AlertTriangle size={18} /> Data-quality checks</div>
                   <div className="mt-3 space-y-2 text-sm leading-6 text-amber-50/65">
                     {analysis.warnings.map((warning) => <p key={warning}>• {warning}</p>)}
                   </div>
@@ -840,104 +850,105 @@ export default function WorkspaceClient() {
 
               <div className="mt-7 grid grid-cols-1 gap-6 xl:grid-cols-[1.08fr_.92fr]">
                 <div className="min-w-0">
-                  <div className="flex items-center justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-white/70">Money leak ranking</p><h3 className="mt-2 text-2xl font-black">Largest dollar signals first</h3></div><BarChart3 className="text-white/30" /></div>
+                  <div className="flex items-center justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Money leak ranking</p><h3 className="mt-2 text-2xl font-semibold">Largest dollar signals first</h3></div><BarChart3 className="text-white/65" /></div>
                   <div className="mt-5 space-y-4">
                     {analysis.leaks.length ? analysis.leaks.map((leak, index) => (
-                      <article key={leak.id} className="rounded-[1.7rem] border border-white/10 bg-white/[0.06] p-5">
+                      <article key={leak.id} className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-black text-white/30">#{index + 1}</span><h4 className="text-xl font-black">{leak.name}</h4><span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/70">{leak.type === "direct" ? "Direct variance" : "Modeled"}</span><span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/70">{leak.confidence} confidence</span></div>
-                            <p className="mt-3 text-sm font-semibold leading-6 text-white/60">{leak.signal}</p>
+                            <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-semibold text-white/65">#{index + 1}</span><h4 className="text-xl font-semibold">{leak.name}</h4><span className="rounded-xl border border-white/10 px-2.5 py-1 text-sm font-semibold uppercase tracking-wider text-white/80">{leak.type === "direct" ? "Direct variance" : "Modeled"}</span><span className="rounded-xl bg-white/10 px-2.5 py-1 text-sm font-semibold uppercase tracking-wider text-white/80">{leak.confidence} confidence</span></div>
+                            <p className="mt-3 text-sm font-semibold leading-6 text-white/80">{leak.signal}</p>
                           </div>
-                          <div className="shrink-0 sm:text-right"><p className="text-2xl font-black">{money(leak.amount)}</p><p className="text-xs font-bold text-white/70">{money(leak.annual)} annualized</p></div>
+                          <div className="shrink-0 sm:text-right"><p className="text-2xl font-semibold">{money(leak.amount)}</p><p className="text-sm font-bold text-white/80">{money(leak.annual)} annualized</p></div>
                         </div>
-                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-white" style={{ width: `${Math.max(4, (leak.amount / highestAmount) * 100)}%` }} /></div>
+                        <div className="mt-4 h-2 overflow-hidden rounded-xl bg-white/10"><div className="h-full rounded-xl bg-white" style={{ width: `${Math.max(4, (leak.amount / highestAmount) * 100)}%` }} /></div>
                         <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                          <div className="rounded-2xl bg-black/25 p-4"><p className="text-xs font-black uppercase tracking-[0.16em] text-white/30">Why this matters</p><p className="mt-2 text-sm leading-6 text-white/70">{leak.whyItMatters}</p></div>
-                          <div className="rounded-2xl bg-white/[0.06] p-4"><p className="text-xs font-black uppercase tracking-[0.16em] text-white/30">First move</p><p className="mt-2 text-sm font-bold leading-6 text-white/75">{leak.firstMove}</p></div>
+                          <div className="rounded-2xl bg-slate-900/25 p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/65">Why this matters</p><p className="mt-2 text-sm leading-6 text-white/80">{leak.whyItMatters}</p></div>
+                          <div className="rounded-2xl bg-white/[0.06] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/65">First move</p><p className="mt-2 text-sm font-bold leading-6 text-white/80">{leak.firstMove}</p></div>
                         </div>
-                        <details className="mt-4 rounded-2xl border border-white/10 p-4"><summary className="cursor-pointer font-black text-white/75">Show root-cause questions</summary><div className="mt-3 space-y-2 text-sm leading-6 text-white/70">{leak.investigate.map((item) => <p key={item}>• {item}</p>)}</div><p className="mt-4 border-t border-white/10 pt-4 text-sm text-white/60"><strong className="text-white/80">Prove the fix with:</strong> {leak.measure}</p></details>
-                        {leak.type === "direct" ? <button type="button" onClick={() => startRecoveryAction(leak.id)} className="mt-4 rounded-full border border-white/20 px-4 py-2.5 text-sm font-black hover:bg-white hover:text-black">Track a fix for {leak.name}</button> : null}
+                        <details className="mt-4 rounded-2xl border border-white/10 p-4"><summary className="cursor-pointer font-semibold text-white/80">Show root-cause questions</summary><div className="mt-3 space-y-2 text-sm leading-6 text-white/80">{leak.investigate.map((item) => <p key={item}>• {item}</p>)}</div><p className="mt-4 border-t border-white/10 pt-4 text-sm text-white/80"><strong className="text-white/80">Prove the fix with:</strong> {leak.measure}</p></details>
+                        {leak.type === "direct" ? <button type="button" onClick={() => startRecoveryAction(leak.id)} className="mt-4 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold hover:bg-white hover:text-slate-900">Track a fix for {leak.name}</button> : null}
                       </article>
                     )) : (
-                      <div className="rounded-[1.7rem] border border-white/10 bg-white/[0.06] p-6"><CheckCircle2 className="text-emerald-300" /><p className="mt-4 text-xl font-black">No completed leak signal yet.</p><p className="mt-2 text-white/70">Enter revenue, actual costs, and targets—or load the demo—to see the ranked analysis.</p></div>
+                      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6"><CheckCircle2 className="text-emerald-300" /><p className="mt-4 text-xl font-semibold">No completed leak signal yet.</p><p className="mt-2 text-white/80">Enter revenue, actual costs, and targets—or load the demo—to see the ranked analysis.</p></div>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-5">
-                  <div className="rounded-[1.8rem] bg-white p-5 text-black">
-                    <div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-black/65">Recovery scenario</p><h3 className="mt-1 text-2xl font-black">What if you recover {recoveryPct}%?</h3></div><Gauge className="text-black/30" /></div>
+                  <div className="rounded-2xl bg-white p-5 text-slate-900">
+                    <div className="flex items-center justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">Recovery scenario</p><h3 className="mt-1 text-2xl font-semibold">What if you recover {recoveryPct}%?</h3></div><Gauge className="text-slate-900/30" /></div>
                     <input type="range" min="25" max="100" step="25" value={recoveryPct} onChange={(event) => setRecoveryPct(Number(event.target.value))} className="mt-6 w-full accent-black" />
-                    <div className="mt-2 flex justify-between text-xs font-black text-black/30"><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+                    <div className="mt-2 flex justify-between text-sm font-semibold text-slate-900/30"><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1"><StatCard label="Potential Recovery" value={money(analysis.recoverableAtScenario)} note="Monthly planning scenario" /><StatCard label="Projected Margin" value={`${analysis.projectedMargin.toFixed(1)}%`} note={`${money(analysis.projectedProfit)} projected operating profit`} /></div>
-                    <p className="mt-4 text-xs leading-5 text-black/65">Recovery scenarios are not forecasts or guarantees. Implementation cost and business constraints are not automatically deducted.</p>
+                    <p className="mt-4 text-sm leading-5 text-slate-600">Recovery scenarios are not forecasts or guarantees. Implementation cost and business constraints are not automatically deducted.</p>
                   </div>
 
-                  <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.06] p-5">
-                    <div className="flex items-center gap-3"><Lightbulb size={19} /><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Fix-this-first plan</p><h3 className="text-xl font-black">Your priorities this month</h3></div></div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+                    <div className="flex items-center gap-3"><Lightbulb size={19} /><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">Fix-this-first plan</p><h3 className="text-xl font-semibold">Your priorities this month</h3></div></div>
                     <div className="mt-5 space-y-4">
                       {analysis.priorityPlan.length ? analysis.priorityPlan.map((item) => (
-                        <div key={item.rank} className="rounded-2xl bg-black/25 p-4"><div className="flex items-center justify-between gap-3"><p className="font-black">{item.rank}. {item.name}</p><p className="font-black">{money(item.amount)}/mo</p></div><p className="mt-2 text-sm leading-6 text-white/60">{item.firstMove}</p><p className="mt-3 text-xs font-bold leading-5 text-white/70">Track: {item.measure}</p></div>
-                      )) : <p className="text-sm leading-6 text-white/70">Complete the financial baseline to generate a prioritized plan.</p>}
+                        <div key={item.rank} className="rounded-2xl bg-slate-900/25 p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold">{item.rank}. {item.name}</p><p className="font-semibold">{money(item.amount)}/mo</p></div><p className="mt-2 text-sm leading-6 text-white/80">{item.firstMove}</p><p className="mt-3 text-sm font-bold leading-5 text-white/80">Track: {item.measure}</p></div>
+                      )) : <p className="text-sm leading-6 text-white/80">Complete the financial baseline to generate a prioritized plan.</p>}
                     </div>
                   </div>
 
-                  <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.06] p-5">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Operating picture</p>
-                  <div className="mt-4 space-y-3 text-sm font-bold"><div className="flex justify-between gap-3"><span className="text-white/70">Revenue</span><span>{money(inputs.revenue)}</span></div><div className="flex justify-between gap-3"><span className="text-white/70">Operating costs · {useItemizedExpenses ? "itemized" : "monthly totals"}</span><span>{exactMoney(analysis.totalExpenses)}</span></div><div className="flex justify-between gap-3"><span className="text-white/70">Estimated operating profit</span><span>{money(analysis.operatingProfit)}</span></div><div className="flex justify-between gap-3 border-t border-white/10 pt-3"><span className="text-white/70">Operating margin</span><span>{analysis.operatingMargin.toFixed(1)}%</span></div>{analysis.revenueGap > 0 ? <div className="flex justify-between gap-3"><span className="text-white/70">Revenue target gap</span><span>{money(analysis.revenueGap)}</span></div> : null}<div className="flex justify-between gap-3"><span className="text-white/70">Diagnostic completeness</span><span>{analysis.completeness}%</span></div></div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/80">Operating picture</p>
+                  <div className="mt-4 space-y-3 text-sm font-bold"><div className="flex justify-between gap-3"><span className="text-white/80">Revenue</span><span>{money(inputs.revenue)}</span></div><div className="flex justify-between gap-3"><span className="text-white/80">Operating costs · {useItemizedExpenses ? "itemized" : "monthly totals"}</span><span>{exactMoney(analysis.totalExpenses)}</span></div><div className="flex justify-between gap-3"><span className="text-white/80">Estimated operating profit</span><span>{money(analysis.operatingProfit)}</span></div><div className="flex justify-between gap-3 border-t border-white/10 pt-3"><span className="text-white/80">Operating margin</span><span>{analysis.operatingMargin.toFixed(1)}%</span></div>{analysis.revenueGap > 0 ? <div className="flex justify-between gap-3"><span className="text-white/80">Revenue target gap</span><span>{money(analysis.revenueGap)}</span></div> : null}<div className="flex justify-between gap-3"><span className="text-white/80">Diagnostic completeness</span><span>{analysis.completeness}%</span></div></div>
                   </div>
                 </div>
               </div>
             </section>
 
-            <section id="recovery-tracker" className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
-              <SectionHeading eyebrow="6 · Follow through" title="See whether the fix worked." body="Start tracking from a direct cost finding above. Record the next period after making a change. PulseIQ shows the observed spending change separately from any amount you personally confirm was caused by the action." />
-              <p className="mt-5 rounded-2xl bg-[#f4efe7] p-4 text-sm leading-6 text-black/65">Actions stay in this browser with your drafts and snapshots. Compare like-for-like periods before claiming a result. Lower spending can reflect lower business volume, timing, or a cost moved elsewhere.</p>
+      <div hidden={activeStage !== "planning"}><PlanningPanel key={businessKey(inputs.businessName)} inputs={analyzedInputs} expenses={expenses} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
+            <section hidden={activeStage !== "actions"} id="recovery-tracker" className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
+              <SectionHeading eyebrow="Follow through" title="See whether the fix worked." body="Start tracking from a direct cost finding above. Record the next period after making a change. PulseIQ shows the observed spending change separately from any amount you personally confirm was caused by the action." />
+              <p className="mt-5 rounded-2xl bg-[#f3f6fb] p-4 text-sm leading-6 text-slate-600">Actions stay in this browser with your drafts and snapshots. Compare like-for-like periods before claiming a result. Lower spending can reflect lower business volume, timing, or a cost moved elsewhere.</p>
               <div className="mt-6 space-y-5">
                 {visibleActions.length ? visibleActions.map((action) => {
                   const observation = recoveryObservation(action);
-                  return <article key={action.id} className="rounded-[1.7rem] border border-black/10 bg-[#faf8f4] p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.16em] text-black/65">{action.categoryName} · baseline {action.baselinePeriod}</p><h3 className="mt-2 text-xl font-black">{action.plannedFix}</h3><p className="mt-2 text-sm text-black/65">Baseline spending {exactMoney(action.baselineActual)} · target {exactMoney(action.baselineTarget)}</p></div><button type="button" onClick={() => setRecoveryActions((current) => current.filter((item) => item.id !== action.id))} className="rounded-full border border-black/15 px-3 py-2 text-xs font-black">Remove action</button></div>
+                  return <article key={action.id} className="rounded-xl border border-slate-900/10 bg-[#f8fafc] p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">{action.categoryName} · baseline {action.baselinePeriod}</p><h3 className="mt-2 text-xl font-semibold">{action.plannedFix}</h3><p className="mt-2 text-sm text-slate-600">Baseline spending {exactMoney(action.baselineActual)} · target {exactMoney(action.baselineTarget)}</p></div><button type="button" onClick={() => setRecoveryActions((current) => current.filter((item) => item.id !== action.id))} className="rounded-xl border border-slate-900/15 px-3 py-2 text-sm font-semibold">Remove action</button></div>
                     <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                      <label className="text-sm font-bold">Person responsible<input value={action.owner} maxLength={80} onChange={(event) => updateRecoveryAction(action.id, { owner: event.target.value })} className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3" placeholder="Name or role (optional)" /></label>
-                      <label className="text-sm font-bold">Follow-up period<input value={action.followupPeriod} maxLength={80} onChange={(event) => updateRecoveryAction(action.id, { followupPeriod: event.target.value, ownerConfirmedAmount: null })} className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3" placeholder="Example: September 2026" /></label>
-                      <label className="text-sm font-bold">Follow-up spending<input type="number" min="0" max="1000000000" step="0.01" value={action.followupActual ?? ""} onChange={(event) => updateRecoveryAction(action.id, { followupActual: event.target.value === "" ? null : Math.min(1_000_000_000, Math.max(0, Number(event.target.value))), ownerConfirmedAmount: null })} className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3" placeholder="Actual cost in follow-up period" /></label>
-                      <div className="flex items-end"><button type="button" onClick={() => recordCurrentPeriod(action)} className="w-full rounded-full border border-black/15 bg-white px-4 py-3 text-sm font-black">Use {currentPeriodLabel || "current period"} from workspace</button></div>
+                      <label className="text-sm font-bold">Person responsible<input value={action.owner} maxLength={80} onChange={(event) => updateRecoveryAction(action.id, { owner: event.target.value })} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-white px-4 py-3" placeholder="Name or role (optional)" /></label>
+                      <label className="text-sm font-bold">Follow-up period<input value={action.followupPeriod} maxLength={80} onChange={(event) => updateRecoveryAction(action.id, { followupPeriod: event.target.value, ownerConfirmedAmount: null })} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-white px-4 py-3" placeholder="Example: September 2026" /></label>
+                      <label className="text-sm font-bold">Follow-up spending<input type="number" min="0" max="1000000000" step="0.01" value={action.followupActual ?? ""} onChange={(event) => updateRecoveryAction(action.id, { followupActual: event.target.value === "" ? null : Math.min(1_000_000_000, Math.max(0, Number(event.target.value))), ownerConfirmedAmount: null })} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-white px-4 py-3" placeholder="Actual cost in follow-up period" /></label>
+                      <div className="flex items-end"><button type="button" onClick={() => recordCurrentPeriod(action)} className="w-full rounded-xl border border-slate-900/15 bg-white px-4 py-3 text-sm font-semibold">Use {currentPeriodLabel || "current period"} from workspace</button></div>
                     </div>
-                    {observation ? <div className="mt-5 rounded-2xl bg-black p-5 text-white"><p className="font-black">Observed spending {observation.observedCostChange >= 0 ? "fell" : "rose"} {exactMoney(Math.abs(observation.observedCostChange))}</p><p className="mt-2 text-sm text-white/60">Gap above the original target {observation.targetGapChange >= 0 ? "narrowed" : "widened"} {exactMoney(Math.abs(observation.targetGapChange))}. The original target is held constant; update it separately if your business changed.</p></div> : <p className="mt-4 text-sm text-black/65">Enter spending from a different period to see an observed change.</p>}
-                    <label className="mt-5 block text-sm font-bold">What changed, and what evidence ties it to your action?<textarea value={action.evidence} maxLength={500} onChange={(event) => updateRecoveryAction(action.id, { evidence: event.target.value })} className="mt-2 min-h-24 w-full rounded-2xl border border-black/10 bg-white px-4 py-3" placeholder="Example: Adjusted Friday staffing; same number of completed jobs; overtime hours fell. Note where you checked." /></label>
-                    {observation && observation.observedCostChange > 0 ? <label className="mt-4 block max-w-sm text-sm font-bold">Amount you can confirm from the evidence<input type="number" min="0" max={observation.observedCostChange} step="0.01" value={action.ownerConfirmedAmount ?? ""} onChange={(event) => updateRecoveryAction(action.id, { ownerConfirmedAmount: event.target.value === "" ? null : Math.min(observation.observedCostChange, Math.max(0, Number(event.target.value))) })} className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3" placeholder="Optional · up to observed reduction" /></label> : null}
-                    {observation?.ownerConfirmedAmount !== null && observation?.ownerConfirmedAmount !== undefined ? <p className="mt-4 text-sm font-black text-emerald-800">Owner-confirmed improvement: {exactMoney(observation.ownerConfirmedAmount)} for this follow-up period. PulseIQ has not independently verified the cause.</p> : action.ownerConfirmedAmount !== null ? <p className="mt-3 text-sm font-bold text-amber-800">Add at least 10 characters of evidence and a different follow-up period before this can be reported as owner-confirmed.</p> : null}
+                    {observation ? <div className="mt-5 rounded-2xl bg-slate-900 p-5 text-white"><p className="font-semibold">Observed spending {observation.observedCostChange >= 0 ? "fell" : "rose"} {exactMoney(Math.abs(observation.observedCostChange))}</p><p className="mt-2 text-sm text-white/80">Gap above the original target {observation.targetGapChange >= 0 ? "narrowed" : "widened"} {exactMoney(Math.abs(observation.targetGapChange))}. The original target is held constant; update it separately if your business changed.</p></div> : <p className="mt-4 text-sm text-slate-600">Enter spending from a different period to see an observed change.</p>}
+                    <label className="mt-5 block text-sm font-bold">What changed, and what evidence ties it to your action?<textarea value={action.evidence} maxLength={500} onChange={(event) => updateRecoveryAction(action.id, { evidence: event.target.value })} className="mt-2 min-h-24 w-full rounded-2xl border border-slate-900/10 bg-white px-4 py-3" placeholder="Example: Adjusted Friday staffing; same number of completed jobs; overtime hours fell. Note where you checked." /></label>
+                    {observation && observation.observedCostChange > 0 ? <label className="mt-4 block max-w-sm text-sm font-bold">Amount you can confirm from the evidence<input type="number" min="0" max={observation.observedCostChange} step="0.01" value={action.ownerConfirmedAmount ?? ""} onChange={(event) => updateRecoveryAction(action.id, { ownerConfirmedAmount: event.target.value === "" ? null : Math.min(observation.observedCostChange, Math.max(0, Number(event.target.value))) })} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-white px-4 py-3" placeholder="Optional · up to observed reduction" /></label> : null}
+                    {observation?.ownerConfirmedAmount !== null && observation?.ownerConfirmedAmount !== undefined ? <p className="mt-4 text-sm font-semibold text-emerald-800">Owner-confirmed improvement: {exactMoney(observation.ownerConfirmedAmount)} for this follow-up period. PulseIQ has not independently verified the cause.</p> : action.ownerConfirmedAmount !== null ? <p className="mt-3 text-sm font-bold text-amber-800">Add at least 10 characters of evidence and a different follow-up period before this can be reported as owner-confirmed.</p> : null}
                   </article>;
-                }) : <p className="rounded-2xl border border-black/10 bg-[#faf8f4] p-5 text-sm text-black/65">No tracked actions for this business yet. Add a business name and a specific reporting period, then choose “Track a fix” from a direct cost finding.</p>}
+                }) : <p className="rounded-2xl border border-slate-900/10 bg-[#f8fafc] p-5 text-sm text-slate-600">No tracked actions for this business yet. Add a business name and a specific reporting period, then choose “Track a fix” from a direct cost finding.</p>}
               </div>
             </section>
 
-            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
+            <section hidden={activeStage !== "results"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <SectionHeading eyebrow="Report tools" title="Take the finding into the meeting." body="Copy the executive report, download a plain-text record, or print the page to PDF. The report states assumptions and includes any recorded action follow-up." />
               <div className="mt-6 flex flex-wrap gap-3">
-                <button type="button" onClick={copyReport} className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 font-black text-white"><ClipboardCopy size={17} /> Copy Report</button>
-                <button type="button" onClick={downloadReport} className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-3 font-black"><FileDown size={17} /> Download Report</button>
-                <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-3 font-black"><Download size={17} /> Print / Save PDF</button>
-                <a href="/request" className="inline-flex items-center gap-2 rounded-full bg-[#e9e1d5] px-5 py-3 font-black">Have PulseIQ investigate the cause <ArrowRight size={17} /></a>
+                <button type="button" onClick={copyReport} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white"><ClipboardCopy size={17} /> Copy Report</button>
+                <button type="button" onClick={downloadReport} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-5 py-3 font-semibold"><FileDown size={17} /> Download Report</button>
+                <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-5 py-3 font-semibold"><Download size={17} /> Print / Save PDF</button>
+                <a href="/request" className="inline-flex items-center gap-2 rounded-xl bg-[#e8eef7] px-5 py-3 font-semibold">Have PulseIQ investigate the cause <ArrowRight size={17} /></a>
               </div>
             </section>
           </div>
 
           <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-            <div className="rounded-[2rem] border border-black/10 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-black/65">Workspace</p><h2 className="mt-1 text-xl font-black">Controls</h2></div><WalletCards className="text-black/25" /></div>
+            <div className="rounded-2xl border border-slate-900/10 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">Workspace</p><h2 className="mt-1 text-xl font-semibold">Controls</h2></div><WalletCards className="text-slate-900/25" /></div>
               <div className="mt-5 grid gap-2">
-                <button type="button" onClick={loadDemo} className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-3 font-black text-white"><Sparkles size={16} /> Load Demo Business</button>
-                <button type="button" onClick={saveSnapshot} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 font-black"><Save size={16} /> Save Snapshot</button>
-                <button type="button" onClick={resetWorkspace} className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-3 font-black"><RotateCcw size={16} /> Clear Current Data</button>
+                <button type="button" onClick={loadDemo} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white"><Sparkles size={16} /> Load Demo Business</button>
+                <button type="button" onClick={saveSnapshot} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-900/15 px-4 py-3 font-semibold"><Save size={16} /> Save Snapshot</button>
+                <button type="button" onClick={resetWorkspace} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-900/15 px-4 py-3 font-semibold"><RotateCcw size={16} /> Clear Current Data</button>
               </div>
-              <div className="mt-5 rounded-2xl bg-[#f4efe7] p-4"><div className="flex items-start gap-3"><LockKeyhole size={17} className="mt-0.5 shrink-0" /><p className="text-xs font-semibold leading-5 text-black/48">Saved snapshots are stored only in this browser. Clearing site data or changing devices removes them.</p></div></div>
+              <div className="mt-5 rounded-2xl bg-[#f3f6fb] p-4"><div className="flex items-start gap-3"><LockKeyhole size={17} className="mt-0.5 shrink-0" /><p className="text-sm font-semibold leading-5 text-slate-600">Saved snapshots are stored only in this browser. Clearing site data or changing devices removes them.</p></div></div>
             </div>
 
-            <div className="rounded-[2rem] border border-black/10 bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-3"><History size={18} /><div><p className="text-xs font-black uppercase tracking-[0.18em] text-black/65">Local history</p><h2 className="text-xl font-black">Saved snapshots</h2></div></div>
+            <div className="rounded-2xl border border-slate-900/10 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3"><History size={18} /><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">Local history</p><h2 className="text-xl font-semibold">Saved snapshots</h2></div></div>
               <div className="mt-4 space-y-3">
                 {snapshots.length ? snapshots.map((snapshot) => {
                   const savedExpenses = normalizeExpenseEntries(snapshot.expenses);
@@ -945,33 +956,33 @@ export default function WorkspaceClient() {
                   const savedPeriod = savedPeriods.includes(snapshot.expensePeriod || "") ? snapshot.expensePeriod! : savedPeriods[0] || "";
                   const result = analyzeBusiness(snapshot.useItemizedExpenses && savedExpenses.length ? applyExpensesToInputs(snapshot.inputs, expensesInPeriod(savedExpenses, savedPeriod)) : snapshot.inputs, 50);
                   return (
-                    <div key={snapshot.id} className="rounded-2xl border border-black/10 bg-[#faf8f4] p-4">
-                      <button type="button" onClick={() => loadSnapshot(snapshot)} className="w-full text-left"><p className="font-black">{snapshot.inputs.businessName}</p><p className="mt-1 text-xs font-semibold text-black/65">{snapshot.inputs.reportingPeriod} · {new Date(snapshot.createdAt).toLocaleDateString()}</p><div className="mt-3 flex items-center justify-between text-sm"><span className="text-black/65">Opportunity</span><span className="font-black">{money(result.totalOpportunity)}</span></div></button>
-                      <button type="button" aria-label={`Delete ${snapshot.inputs.businessName} snapshot`} onClick={() => deleteSnapshot(snapshot.id)} className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-black/65 hover:text-black"><Trash2 size={13} /> Remove</button>
+                    <div key={snapshot.id} className="rounded-2xl border border-slate-900/10 bg-[#f8fafc] p-4">
+                      <button type="button" onClick={() => loadSnapshot(snapshot)} className="w-full text-left"><p className="font-semibold">{snapshot.inputs.businessName}</p><p className="mt-1 text-sm font-semibold text-slate-600">{snapshot.inputs.reportingPeriod} · {new Date(snapshot.createdAt).toLocaleDateString()}</p><div className="mt-3 flex items-center justify-between text-sm"><span className="text-slate-600">Opportunity</span><span className="font-semibold">{money(result.totalOpportunity)}</span></div></button>
+                      <button type="button" aria-label={`Delete ${snapshot.inputs.businessName} snapshot`} onClick={() => deleteSnapshot(snapshot.id)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900"><Trash2 size={13} /> Remove</button>
                     </div>
                   );
-                }) : <p className="rounded-2xl bg-[#faf8f4] p-4 text-sm leading-6 text-black/65">No snapshots yet. Save a completed month so you can reload it later.</p>}
+                }) : <p className="rounded-2xl bg-[#f8fafc] p-4 text-sm leading-6 text-slate-600">No snapshots yet. Save a completed month so you can reload it later.</p>}
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-black p-5 text-white shadow-xl">
+            <div className="rounded-2xl bg-slate-900 p-5 text-white shadow-xl">
               <Target size={20} />
-              <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-white/70">When the free scan is not enough</p>
-              <h2 className="mt-2 text-2xl font-black">Find the cause behind the number.</h2>
-              <p className="mt-3 text-sm leading-6 text-white/70">A paid analysis can segment payroll, sales, refunds, contacts, schedules, vendors, or workflow data to test why the leak exists instead of guessing from a monthly total.</p>
-              <a href="/request" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 font-black text-black">Choose an analysis <ArrowRight size={16} /></a>
+              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-white/80">When the free scan is not enough</p>
+              <h2 className="mt-2 text-2xl font-semibold">Find the cause behind the number.</h2>
+              <p className="mt-3 text-sm leading-6 text-white/80">A paid analysis can segment payroll, sales, refunds, contacts, schedules, vendors, or workflow data to test why the leak exists instead of guessing from a monthly total.</p>
+              <a href="/request" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-slate-900">Choose an analysis <ArrowRight size={16} /></a>
             </div>
           </aside>
         </div>
       </section>
 
-      <div className="px-5 pb-16 md:px-8"><PlanningPanel key={businessKey(inputs.businessName)} inputs={analyzedInputs} expenses={expenses} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
 
-      <section className="border-t border-black/10 bg-[#e9e1d5] px-5 py-14 md:px-8">
+
+      <section className="border-t border-slate-900/10 bg-[#e8eef7] px-5 py-14 md:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
-          <div className="rounded-[1.8rem] bg-white/70 p-6"><TrendingUp /><h2 className="mt-4 text-xl font-black">Dollar-first prioritization</h2><p className="mt-3 leading-7 text-black/65">PulseIQ ranks completed signals by monthly impact instead of burying owners under a wall of ratios.</p></div>
-          <div className="rounded-[1.8rem] bg-white/70 p-6"><ShieldCheck /><h2 className="mt-4 text-xl font-black">Transparent math</h2><p className="mt-3 leading-7 text-black/65">Targets come from the business. Modeled opportunities are labeled. Revenue gaps stay separate from cost overruns.</p></div>
-          <div className="rounded-[1.8rem] bg-white/70 p-6"><BriefcaseBusiness /><h2 className="mt-4 text-xl font-black">Built for action</h2><p className="mt-3 leading-7 text-black/65">Every finding points to a first investigation and the metric that should confirm whether the fix worked.</p></div>
+          <div className="rounded-2xl bg-white/70 p-6"><TrendingUp /><h2 className="mt-4 text-xl font-semibold">Dollar-first prioritization</h2><p className="mt-3 leading-7 text-slate-600">PulseIQ ranks completed signals by monthly impact instead of burying owners under a wall of ratios.</p></div>
+          <div className="rounded-2xl bg-white/70 p-6"><ShieldCheck /><h2 className="mt-4 text-xl font-semibold">Transparent math</h2><p className="mt-3 leading-7 text-slate-600">Targets come from the business. Modeled opportunities are labeled. Revenue gaps stay separate from cost overruns.</p></div>
+          <div className="rounded-2xl bg-white/70 p-6"><BriefcaseBusiness /><h2 className="mt-4 text-xl font-semibold">Built for action</h2><p className="mt-3 leading-7 text-slate-600">Every finding points to a first investigation and the metric that should confirm whether the fix worked.</p></div>
         </div>
       </section>
     </main>

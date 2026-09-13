@@ -25,6 +25,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${siteUrl}/profit-leak-analysis`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/business-expense-analysis`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.88,
+    },
+    {
+      url: `${siteUrl}/overtime-cost-analysis`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.88,
+    },
+    {
+      url: `${siteUrl}/labor-cost-analysis`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.88,
+    },
+    {
+      url: `${siteUrl}/service-business-profitability`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/insights`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
       url: `${siteUrl}/request`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -78,3 +78,27 @@ test("health score explanation reconciles deductions and priorities stay ranked"
   assert.ok(result.priorityPlan.every((item, i, rows) => i === 0 || rows[i-1].amount >= item.amount));
   assert.equal(analyzeBusiness(defaultInputs, 0).score, 0);
 });
+
+
+test("forecast labels use the month after the baseline and roll across years", async () => {
+  const { reportingMonth, forecastMonth } = await import("../app/workspace/period");
+  assert.equal(reportingMonth("August 2026"), "2026-08");
+  assert.equal(reportingMonth("Aug 2026"), "2026-08");
+  assert.equal(reportingMonth("2026-13"), null);
+  assert.equal(forecastMonth("December 2026", 1), "Jan 2027");
+  assert.equal(forecastMonth("Current month", 1), "Month 1");
+  assert.equal(projectBusiness({ ...defaultInputs, revenue: 10000, payroll: 3000, reportingPeriod: "2026-08" }, defaultForecast).rows[0].label, "Sep 2026");
+  assert.equal(analyzeBusiness({ ...defaultInputs, revenue: 10000 }, 0).score, 0);
+});
+
+test("PDF handles escaped business text and contains evidence and the active forecast", async () => {
+  const { buildExecutivePdf } = await import("../app/workspace/pdf-report");
+  const bytes = buildExecutivePdf({ inputs: { ...demoInputs, businessName: "A (Test) \\ Co" }, period: "August 2026", source: "Monthly category totals", expenses: [], actions: [], recoveryPct: 50, plan: { settings: { ...defaultForecast, revenueGrowth: 2 }, revenueSwing: 15, costSwing: 5 }, generatedAt: "2026-09-13" });
+  const text = new TextDecoder().decode(bytes);
+  assert.ok(text.startsWith("%PDF-1.4"));
+  assert.ok(text.endsWith("%%EOF"));
+  assert.ok(text.includes("Sep 2026"));
+  assert.ok(text.includes("Monthly revenue growth 2%"));
+  assert.ok(text.includes("Calculation:"));
+  assert.ok(text.includes("A \\(Test\\) \\\\ Co"));
+});

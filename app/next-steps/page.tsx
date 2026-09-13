@@ -1,0 +1,22 @@
+import type { Metadata } from "next";
+import { ArrowRight, FileCheck2, Mail, ShieldCheck } from "lucide-react";
+import { billingPortalUrl, contactEmail } from "../site-config";
+
+export const metadata: Metadata = { title: "Your analysis: next steps", description: "What to prepare, how your analysis begins, and how to manage Monthly Pulse billing.", robots: { index: false, follow: true } };
+const steps = [
+  { title: "Keep your checkout confirmation", body: "If you completed checkout, keep the Stripe confirmation or receipt and use the same business email when contacting PulseIQ. Visiting this page does not verify a payment." },
+  { title: "Confirm the question and data", body: "PulseIQ will contact you at the checkout email to agree on the question, relevant records, and scope. You can also email your business name and checkout reference to start that conversation. Prepare one complete reporting period and keep a copy of your original records." },
+  { title: "Agree on the delivery plan", body: "Confirm the appropriate way to share records and the delivery date before sending business files. Analysis begins once the necessary data and scope are agreed. This website does not automatically upload or deliver a paid analysis." },
+  { title: "Review findings and take action", body: "Your chosen service determines the deliverable: a focused action brief, a deeper findings report, or a monthly scorecard. Review the assumptions, choose an owner for each action, and compare the next period to see what changed." },
+];
+
+export default function NextStepsPage() {
+  return <main className="min-h-screen bg-[#f3f6fb] px-5 py-10 text-slate-900 md:px-8">
+    <header className="mx-auto flex max-w-5xl items-center justify-between gap-4"><a href="/" className="text-xl font-semibold">PulseIQ <span className="text-slate-500">Operations</span></a><a href="/workspace" className="text-sm font-semibold text-blue-700">Return to workspace</a></header>
+    <section className="mx-auto mt-14 max-w-5xl"><p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Your analysis, step by step</p><h1 className="mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">A clear path from your question to your next decision.</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">Here is what happens after checkout and what you can prepare now.</p>
+      <div className="mt-10 grid gap-5 md:grid-cols-2">{steps.map((step, i) => <article key={step.title} className="rounded-2xl border border-slate-200 bg-white p-7"><p className="text-sm font-semibold text-blue-700">Step {i + 1}</p><h2 className="mt-3 text-xl font-semibold">{step.title}</h2><p className="mt-4 leading-7 text-slate-600">{step.body}</p></article>)}</div>
+      <div className="mt-8 rounded-2xl bg-slate-900 p-7 text-white"><div className="flex items-center gap-3"><Mail size={22} /><h2 className="text-2xl font-semibold">Stay in touch</h2></div><p className="mt-4 max-w-3xl leading-7 text-white/80">Questions about your purchase or delivery? Contact PulseIQ with your business name, checkout email, and reference. Avoid including card details or sensitive account information.</p><a href={`mailto:${contactEmail}?subject=PulseIQ%20analysis%20next%20steps`} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-slate-900">{contactEmail} <ArrowRight size={17} /></a></div>
+      <div className="mt-8 grid gap-5 md:grid-cols-2"><section className="rounded-2xl border border-slate-200 bg-white p-7"><FileCheck2 className="text-blue-700" /><h2 className="mt-4 text-xl font-semibold">Monthly Pulse billing</h2><p className="mt-3 leading-7 text-slate-600">Monthly Pulse is $199 per month until canceled. Use the Stripe portal with your checkout email to view invoices, update your payment method, or cancel at the end of the current billing period.</p><a href={billingPortalUrl} className="mt-4 inline-block font-semibold text-blue-700">Manage billing →</a></section><section className="rounded-2xl border border-slate-200 bg-white p-7"><ShieldCheck className="text-teal-700" /><h2 className="mt-4 text-xl font-semibold">Prepare only what is needed</h2><p className="mt-3 leading-7 text-slate-600">Use business records relevant to the agreed question. Remove unnecessary personal information. Keep passwords, bank login credentials, and payment-card details out of your files.</p><a href="/privacy" className="mt-4 inline-block font-semibold text-blue-700">Read the privacy policy →</a></section></div>
+    </section>
+  </main>;
+}

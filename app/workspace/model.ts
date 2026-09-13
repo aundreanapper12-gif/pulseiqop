@@ -396,7 +396,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
   const marginPenalty = operatingMargin < 0 ? 24 : operatingMargin < 5 ? 16 : operatingMargin < 10 ? 8 : 0;
   const completenessPenalty = completeness < 25 ? 10 : completeness < 50 ? 5 : 0;
   const score =
-    inputs.revenue > 0
+    inputs.revenue > 0 && totalExpenses > 0
       ? Math.max(
           10,
           Math.min(
@@ -417,6 +417,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
     (category) => Number(inputs[category.actual]) > 0 && Number(inputs[category.target]) <= 0,
   ).length;
   const warnings: string[] = [];
+  if (totalExpenses <= 0) warnings.push("Add operating costs before interpreting profit or the health score. Unentered expenses can overstate profitability.");
   if (inputs.revenue <= 0) warnings.push("Add monthly revenue before relying on the health score or margin view.");
   if (missingTargetCount > 0)
     warnings.push(`${missingTargetCount} cost categor${missingTargetCount === 1 ? "y has" : "ies have"} actual spending but no target, so those dollars are not evaluated for overrun.`);

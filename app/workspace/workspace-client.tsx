@@ -53,6 +53,9 @@ import {
   UNDATED_PERIOD,
 } from "./expenses";
 import PlanningPanel from "./planning-panel";
+import { defaultForecast } from "./forecast";
+import { forecastMonth, reportingMonth } from "./period";
+import type { ReportPlan } from "./pdf-report";
 import { inspectExpenses } from "./quality";
 import { businessKey, MAX_RECOVERY_ACTIONS, normalizeRecoveryActions, RecoveryAction, recoveryObservation } from "./recovery";
 
@@ -178,6 +181,8 @@ function SectionHeading({ eyebrow, title, body }: { eyebrow: string; title: stri
 }
 
 export default function WorkspaceClient() {
+  const [reportPlan, setReportPlan] = useState<ReportPlan>({ settings: defaultForecast, revenueSwing: 15, costSwing: 5 });
+  const [pdfBusy, setPdfBusy] = useState(false);
   const [activeStage, setActiveStage] = useState("setup");
   const [inputs, setInputs] = useState<BusinessInputs>(defaultInputs);
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
@@ -598,11 +603,29 @@ export default function WorkspaceClient() {
       `Projected operating profit: ${money(analysis.projectedProfit)}`,
       `Projected operating margin: ${analysis.projectedMargin.toFixed(1)}%`,
       "",
+      "FORECAST ASSUMPTIONS",
+      `Baseline: ${currentPeriodLabel}; ${reportPlan.settings.horizon} months from ${forecastMonth(currentPeriodLabel, 1)}`,
+      `Monthly revenue growth ${reportPlan.settings.revenueGrowth}%; cost growth ${reportPlan.settings.expenseGrowth}%; payroll change ${reportPlan.settings.payrollChange}%; other-cost reduction ${reportPlan.settings.costReduction}%`,
+      `Opening cash ${exactMoney(reportPlan.settings.openingCash)}; monthly adjustments ${exactMoney(reportPlan.settings.monthlyCashAdjustments)}`,
+      "",
       "IMPORTANT",
       "PulseIQ identifies financial and operational signals from the data entered. A variance is not proof of waste or causation. Modeled opportunities are planning estimates, not guaranteed savings or revenue.",
     ];
     return lines.join("\n");
-  }, [analysis, inputs, analyzedInputs, currentExpenses, activeExpensePeriod, currentPeriodLabel, expenseSummary, useItemizedExpenses, recoveryPct, periods.length, visibleActions]);
+  }, [analysis, inputs, analyzedInputs, currentExpenses, activeExpensePeriod, currentPeriodLabel, expenseSummary, useItemizedExpenses, recoveryPct, periods.length, visibleActions, reportPlan]);
+
+  const downloadExecutivePdf = async () => {
+    setPdfBusy(true);
+    try {
+      const { buildExecutivePdf } = await import("./pdf-report");
+      const bytes = buildExecutivePdf({ inputs: analyzedInputs, period: currentPeriodLabel, source: useItemizedExpenses ? "Selected-month itemized expenses" : "Entered monthly category totals", expenses: useItemizedExpenses ? currentExpenses : [], actions: visibleActions, recoveryPct, plan: reportPlan, generatedAt: new Date().toISOString().slice(0, 10) });
+      const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: "application/pdf" }));
+      const link = document.createElement("a"); link.href = url; link.download = `pulseiq-${(inputs.businessName || "business").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-executive-report.pdf`; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus("Executive PDF downloaded with the current figures, forecast assumptions, findings, and action follow-up.");
+    } catch { setStatus("The PDF could not be generated. Download the text report to keep a copy."); }
+    finally { setPdfBusy(false); }
+  };
 
   const copyReport = async () => {
     try {
@@ -665,6 +688,7 @@ export default function WorkspaceClient() {
         </div>
       </section>
 
+      {activeStage === "setup" && analyzedInputs.revenue === 0 && analysis.totalExpenses === 0 ? <section className="mx-auto mb-6 max-w-7xl px-5"><div className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="text-xl font-semibold">Choose how to get started</h2><p className="mt-2 text-sm text-slate-600">Use totals for a quick scan, individual records for expense detail, or the fictional demo to explore.</p><div className="mt-4 flex flex-wrap gap-3"><a href="#budget" className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white">Enter monthly totals</a><a href="#expense-entry" onClick={() => setActiveStage("expenses")} className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold">Add expenses</a><button onClick={loadDemo} className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold">Explore demo</button></div></div></section> : null}
       <nav aria-label="Workspace sections" className="workspace-navigation mx-auto mb-6 flex max-w-7xl flex-wrap gap-2 px-5 text-sm font-bold">
         {[{id:"setup",hash:"setup",label:"1. Business & budget"},{id:"expenses",hash:"expense-entry",label:"2. Expenses"},{id:"results",hash:"results",label:"3. Results & priorities"},{id:"planning",hash:"planning",label:"4. Forecast"},{id:"actions",hash:"recovery-tracker",label:"5. Track actions"}].map(stage => <a key={stage.id} href={`#${stage.hash}`} aria-current={activeStage === stage.id ? "page" : undefined} onClick={() => setActiveStage(stage.id)} className={`rounded-xl border px-4 py-3 ${activeStage === stage.id ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"}`}>{stage.label}</a>)}
       </nav>
@@ -684,7 +708,7 @@ export default function WorkspaceClient() {
                 </label>
                 <label>
                   <span className="text-sm font-semibold text-slate-600">Reporting period</span>
-                  <input value={inputs.reportingPeriod} onChange={(event) => setValue("reportingPeriod", event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold outline-none focus:border-slate-900/45" placeholder="August 2026" />
+                  <input value={inputs.reportingPeriod} onChange={(event) => setValue("reportingPeriod", event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3 font-bold outline-none focus:border-slate-900/45" placeholder="August 2026 or 2026-08" />
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <NumericInput label="Employees" value={inputs.employees} onChange={(value) => setValue("employees", value)} />
@@ -693,7 +717,7 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-            <section hidden={activeStage !== "setup"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
+            <section id="budget" hidden={activeStage !== "setup"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                 <SectionHeading eyebrow="Monthly budget" title="Monthly revenue & budget" body="A direct cost leak is only flagged when an entered actual is above an entered target. If you leave a target blank, PulseIQ does not invent one." />
                 <div className="flex shrink-0 flex-wrap gap-2">
@@ -810,7 +834,7 @@ export default function WorkspaceClient() {
                 <div className="max-w-3xl">
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">PulseIQ executive diagnostic</p>
                   <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{inputs.businessName || "Your business"}: where to look first.</h2>
-                  <p className="mt-4 leading-7 text-white/80">{analysis.executiveSummary}</p>
+                  <p className="mt-4 leading-7 text-white/80">{analyzedInputs.revenue > 0 && analysis.totalExpenses > 0 ? `For ${currentPeriodLabel}, revenue of ${money(analyzedInputs.revenue)} less entered operating costs of ${money(analysis.totalExpenses)} leaves ${money(analysis.operatingProfit)} in estimated operating profit (${analysis.operatingMargin.toFixed(1)}% margin). Review the priorities below and check that your records cover the same complete month.` : "Enter revenue and complete operating costs for a specific month to see your financial position. Results remain provisional until you review the records."}</p>
                 </div>
                 <div className={`rounded-xl px-4 py-2 text-sm font-semibold ${analysis.risk === "High" ? "bg-red-400/15 text-red-200" : analysis.risk === "Moderate" ? "bg-amber-300/15 text-amber-200" : analysis.risk === "Controlled" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/10 text-white/80"}`}>
                   {analysis.risk} risk signal
@@ -818,12 +842,14 @@ export default function WorkspaceClient() {
               </div>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard dark label="Health Score" value={analysis.score ? `${analysis.score}/100` : "—"} note="Prioritization signal, not a rating" />
-                <StatCard dark label="Direct Overruns" value={money(analysis.directLeakTotal)} note="Actual spending above entered targets" />
-                <StatCard dark label="Modeled Opportunity" value={money(analysis.modeledOpportunityTotal)} note="Completed lead + rework models" />
-                <StatCard dark label="Annualized Impact" value={money(analysis.annualOpportunity)} note="If this monthly pattern persists" />
+                <StatCard dark label="Monthly revenue" value={money(analyzedInputs.revenue)} note={currentPeriodLabel || "Choose a reporting month"} />
+                <StatCard dark label="Operating costs" value={exactMoney(analysis.totalExpenses)} note={useItemizedExpenses ? "Selected-month expense records" : "Entered monthly totals"} />
+                <StatCard dark label="Operating profit" value={money(analysis.operatingProfit)} note={analyzedInputs.revenue > 0 ? `${analysis.operatingMargin.toFixed(1)}% operating margin` : "Revenue required to interpret"} />
+                <StatCard dark label="PulseIQ score" value={analysis.score ? `${analysis.score}/100` : "—"} note="Input-based prioritization signal" />
               </div>
+              <div className="mt-5 rounded-xl border border-white/15 bg-white/[0.06] p-5"><p className="font-semibold">Your biggest concern</p><p className="mt-2 leading-7 text-white/80">{analysis.operatingProfit < 0 && analyzedInputs.revenue > 0 ? `Entered costs exceed revenue by ${money(-analysis.operatingProfit)}. Confirm complete, comparable records and prioritize restoring operating coverage.` : analysis.leaks[0] ? `${analysis.leaks[0].name} is the largest investigation signal at ${money(analysis.leaks[0].amount)} this month. ${analysis.leaks[0].firstMove}` : "Complete the input checks and review category targets before drawing a conclusion."}</p><div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80"><span>Budget overruns: <strong>{money(analysis.directLeakTotal)}</strong></span><span>Modeled opportunity: <strong>{money(analysis.modeledOpportunityTotal)}</strong></span><span>Annualized signals: <strong>{money(analysis.annualOpportunity)}</strong></span></div></div>
 
+              <div className="mt-5 grid gap-3 lg:grid-cols-3">{analysis.priorityPlan.slice(0, 3).map(item => <article key={item.rank} className="rounded-xl border border-white/15 p-5"><p className="text-sm text-teal-200">Priority {item.rank} · {money(item.amount)} monthly signal</p><h3 className="mt-2 text-lg font-semibold">{item.name}</h3><p className="mt-3 text-sm leading-6 text-white/80">{item.firstMove}</p></article>)}</div>
               <details className="mt-5 rounded-2xl border border-white/15 p-5">
                 <summary className="cursor-pointer text-base font-bold">What drives your PulseIQ Health Score?</summary>
                 <p className="mt-3 text-sm leading-6 text-white/80">Starts at 100, subtracts the signals below, rounds to a whole number, then limits the result to 10–98. Revenue is required. This prioritization score does not assess debt, actual cash flow, or creditworthiness.</p>
@@ -866,6 +892,11 @@ export default function WorkspaceClient() {
                           <div className="rounded-2xl bg-slate-900/25 p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/65">Why this matters</p><p className="mt-2 text-sm leading-6 text-white/80">{leak.whyItMatters}</p></div>
                           <div className="rounded-2xl bg-white/[0.06] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/65">First move</p><p className="mt-2 text-sm font-bold leading-6 text-white/80">{leak.firstMove}</p></div>
                         </div>
+                        <details className="mt-4 rounded-xl border border-white/15 p-4"><summary className="cursor-pointer font-semibold">View calculation & source records</summary><div className="mt-4 space-y-3 text-sm leading-6 text-white/80">
+                          {leak.type === "direct" ? (() => { const category = costCategories.find(c => c.id === leak.id)!; return <p><strong>{exactMoney(Number(analyzedInputs[category.actual]))} actual − {exactMoney(Number(analyzedInputs[category.target]))} target = {exactMoney(leak.amount)} above target.</strong> Targets are entered by the owner. The difference is a budget overrun, not confirmed waste.</p>; })() : leak.id === "missed-leads" ? <p>{analyzedInputs.monthlyLeads} leads × {analyzedInputs.missedContactPct}% missed × {analyzedInputs.conversionRate}% conversion × {exactMoney(analyzedInputs.avgCustomerValue)} customer value = {exactMoney(leak.amount)} modeled revenue opportunity. Conversion and customer value are assumptions.</p> : <p>{analyzedInputs.completedJobs} jobs × {analyzedInputs.reworkPct}% rework × {exactMoney(analyzedInputs.reworkCostPerJob)} cost per job = {exactMoney(leak.amount)} modeled rework cost. Check whether this cost is already included in your operating categories.</p>}
+                          <p>Period: {currentPeriodLabel}. Source: {leak.type === "modeled" ? "Entered operating model inputs" : useItemizedExpenses ? "Selected-month itemized expense totals" : "Entered monthly category totals"}.</p>
+                          {useItemizedExpenses && currentExpenses.some(e => e.category === leak.id) ? <div className="overflow-x-auto"><table className="w-full text-left"><caption className="mb-3 text-left">Supporting entries · showing up to 5 of {currentExpenses.filter(e => e.category === leak.id).length}</caption><thead><tr><th className="p-2">Date</th><th className="p-2">Vendor</th><th className="p-2">Amount</th></tr></thead><tbody>{currentExpenses.filter(e => e.category === leak.id).slice(0, 5).map(e => <tr key={e.id} className="border-t border-white/15"><td className="p-2">{e.date || "Undated"}</td><td className="p-2">{e.vendor}</td><td className="whitespace-nowrap p-2">{exactMoney(e.amount)}</td></tr>)}</tbody></table></div> : <p>No itemized source records are included for this finding. Review the original totals or model inputs.</p>}
+                        </div></details>
                         <details className="mt-4 rounded-2xl border border-white/10 p-4"><summary className="cursor-pointer font-semibold text-white/80">Show root-cause questions</summary><div className="mt-3 space-y-2 text-sm leading-6 text-white/80">{leak.investigate.map((item) => <p key={item}>• {item}</p>)}</div><p className="mt-4 border-t border-white/10 pt-4 text-sm text-white/80"><strong className="text-white/80">Prove the fix with:</strong> {leak.measure}</p></details>
                         {leak.type === "direct" ? <button type="button" onClick={() => startRecoveryAction(leak.id)} className="mt-4 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold hover:bg-white hover:text-slate-900">Track a fix for {leak.name}</button> : null}
                       </article>
@@ -901,7 +932,7 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-      <div hidden={activeStage !== "planning"}><PlanningPanel key={businessKey(inputs.businessName)} inputs={analyzedInputs} expenses={expenses} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
+      <div hidden={activeStage !== "planning"}><PlanningPanel key={businessKey(inputs.businessName)} inputs={{ ...analyzedInputs, reportingPeriod: currentPeriodLabel }} expenses={expenses} onPlanChange={setReportPlan} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
             <section hidden={activeStage !== "actions"} id="recovery-tracker" className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <SectionHeading eyebrow="Follow through" title="See whether the fix worked." body="Start tracking from a direct cost finding above. Record the next period after making a change. PulseIQ shows the observed spending change separately from any amount you personally confirm was caused by the action." />
               <p className="mt-5 rounded-2xl bg-[#f3f6fb] p-4 text-sm leading-6 text-slate-600">Actions stay in this browser with your drafts and snapshots. Compare like-for-like periods before claiming a result. Lower spending can reflect lower business volume, timing, or a cost moved elsewhere.</p>
@@ -926,17 +957,18 @@ export default function WorkspaceClient() {
             </section>
 
             <section hidden={activeStage !== "results"} className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
-              <SectionHeading eyebrow="Report tools" title="Take the finding into the meeting." body="Copy the executive report, download a plain-text record, or print the page to PDF. The report states assumptions and includes any recorded action follow-up." />
+              <SectionHeading eyebrow="Report tools" title="Take the finding into the meeting." body="Download an executive PDF with your financial position, supporting findings, forecast, and action follow-up. Copy or download the text version when you need a quick record." />
               <div className="mt-6 flex flex-wrap gap-3">
                 <button type="button" onClick={copyReport} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white"><ClipboardCopy size={17} /> Copy Report</button>
                 <button type="button" onClick={downloadReport} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-5 py-3 font-semibold"><FileDown size={17} /> Download Report</button>
-                <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-5 py-3 font-semibold"><Download size={17} /> Print / Save PDF</button>
+                <button type="button" onClick={downloadExecutivePdf} disabled={pdfBusy} className="inline-flex items-center gap-2 rounded-xl border border-slate-900/15 px-5 py-3 font-semibold"><Download size={17} /> {pdfBusy ? "Preparing PDF…" : "Download executive PDF"}</button>
                 <a href="/request" className="inline-flex items-center gap-2 rounded-xl bg-[#e8eef7] px-5 py-3 font-semibold">Have PulseIQ investigate the cause <ArrowRight size={17} /></a>
               </div>
             </section>
           </div>
 
-          <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+          <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">            <div className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-lg font-semibold">Before you trust the result</h2><div className="mt-4 space-y-3 text-sm">{[{label:"Business name",done:Boolean(inputs.businessName.trim())},{label:"Specific reporting month",done:Boolean(reportingMonth(currentPeriodLabel))},{label:"Monthly revenue entered",done:analyzedInputs.revenue > 0},{label:"Operating costs entered",done:analysis.totalExpenses > 0}].map(check => <p key={check.label} className="flex items-center gap-2">{check.done ? <CheckCircle2 size={16} className="shrink-0 text-teal-700" /> : <AlertTriangle size={16} className="shrink-0 text-amber-700" />}{check.label}</p>)}</div><p className="mt-4 text-sm leading-6 text-slate-600">Check that revenue, expenses, and targets cover the same complete month. Filled fields do not verify your books.</p><a href="#setup" onClick={() => setActiveStage("setup")} className="mt-4 inline-block text-sm font-semibold text-blue-700">Review business & budget</a></div>
+
             <div className="rounded-2xl border border-slate-900/10 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">Workspace</p><h2 className="mt-1 text-xl font-semibold">Controls</h2></div><WalletCards className="text-slate-900/25" /></div>
               <div className="mt-5 grid gap-2">

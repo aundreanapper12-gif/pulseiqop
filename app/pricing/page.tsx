@@ -14,7 +14,7 @@ const plans = [
     price: "$0",
     cadence: "",
     description: "See your expenses, compare costs with your targets, and choose what to investigate first.",
-    features: ["Actual-vs-Target Cost Scan", "Missed-Lead and Rework Models", "Ranked Profit-Leak Findings", "Recovery Scenarios", "Saved Browser Snapshots", "Printable Executive Report"],
+    features: ["Actual-vs-Target Cost Scan", "Missed-Lead and Rework Models", "Ranked Findings with Source Details", "Calendar Forecasts and Stress Tests", "Saved Browser Snapshots", "Downloadable Executive PDF"],
     href: "/workspace",
     cta: "Analyze My Business",
     featured: false,

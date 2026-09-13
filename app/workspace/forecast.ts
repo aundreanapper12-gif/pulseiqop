@@ -1,4 +1,5 @@
 import { BusinessInputs, costCategories } from "./model";
+import { forecastMonth } from "./period";
 
 export type ForecastSettings = {
   horizon: 3 | 6 | 12;
@@ -71,7 +72,7 @@ export function projectBusiness(inputs: BusinessInputs, settings: ForecastSettin
     const scenarioProfit = round(projectedRevenue - scenarioCosts);
     baseCash += baseProfit + s.monthlyCashAdjustments;
     scenarioCash += scenarioProfit + s.monthlyCashAdjustments;
-    return { month, label: `Month ${month}`, revenue: projectedRevenue, baseCosts, scenarioCosts, baseProfit, scenarioProfit, baseCash: round(baseCash), scenarioCash: round(scenarioCash) };
+    return { month, label: forecastMonth(inputs.reportingPeriod, month), revenue: projectedRevenue, baseCosts, scenarioCosts, baseProfit, scenarioProfit, baseCash: round(baseCash), scenarioCash: round(scenarioCash) };
   });
   const firstLoss = rows.find(row => row.baseProfit < 0)?.month ?? null;
   const firstCashShortfall = rows.find(row => row.scenarioCash < 0)?.month ?? null;

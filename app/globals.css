@@ -185,3 +185,7 @@ section[id] { scroll-margin-top: 7rem; }
   [hidden] { display: block !important; }
   .workspace-navigation, aside { display: none !important; }
 }
+
+/* Keep small labels legible on both light and executive surfaces. */
+:is(.text-slate-900\/25, .text-slate-900\/30, .text-slate-900\/35, .text-slate-900\/38, .text-slate-900\/40, .text-slate-900\/45, .text-slate-900\/50) { color: #475569; }
+:is(.text-white\/40, .text-white\/45, .text-white\/50) { color: rgb(255 255 255 / 80%); }

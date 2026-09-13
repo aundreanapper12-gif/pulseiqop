@@ -26,7 +26,7 @@ const plans = [
     cadence: "One-Time",
     description: "A focused analysis for one high-value business question that needs a sharper answer than a monthly total can provide.",
     features: ["One Operational Question", "One Focused Dataset", "Pattern and Risk Review", "Three Prioritized Recommendations", "Concise Action Brief", "Transparent Assumptions and Limitations"],
-    href: "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
+    href: "/request?service=quick",
     cta: "Start Quick Leak Check",
     featured: false,
   },
@@ -37,7 +37,7 @@ const plans = [
     cadence: "One-Time",
     description: "A deeper operational review that connects financial signals to likely root causes, business impact, and priority actions.",
     features: ["Up to Four Relevant Data Sources", "Operational Health View", "Financial-Impact Estimates", "Segmented Root-Cause Analysis", "Visual Findings Report", "30-Minute Results Review"],
-    href: "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
+    href: "/request?service=complete",
     cta: "Get Profit Leak Analysis",
     featured: true,
   },
@@ -48,7 +48,7 @@ const plans = [
     cadence: "Per Month",
     description: "Recurring executive visibility for teams that want trends, risks, progress, and priorities reviewed every month.",
     features: ["Monthly KPI Review", "Trend and Risk Alerts", "Updated Action Priorities", "Monthly Executive Scorecard", "Progress Against Prior Findings", "Cancel Through Stripe at Period End"],
-    href: "https://buy.stripe.com/dRm7sNckifJ78UWdbm7ok05",
+    href: "/request?service=monthly",
     cta: "Start Monthly Pulse",
     featured: false,
   },
@@ -89,6 +89,7 @@ export default function PricingPage() {
             ))}
           </div>
 
+          <p className="mt-8 leading-7 text-slate-600">Paid services use secure Stripe checkout. After checkout, agree on the data, scope, and delivery date with PulseIQ. Read the <a href="/terms#refunds" className="font-semibold text-blue-700 underline">refund and cancellation information</a> before purchasing.</p>
           <div className="mt-10 rounded-2xl border border-slate-900/10 bg-white/70 p-6 md:p-8">
             <h2 className="text-2xl font-semibold">Decision Intelligence, Not Inflated Promises</h2>
             <p className="mt-4 max-w-4xl leading-7 text-slate-600">PulseIQ provides operational analysis and decision support—not guaranteed savings. A flagged variance or modeled opportunity identifies where deeper investigation may have financial value. Paid analysis goes further into the supporting data so recommendations are tied to actual patterns, transparent assumptions, and measurable next steps.</p>

@@ -1,6 +1,6 @@
 # PulseIQ Customer Acquisition Playbook
 
-> Launch status (2026-09-12): A fresh production release now serves the homepage, /workspace, /pricing, and /request with HTTP 200, and all associated Vercel checks passed. The free interactive scan and request delivery still need end-to-end verification; live paid checkout has not been configured or verified. Keep link-driven promotion in draft until the free flow is tested, and keep paid promotion on hold until business inbox and payment paths work. Ready-to-publish copy is maintained in the separate PulseIQ Solutions launch campaign artifact.
+> Launch status (2026-09-13): Stripe live API confirms all three service links are active at $149, $399, and $199/month. Checkout collects the customer/business names and business question, and redirects to /next-steps. The billing portal supports invoices, payment-method updates, and cancellation at period end. Pricing now leads to the selected intake service. Vercel Web Analytics and selected action events are installed; enable Web Analytics in the correct Vercel project and verify incoming events before relying on campaign numbers. Email requests still require the customer to send their own email draft. Successful charge, receipt delivery, and business-inbox delivery remain unverified; do not call checkout clicks purchases.
 
 ## Core positioning
 
@@ -222,3 +222,22 @@ Only test paid traffic after the site can measure workspace completion → reque
 ## Launch rule
 
 **Do not spend money to acquire traffic until the production deployment, business inbox, Stripe payment links, request flow, and at least one test-mode checkout have been verified end-to-end.**
+
+
+## Launch copy ready for review
+
+Your business can stay busy while your money quietly slips through the cracks. PulseIQ Operations helps service business owners see where spending is going, compare costs with their targets, and decide what needs attention first. Start with the free workspace using your monthly totals or an expense CSV. Want a closer look? Quick Leak Check starts at $149. Visit https://www.pulseiqoperations.online/?utm_source=facebook&utm_medium=social&utm_campaign=launch to explore. Figures and forecasts are estimates, and the free workspace processes your business data in your browser.
+
+## Campaign links
+
+Facebook: https://www.pulseiqoperations.online/?utm_source=facebook&utm_medium=social&utm_campaign=launch
+
+LinkedIn: https://www.pulseiqoperations.online/?utm_source=linkedin&utm_medium=social&utm_campaign=launch
+
+Email: https://www.pulseiqoperations.online/?utm_source=email&utm_medium=email&utm_campaign=launch
+
+## First-customer operations
+
+Use Stripe payment records to confirm payment and the selected service. Match the business name, checkout email, business question, and request reference where available. Contact the customer to agree on the data, scope, deliverable, and delivery date before analysis begins. Keep the original records and document assumptions in the report. Send the agreed deliverable and invite feedback. For Monthly Pulse, arrange the next reporting period and remind the customer that self-service billing management is available. The site does not automatically send an intake email or produce a paid client report.
+
+No marketing posts or outreach messages were sent by this update.

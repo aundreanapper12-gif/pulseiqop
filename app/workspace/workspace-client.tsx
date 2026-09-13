@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -326,6 +327,7 @@ export default function WorkspaceClient() {
   };
 
   const loadDemo = () => {
+    track("demo_loaded");
     setActiveStage("results");
     window.history.pushState(null, "", "#results");
     setInputs(demoInputs);
@@ -463,6 +465,7 @@ export default function WorkspaceClient() {
       const accepted = entries.slice(0, available);
       if (accepted.length) {
         setExpenses((current) => [...current, ...accepted]);
+        if (accepted.length > 0) track("csv_imported", { kind: "itemized_expenses" });
         setStatus(`Added ${accepted.length} expenses. ${skipped + entries.length - accepted.length} rows were skipped. Imports append; review for duplicates, then choose itemized totals to include the list in the diagnostic.`);
       } else setStatus(`No expenses added. ${skipped} rows were skipped. Check the template, categories, and amounts.`);
     } catch (error) {
@@ -527,7 +530,7 @@ export default function WorkspaceClient() {
       });
 
       setInputs((current) => ({ ...current, ...patch }));
-      if (matched > 0) setUseItemizedExpenses(false);
+      if (matched > 0) { setUseItemizedExpenses(false); track("csv_imported", { kind: "category_totals" }); }
       setStatus(
         matched > 0
           ? `Imported ${matched} cost categories from ${file.name}. Add revenue and operating metrics to complete the picture.`
@@ -622,6 +625,7 @@ export default function WorkspaceClient() {
       const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: "application/pdf" }));
       const link = document.createElement("a"); link.href = url; link.download = `pulseiq-${(inputs.businessName || "business").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-executive-report.pdf`; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      track("report_downloaded", { format: "pdf" });
       setStatus("Executive PDF downloaded with the current figures, forecast assumptions, findings, and action follow-up.");
     } catch { setStatus("The PDF could not be generated. Download the text report to keep a copy."); }
     finally { setPdfBusy(false); }
@@ -644,6 +648,7 @@ export default function WorkspaceClient() {
     link.download = `pulseiq-${(inputs.businessName || "business").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-report.txt`;
     link.click();
     URL.revokeObjectURL(url);
+    track("report_downloaded", { format: "text" });
     setStatus("Executive report downloaded.");
   };
 

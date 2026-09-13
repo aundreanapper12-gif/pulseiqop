@@ -160,6 +160,7 @@ const serviceSchema = {
 const utilityLinks = [
   ["Workspace", "/workspace"],
   ["Pricing", "/pricing"],
+  ["Delivery process", "/next-steps"],
   ["FAQ", "/faq"],
   ["Methodology", "/methodology"],
   ["Privacy", "/privacy"],

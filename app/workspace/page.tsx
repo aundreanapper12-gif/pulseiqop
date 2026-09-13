@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import WorkspaceClient from "./workspace-client";
 
 export const metadata: Metadata = {
-  title: "Business Money Leak Workspace",
+  title: "Executive Profit Intelligence Workspace",
   description:
-    "Enter monthly costs or itemize work expenses, see spending by category and vendor, identify potential profit leaks, and create a prioritized action plan.",
+    "Analyze revenue, labor, expenses, missed opportunities, and operating performance in one decision-focused workspace built for growing service businesses.",
   alternates: { canonical: "/workspace" },
 };
 

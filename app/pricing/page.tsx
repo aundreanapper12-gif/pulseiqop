@@ -3,51 +3,51 @@ import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Start with the free PulseIQ business money-leak workspace, then choose a focused analysis, full profit-leak analysis, or recurring monthly monitoring.",
+  description: "Operational profit intelligence for service businesses without an in-house analyst. Start free, then choose focused, full, or recurring analysis.",
   alternates: { canonical: "/pricing" },
 };
 
 const plans = [
   {
-    label: "Free workspace",
+    label: "Free Workspace",
     name: "PulseIQ Snapshot",
     price: "$0",
     cadence: "",
-    description: "For an owner who wants to see where the first investigation should begin.",
-    features: ["Actual-vs-target cost scan", "Missed-lead and rework models", "Ranked money-leak findings", "Recovery scenarios", "Local saved snapshots", "Printable executive report"],
+    description: "A fast, executive-level view of where your first operational investigation should begin.",
+    features: ["Actual-vs-Target Cost Scan", "Missed-Lead and Rework Models", "Ranked Profit-Leak Findings", "Recovery Scenarios", "Saved Browser Snapshots", "Printable Executive Report"],
     href: "/workspace",
-    cta: "Analyze my business",
+    cta: "Analyze My Business",
     featured: false,
   },
   {
-    label: "Best first paid step",
+    label: "Best First Paid Step",
     name: "Quick Leak Check",
     price: "$149",
-    cadence: "one-time",
-    description: "For one expensive question that needs a sharper answer than a monthly total can provide.",
-    features: ["One operational question", "One focused dataset", "Pattern and risk review", "Three prioritized recommendations", "Concise action brief", "Assumptions and limitations stated"],
+    cadence: "One-Time",
+    description: "A focused analysis for one high-value business question that needs a sharper answer than a monthly total can provide.",
+    features: ["One Operational Question", "One Focused Dataset", "Pattern and Risk Review", "Three Prioritized Recommendations", "Concise Action Brief", "Transparent Assumptions and Limitations"],
     href: "https://buy.stripe.com/6oU6oJacagNbb344EQ7ok03",
     cta: "Start Quick Leak Check — $149",
     featured: false,
   },
   {
-    label: "Most complete",
+    label: "Most Comprehensive",
     name: "Profit Leak Analysis",
     price: "$399",
-    cadence: "one-time",
-    description: "For a business that needs the financial signal connected to the likely operational cause.",
-    features: ["Up to four relevant data sources", "Operational health view", "Financial-impact estimates", "Segmented root-cause analysis", "Visual findings report", "30-minute results call"],
+    cadence: "One-Time",
+    description: "A deeper operational review that connects financial signals to likely root causes, business impact, and priority actions.",
+    features: ["Up to Four Relevant Data Sources", "Operational Health View", "Financial-Impact Estimates", "Segmented Root-Cause Analysis", "Visual Findings Report", "30-Minute Results Review"],
     href: "https://buy.stripe.com/cNi5kF3NMcwVc787R27ok04",
     cta: "Get My Profit Leak Analysis — $399",
     featured: true,
   },
   {
-    label: "Ongoing visibility",
+    label: "Ongoing Intelligence",
     name: "Monthly Pulse",
     price: "$199",
-    cadence: "per month",
-    description: "For teams that want recurring review after the key metrics and business context are understood.",
-    features: ["Monthly KPI review", "Trend and risk flags", "Updated action priorities", "Monthly scorecard", "Progress against prior findings", "Cancel in Stripe, effective at period end"],
+    cadence: "Per Month",
+    description: "Recurring executive visibility for teams that want trends, risks, progress, and priorities reviewed every month.",
+    features: ["Monthly KPI Review", "Trend and Risk Alerts", "Updated Action Priorities", "Monthly Executive Scorecard", "Progress Against Prior Findings", "Cancel Through Stripe at Period End"],
     href: "https://buy.stripe.com/dRm7sNckifJ78UWdbm7ok05",
     cta: "Start Monthly Pulse — $199/mo",
     featured: false,
@@ -67,9 +67,9 @@ export default function PricingPage() {
       <section className="px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-4xl">
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-black/35">Simple path to a better answer</p>
-            <h1 className="mt-4 text-5xl font-black leading-[0.98] tracking-[-0.045em] md:text-7xl">Start free. Pay when the question is worth digging into.</h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-black/58">The free workspace finds the signal. Paid analysis is for the point where you need to know what is actually driving the number, what to change, and how to measure the result.</p>
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-black/35">Executive-Grade Insight Without an In-House Analyst</p>
+            <h1 className="mt-4 text-5xl font-black leading-[0.98] tracking-[-0.045em] md:text-7xl">Start Free. Go Deeper When the Decision Matters.</h1>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-black/58">PulseIQ turns operational data into clear financial priorities. Use the free workspace to identify the signal, then choose a focused or comprehensive analysis when you need to understand what is driving the number, what to change, and how to measure the result.</p>
           </div>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-4">
@@ -90,8 +90,8 @@ export default function PricingPage() {
           </div>
 
           <div className="mt-10 rounded-[2rem] border border-black/10 bg-white/70 p-6 md:p-8">
-            <h2 className="text-2xl font-black">What PulseIQ is—and is not—selling</h2>
-            <p className="mt-4 max-w-4xl leading-7 text-black/55">PulseIQ sells analysis and decision support, not guaranteed savings. A flagged variance or modeled opportunity tells you where the next investigation may have financial value. Paid work goes deeper into the supporting data so recommendations can be tied to actual patterns instead of generic advice.</p>
+            <h2 className="text-2xl font-black">Decision Intelligence, Not Inflated Promises</h2>
+            <p className="mt-4 max-w-4xl leading-7 text-black/55">PulseIQ provides operational analysis and decision support—not guaranteed savings. A flagged variance or modeled opportunity identifies where deeper investigation may have financial value. Paid analysis goes further into the supporting data so recommendations are tied to actual patterns, transparent assumptions, and measurable next steps.</p>
           </div>
         </div>
       </section>

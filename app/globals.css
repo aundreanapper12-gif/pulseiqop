@@ -148,3 +148,10 @@ article a { text-align: center; }
   h1 { overflow-wrap: break-word; }
   input, select, textarea { font-size: 1rem; }
 }
+
+@media (max-width: 480px) {
+  #results .grid { grid-template-columns: minmax(0, 1fr); }
+  #results .grid > * { min-width: 0; }
+  #results .flex { flex-wrap: wrap; }
+  #results p, #results h3, #results h4, #results summary { overflow-wrap: anywhere; }
+}

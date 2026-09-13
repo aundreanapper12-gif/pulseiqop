@@ -9,5 +9,5 @@
     "types": ["node"],
     "skipLibCheck": true
   },
-  "include": ["app/workspace/model.ts", "app/workspace/expenses.ts", "app/workspace/recovery.ts", "tests/workspace.test.ts"]
+  "include": ["app/workspace/model.ts", "app/workspace/expenses.ts", "app/workspace/recovery.ts", "app/workspace/forecast.ts", "app/workspace/quality.ts", "tests/*.test.ts"]
 }

@@ -52,6 +52,8 @@ import {
   summarizeExpenses,
   UNDATED_PERIOD,
 } from "./expenses";
+import PlanningPanel from "./planning-panel";
+import { inspectExpenses } from "./quality";
 import { businessKey, MAX_RECOVERY_ACTIONS, normalizeRecoveryActions, RecoveryAction, recoveryObservation } from "./recovery";
 
 type Snapshot = {
@@ -192,6 +194,7 @@ export default function WorkspaceClient() {
   const periods = useMemo(() => expensePeriods(expenses), [expenses]);
   const activeExpensePeriod = periods.includes(selectedExpensePeriod) ? selectedExpensePeriod : periods[0] || "";
   const currentExpenses = useMemo(() => expensesInPeriod(expenses, activeExpensePeriod), [expenses, activeExpensePeriod]);
+  const currentQualityFindings = useMemo(() => inspectExpenses(currentExpenses), [currentExpenses]);
   const expenseSummary = useMemo(() => summarizeExpenses(currentExpenses), [currentExpenses]);
   const expensePatterns = useMemo(() => reviewExpensePatterns(expenses), [expenses]);
   const periodComparison = useMemo(() => compareExpensePeriods(expenses, activeExpensePeriod), [expenses, activeExpensePeriod]);
@@ -612,12 +615,12 @@ export default function WorkspaceClient() {
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-black text-white shadow-lg"><Sparkles size={18} /></span>
             <span>
               <span className="block text-lg leading-none">PulseIQ</span>
-              <span className="mt-1 block text-xs uppercase tracking-[0.22em] text-black/65">Business Workspace</span>
+              <span className="mt-1 block text-xs uppercase tracking-[0.22em] text-black/65">Workspace</span>
             </span>
           </a>
           <div className="flex items-center gap-2">
             <a href="/" className="hidden items-center gap-2 rounded-full border border-black/10 bg-white/65 px-4 py-2.5 text-sm font-black sm:inline-flex"><ArrowLeft size={15} /> Home</a>
-            <a href="/request" className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-black text-white">Get deeper analysis <ArrowRight size={15} /></a>
+            <a href="/request" className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-black text-white"><span className="hidden sm:inline">Get deeper analysis</span><span className="sm:hidden">Analysis</span> <ArrowRight size={15} /></a>
           </div>
         </div>
       </header>
@@ -628,7 +631,7 @@ export default function WorkspaceClient() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm font-black"><BriefcaseBusiness size={16} /> Your business workspace</div>
               <h1 className="mt-4 max-w-5xl text-3xl font-black leading-[1.1] tracking-tight md:text-5xl">See where your business money goes.</h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-black/65">Enter your monthly numbers or add individual expenses below. Compare spending with your targets, explore potential opportunities, and get a practical next step.</p>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-black/65">Enter your monthly numbers or expenses. Diagnose spending, forecast the next 3–12 months, and prioritize what to investigate first.</p>
             </div>
             <div className="rounded-[2rem] bg-black p-6 text-white shadow-2xl">
               <div className="flex items-start gap-4">
@@ -654,9 +657,10 @@ export default function WorkspaceClient() {
         </div>
       </section>
 
-      <section className="px-5 pb-24 md:px-8">
-        <div className="mx-auto grid max-w-7xl gap-7 xl:grid-cols-[1fr_380px]">
-          <div className="space-y-7">
+      <nav aria-label="Workspace sections" className="mx-auto mb-6 flex max-w-7xl flex-wrap gap-3 px-5 text-sm font-bold"><a href="#expense-entry" className="rounded-full border border-black/15 bg-white px-5 py-3">Enter expenses</a><a href="#results" className="rounded-full border border-black/15 bg-white px-5 py-3">Diagnose & optimize</a><a href="#planning" className="rounded-full bg-black px-5 py-3 text-white">Forecast & review data</a><a href="#recovery-tracker" className="rounded-full border border-black/15 bg-white px-5 py-3">Track actions</a></nav>
+      <section className="px-5 pb-12 md:px-8">
+        <div className="mx-auto grid grid-cols-1 max-w-7xl gap-7 xl:grid-cols-[1fr_380px]">
+          <div className="min-w-0 space-y-7">
             <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
               <SectionHeading eyebrow="1 · Business profile" title="Give the numbers context." body="PulseIQ does not use a one-size-fits-all industry benchmark in the free workspace. Your targets, budgets, forecasts, and operating context are the baseline." />
               <div className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -711,7 +715,7 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
-            <section className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
+            <section id="expense-entry" className="rounded-[2.2rem] border border-black/10 bg-white p-6 shadow-sm md:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <SectionHeading eyebrow="3 · Work expenses" title="See exactly where the money went." body="Add bills one at a time or import an expense CSV. PulseIQ groups the spending by category and vendor, shows the dollar amounts and shares, and compares it with the targets you entered above." />
                 <div className="flex shrink-0 flex-wrap gap-2">
@@ -790,6 +794,7 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
+            {useItemizedExpenses && currentQualityFindings.length > 0 ? <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5"><p className="font-black">Review the data behind these results</p><p className="mt-2 text-sm leading-6">{currentQualityFindings.length} checks need review in the selected expense month. Missing dates, catch-all categories, vendor inconsistencies, or unusually large amounts may affect interpretation.</p><a href="#planning" className="mt-3 inline-block text-sm font-bold underline">Open data review</a></div> : null}
             <section id="results" className="rounded-[2.2rem] bg-[#111] p-6 text-white shadow-2xl md:p-8">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-3xl">
@@ -826,8 +831,8 @@ export default function WorkspaceClient() {
                 </div>
               ) : null}
 
-              <div className="mt-7 grid gap-6 xl:grid-cols-[1.08fr_.92fr]">
-                <div>
+              <div className="mt-7 grid grid-cols-1 gap-6 xl:grid-cols-[1.08fr_.92fr]">
+                <div className="min-w-0">
                   <div className="flex items-center justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-white/70">Money leak ranking</p><h3 className="mt-2 text-2xl font-black">Largest dollar signals first</h3></div><BarChart3 className="text-white/30" /></div>
                   <div className="mt-5 space-y-4">
                     {analysis.leaks.length ? analysis.leaks.map((leak, index) => (
@@ -952,6 +957,8 @@ export default function WorkspaceClient() {
           </aside>
         </div>
       </section>
+
+      <div className="px-5 pb-16 md:px-8"><PlanningPanel key={businessKey(inputs.businessName)} inputs={analyzedInputs} expenses={expenses} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
 
       <section className="border-t border-black/10 bg-[#e9e1d5] px-5 py-14 md:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">

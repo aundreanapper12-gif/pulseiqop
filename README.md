@@ -75,6 +75,14 @@ The free workspace performs its core calculations in the browser. Selected CSV f
 
 Do not expand the free diagnostic to collect passwords, bank credentials, payment-card details, Social Security numbers, medical records, or unrelated sensitive personal information.
 
+## Planning tools
+
+The workspace now includes 3-, 6-, and 12-month assumption-based projections with baseline/scenario comparison, monthly compound revenue and cost growth, a one-time payroll/overtime change, other-cost reductions, opening cash and monthly cash adjustments. Historical rows support a geometric trend from at least three consecutive months. Plans can be saved/loaded per named business in browser local storage and exported with assumptions. In-app alerts detect projected operating losses and scenario cash shortfalls. These are not statistical forecasts, background alerts, or guaranteed savings.
+
+Data review suggests catch-all categorization and canonical vendor names, validates dates, and flags large expenses against same-month/same-category peers. Corrections require a click; no entries are automatically deleted.
+
+Automatic account syncing, customer authentication, encrypted cloud connector-token storage, provider OAuth applications, scheduled jobs, and email alert delivery are not configured. Do not advertise them as available. The existing Stripe payment links sell PulseIQ services; they do not authorize access to customer transaction data.
+
 ## Client intake configuration
 
 The request page and footer use `anapperk12@gmail.com` as the public PulseIQ contact address. To override it, set this Production environment variable:

@@ -132,3 +132,19 @@ textarea::placeholder { color: rgba(16, 16, 16, 0.32); }
   * { box-shadow: none !important; text-shadow: none !important; }
   #results { padding: 0 !important; }
 }
+
+/* Comfortable controls and readable layouts across the business workspace. */
+section[id], div[id="sample"] { scroll-margin-top: 6rem; }
+button, input, select, textarea { font: inherit; }
+button, summary { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+input, select, textarea { min-width: 0; }
+nav a, header a { flex-shrink: 0; }
+article { min-width: 0; }
+article a { text-align: center; }
+.site-utility a { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  header > div, nav > div { gap: 0.65rem; }
+  h1 { overflow-wrap: break-word; }
+  input, select, textarea { font-size: 1rem; }
+}

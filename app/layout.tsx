@@ -10,11 +10,11 @@ const siteUrl = "https://www.pulseiqoperations.online";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PulseIQ Operations | Operational Profit Intelligence",
+    default: "PulseIQ Operations | Know where your money goes",
     template: "%s | PulseIQ Operations",
   },
   description:
-    "PulseIQ Operations gives growing service businesses executive-level visibility into profit leakage, labor efficiency, expenses, missed leads, rework, and operational performance.",
+    "Understand your business expenses, payroll, missed leads, and repeat work. Run a free business scan and get practical next steps with PulseIQ Operations.",
   applicationName: "PulseIQ Operations",
   icons: {
     icon: [{ url: "/pulseiq-solutions-icon.png", type: "image/png", sizes: "512x512" }],
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "PulseIQ Operations",
-    title: "PulseIQ Operations | Operational Profit Intelligence",
+    title: "PulseIQ Operations | Know where your money goes",
     description:
       "Turn business data into prioritized financial and operational decisions with transparent assumptions and executive-ready analysis.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PulseIQ Operations | Operational Profit Intelligence",
+    title: "PulseIQ Operations | Know where your money goes",
     description:
       "Identify costly operational gaps, quantify financial impact, and prioritize the decisions that matter most.",
   },
@@ -178,8 +178,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         <div className="site-utility border-t border-black/10 bg-[#eee7dc] px-5 py-6 text-[#101010] md:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm md:flex-row md:items-center md:justify-between">
-            <p className="font-semibold text-black/45">© 2026 PulseIQ Operations · Clear Data. Better Decisions. Stronger Operations.</p>
-            <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-black text-black/55">
+            <p className="font-semibold text-black/65">© 2026 PulseIQ Operations · Clear Data. Better Decisions. Stronger Operations.</p>
+            <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-black text-black/65">
               {utilityLinks.map(([label, href]) => (
                 <a key={href} href={href} className="hover:text-black">{label}</a>
               ))}
@@ -190,12 +190,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         </div>
 
-        <a
-          href="/workspace"
-          className="site-cta fixed bottom-5 right-5 z-[60] rounded-full bg-black px-5 py-3 text-sm font-black text-white shadow-2xl hover:-translate-y-0.5 hover:shadow-xl"
-        >
-          Analyze My Business
-        </a>
+
       </body>
     </html>
   );

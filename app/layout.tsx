@@ -10,11 +10,11 @@ const siteUrl = "https://www.pulseiqoperations.online";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    default: "PulseIQ Operations | Operational Profit Intelligence",
     template: "%s | PulseIQ Operations",
   },
   description:
-    "PulseIQ helps growing businesses identify costly gaps in labor, expenses, missed leads, rework, and daily operations—then prioritize what to fix first.",
+    "PulseIQ Operations gives growing service businesses executive-level visibility into profit leakage, labor efficiency, expenses, missed leads, rework, and operational performance.",
   applicationName: "PulseIQ Operations",
   icons: {
     icon: [{ url: "/pulseiq-solutions-icon.png", type: "image/png", sizes: "512x512" }],
@@ -40,15 +40,15 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "PulseIQ Operations",
-    title: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    title: "PulseIQ Operations | Operational Profit Intelligence",
     description:
-      "Put your business numbers in. See where money may be leaking, what to investigate first, and what the financial opportunity could be.",
+      "Turn business data into prioritized financial and operational decisions with transparent assumptions and executive-ready analysis.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PulseIQ Operations | Find Profit Leaks in Your Business",
+    title: "PulseIQ Operations | Operational Profit Intelligence",
     description:
-      "Identify costly operational gaps, estimate financial impact, and prioritize what to fix first.",
+      "Identify costly operational gaps, quantify financial impact, and prioritize the decisions that matter most.",
   },
   robots: {
     index: true,
@@ -71,7 +71,7 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "PulseIQ Operations",
   url: siteUrl,
-  description: "Operational profit intelligence for growing businesses.",
+  description: "Operational profit intelligence for growing service businesses.",
 };
 
 const organizationSchema = {
@@ -178,13 +178,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         <div className="site-utility border-t border-black/10 bg-[#eee7dc] px-5 py-6 text-[#101010] md:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm md:flex-row md:items-center md:justify-between">
-            <p className="font-semibold text-black/45">© 2026 PulseIQ Operations · Clear data. Better decisions.</p>
+            <p className="font-semibold text-black/45">© 2026 PulseIQ Operations · Clear Data. Better Decisions. Stronger Operations.</p>
             <nav aria-label="PulseIQ site information" className="flex flex-wrap gap-x-5 gap-y-2 font-black text-black/55">
               {utilityLinks.map(([label, href]) => (
                 <a key={href} href={href} className="hover:text-black">{label}</a>
               ))}
-              <a href="/request" className="text-black">Request analysis</a>
-              <a href={billingPortalUrl} className="hover:text-black">Manage billing</a>
+              <a href="/request" className="text-black">Request Analysis</a>
+              <a href={billingPortalUrl} className="hover:text-black">Manage Billing</a>
               <a href={`mailto:${contactEmail}`} className="text-black">{contactEmail}</a>
             </nav>
           </div>
@@ -194,7 +194,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="/workspace"
           className="site-cta fixed bottom-5 right-5 z-[60] rounded-full bg-black px-5 py-3 text-sm font-black text-white shadow-2xl hover:-translate-y-0.5 hover:shadow-xl"
         >
-          Analyze my business
+          Analyze My Business
         </a>
       </body>
     </html>

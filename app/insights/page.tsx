@@ -3,32 +3,32 @@ import { ArrowRight, BarChart3, BriefcaseBusiness, Gauge, Search, Sparkles, Tren
 
 export const metadata: Metadata = {
   title: "Business Operations Insights",
-  description: "Practical guidance on profit leaks, labor cost, overtime, business expenses, and service business profitability from PulseIQ Operations.",
+  description: "Executive-level guidance on profit leakage, labor cost, overtime, business expenses, and service business profitability from PulseIQ Operations.",
   alternates: { canonical: "/insights" },
 };
 
 const guides = [
   {
     title: "Profit Leak Analysis",
-    body: "Learn how to separate verified cost variances from modeled opportunities and decide which operating gap deserves a closer look.",
+    body: "Separate verified cost variances from modeled opportunities and identify which operating gap deserves executive attention first.",
     href: "/profit-leak-analysis",
     icon: Search,
   },
   {
     title: "Business Expense Analysis",
-    body: "See how category, vendor, and month-over-month expense movement can reveal where operating costs are drifting.",
+    body: "Examine category, vendor, and month-over-month movement to reveal where operating costs are drifting and where follow-up may create value.",
     href: "/business-expense-analysis",
     icon: BarChart3,
   },
   {
     title: "Overtime Cost Analysis",
-    body: "Move beyond the overtime total and investigate the employees, shifts, teams, or demand patterns driving repeated overages.",
+    body: "Move beyond the total and isolate the employees, shifts, teams, or demand patterns behind recurring overtime pressure.",
     href: "/overtime-cost-analysis",
     icon: Gauge,
   },
   {
     title: "Labor Cost Analysis",
-    body: "Compare payroll, paid hours, revenue, and workload before deciding whether rising labor cost is a problem or a growth signal.",
+    body: "Connect payroll, paid hours, revenue, and workload before deciding whether rising labor cost reflects growth, inefficiency, or a deeper operating issue.",
     href: "/labor-cost-analysis",
     icon: BriefcaseBusiness,
   },
@@ -53,9 +53,9 @@ export default function InsightsPage() {
       <section className="px-5 py-20 md:px-8 md:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-5xl">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-black/40">PulseIQ Insights</p>
-            <h1 className="mt-5 text-5xl font-black leading-[0.96] tracking-[-0.05em] md:text-7xl">Make Better Operating Decisions From The Numbers You Already Have.</h1>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-black/60 md:text-xl">Practical guidance for service-business owners who want to understand labor, expenses, profitability, and operational leakage without needing an in-house analytics team.</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-black/40">PulseIQ Executive Insights</p>
+            <h1 className="mt-5 text-5xl font-black leading-[0.96] tracking-[-0.05em] md:text-7xl">Turn Operational Data Into Clearer, Faster Business Decisions.</h1>
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-black/60 md:text-xl">Practical intelligence for service-business leaders who want sharper visibility into labor, expenses, profitability, and operational leakage—without building an in-house analytics department.</p>
           </div>
 
           <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -66,7 +66,7 @@ export default function InsightsPage() {
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black text-white"><Icon size={19} /></span>
                   <h2 className="mt-6 text-2xl font-black">{guide.title}</h2>
                   <p className="mt-4 leading-7 text-black/55">{guide.body}</p>
-                  <span className="mt-7 inline-flex items-center gap-2 font-black">Explore The Guide <ArrowRight size={16} /></span>
+                  <span className="mt-7 inline-flex items-center gap-2 font-black">Explore The Insight <ArrowRight size={16} /></span>
                 </a>
               );
             })}
@@ -77,9 +77,9 @@ export default function InsightsPage() {
       <section className="bg-[#111] px-5 py-20 text-white md:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_.7fr] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40">From Reading To Action</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">Use The Free Workspace To See Which Signal Is Strongest In Your Business.</h2>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-white/55">The guides explain the questions. The PulseIQ workspace helps you organize your own numbers, compare actuals with targets, rank findings, and decide what deserves a deeper look.</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40">From Insight To Action</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">See Which Financial And Operational Signal Deserves Attention First.</h2>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-white/55">The Insights library explains the questions. The PulseIQ workspace helps organize your own numbers, compare actuals with targets, rank findings, and turn uncertainty into a prioritized next move.</p>
           </div>
           <a href="/workspace" className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-4 font-black text-black lg:justify-self-end">Analyze My Business <ArrowRight size={18} /></a>
         </div>

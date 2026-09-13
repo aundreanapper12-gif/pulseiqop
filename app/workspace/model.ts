@@ -441,7 +441,7 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
         ? `${inputs.businessName || "This business"} is at or below the targets entered across the analyzed categories. PulseIQ did not detect a target-based cost overrun or completed modeled opportunity from the data provided.`
         : `${inputs.businessName || "This business"} shows ${money(totalOpportunity)} in monthly improvement opportunity across the completed models. ${top.name} is the largest signal at ${money(top.amount)} per month${second ? `, followed by ${second.name} at ${money(second.amount)}` : ""}. Estimated operating margin is ${operatingMargin.toFixed(1)}%. A ${recoveryPct}% recovery scenario would improve monthly operating profit by about ${money(recoverableAtScenario)}.`;
 
-  const priorityPlan = leaks.slice(0, 3).map((leak, index) => ({
+  const priorityPlan = leaks.slice(0, 5).map((leak, index) => ({
     rank: index + 1,
     name: leak.name,
     amount: leak.amount,
@@ -464,6 +464,12 @@ export function analyzeBusiness(inputs: BusinessInputs, recoveryPct = 50) {
     operatingMargin,
     completeness,
     score,
+    scoreDeductions: [
+      { name: "Improvement opportunity", points: Math.min(48, leakageRate * 210), detail: "Completed cost and operational opportunities relative to revenue; capped at 48 points." },
+      { name: "Revenue target gap", points: Math.min(18, revenueGapRate * 45), detail: "Shortfall relative to your entered revenue target; capped at 18 points." },
+      { name: "Operating margin", points: marginPenalty, detail: "24 points below 0%, 16 below 5%, 8 below 10%, otherwise 0." },
+      { name: "Diagnostic coverage", points: completenessPenalty, detail: "10 points below 25% diagnostic completeness, 5 below 50%, otherwise 0." },
+    ],
     risk,
     recoverableAtScenario,
     projectedProfit,

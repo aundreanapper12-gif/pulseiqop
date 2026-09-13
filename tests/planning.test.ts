@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { defaultInputs } from "../app/workspace/model";
-import { defaultForecast, historyTrend, normalizeForecast, normalizeHistory, projectBusiness } from "../app/workspace/forecast";
+import { analyzeBusiness, defaultInputs, demoInputs } from "../app/workspace/model";
+import { compareForecastCases, defaultForecast, historyTrend, normalizeForecast, normalizeHistory, projectBusiness } from "../app/workspace/forecast";
 import { inspectExpenses } from "../app/workspace/quality";
 import type { ExpenseEntry } from "../app/workspace/expenses";
 
@@ -51,4 +51,30 @@ test("large expense review uses comparable peers in the same month and category"
   const large = { ...peers[0], id: "large", amount: 400 };
   assert.ok(inspectExpenses([...peers, large]).some(f => f.entryId === "large" && f.title === "Unusually large expense"));
   assert.ok(!inspectExpenses([...peers, { ...large, date: "2026-03-01" }]).some(f => f.title === "Unusually large expense"));
+});
+
+
+test("case stress tests apply level shocks once and reconcile expected to scenario", () => {
+  const inputs = { ...defaultInputs, revenue: 10000, payroll: 6000 };
+  const settings = { ...defaultForecast, horizon: 3 as const, revenueGrowth: 10, openingCash: 1000, monthlyCashAdjustments: -500 };
+  const [best, expected, worst] = compareForecastCases(inputs, settings, 15, 5);
+  const baseline = projectBusiness(inputs, settings);
+  assert.equal(worst.rows[0].revenue, 9350);
+  assert.equal(worst.rows[1].revenue, 10285);
+  assert.equal(worst.rows[0].costs, 6300);
+  assert.equal(worst.rows[0].cash, 3550);
+  assert.equal(expected.final.profit, baseline.rows[2].scenarioProfit);
+  assert.equal(expected.final.cash, baseline.rows[2].scenarioCash);
+  assert.ok(best.totalProfit > expected.totalProfit);
+  assert.ok(expected.totalProfit > worst.totalProfit);
+  const collapse = compareForecastCases({ ...inputs, payroll: 10000 }, { ...defaultForecast, horizon: 3, openingCash: 500 }, 15, 5)[2];
+  assert.equal(collapse.firstShortfall, 1);
+});
+
+test("health score explanation reconciles deductions and priorities stay ranked", () => {
+  const result = analyzeBusiness(demoInputs, 0);
+  assert.equal(result.score, Math.max(10, Math.min(98, Math.round(100 - result.scoreDeductions.reduce((sum, item) => sum + item.points, 0)))));
+  assert.equal(result.priorityPlan.length, Math.min(5, result.leaks.length));
+  assert.ok(result.priorityPlan.every((item, i, rows) => i === 0 || rows[i-1].amount >= item.amount));
+  assert.equal(analyzeBusiness(defaultInputs, 0).score, 0);
 });

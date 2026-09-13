@@ -78,3 +78,22 @@ export function projectBusiness(inputs: BusinessInputs, settings: ForecastSettin
   const totalImprovement = round(rows.reduce((sum, row) => sum + row.scenarioProfit - row.baseProfit, 0));
   return { rows, firstLoss, firstCashShortfall, totalImprovement, ready: revenue > 0, expenses, payroll, otherCosts };
 }
+
+// One-time level shocks to each projected month, not changes in compounded growth.
+export function compareForecastCases(inputs: BusinessInputs, settings: ForecastSettings, revenueSwing = 15, costSwing = 5) {
+  const revenuePct = bounded(revenueSwing, 0, 50);
+  const costPct = bounded(costSwing, 0, 50);
+  const projection = projectBusiness(inputs, settings);
+  const s = normalizeForecast(settings);
+  return [{ name: "Best case", direction: 1 }, { name: "Expected case", direction: 0 }, { name: "Worst case", direction: -1 }].map(({ name, direction }) => {
+    let cash = s.openingCash;
+    const rows = projection.rows.map(row => {
+      const revenue = round(row.revenue * (1 + direction * revenuePct / 100));
+      const costs = round(row.scenarioCosts * (1 - direction * costPct / 100));
+      const profit = round(revenue - costs);
+      cash += profit + s.monthlyCashAdjustments;
+      return { month: row.month, revenue, costs, profit, cash: round(cash) };
+    });
+    return { name, rows, final: rows[rows.length - 1], totalProfit: round(rows.reduce((sum, row) => sum + row.profit, 0)), firstShortfall: rows.find(row => row.cash < 0)?.month ?? null };
+  });
+}

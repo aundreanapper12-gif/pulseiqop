@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, ArrowRight, Download, ShieldCheck, TrendingUp } from "lucide-react";
-import { BusinessInputs, costCategories, money } from "./model";
+import { analyzeBusiness, BusinessInputs, costCategories, money } from "./model";
 import { ExpenseEntry } from "./expenses";
-import { defaultForecast, ForecastSettings, HistoryMonth, historyTrend, normalizeForecast, normalizeHistory, projectBusiness } from "./forecast";
+import { compareForecastCases, defaultForecast, ForecastSettings, HistoryMonth, historyTrend, normalizeForecast, normalizeHistory, projectBusiness } from "./forecast";
 import { inspectExpenses } from "./quality";
 import { businessKey } from "./recovery";
 
@@ -15,6 +15,10 @@ function Control({ label, value, min, max, onChange, hint }: { label: string; va
 
 export default function PlanningPanel({ inputs, expenses, onUpdateExpense }: { inputs: BusinessInputs; expenses: ExpenseEntry[]; onUpdateExpense: (id: string, patch: Partial<ExpenseEntry>) => void }) {
   const [settings, setSettings] = useState<ForecastSettings>(defaultForecast);
+  const [revenueSwing, setRevenueSwing] = useState(15);
+  const [costSwing, setCostSwing] = useState(5);
+  const [question, setQuestion] = useState<"spending" | "drop" | "hire">("spending");
+  const [hireCost, setHireCost] = useState(0);
   const [history, setHistory] = useState<HistoryMonth[]>([]);
   const [month, setMonth] = useState("");
   const [historicalRevenue, setHistoricalRevenue] = useState(0);
@@ -22,13 +26,15 @@ export default function PlanningPanel({ inputs, expenses, onUpdateExpense }: { i
   const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"predict" | "quality">("predict");
   const projection = useMemo(() => projectBusiness(inputs, settings), [inputs, settings]);
+  const cases = useMemo(() => compareForecastCases(inputs, settings, revenueSwing, costSwing), [inputs, settings, revenueSwing, costSwing]);
+  const analysis = useMemo(() => analyzeBusiness(inputs, 0), [inputs]);
   const findings = useMemo(() => inspectExpenses(expenses), [expenses]);
   const trend = useMemo(() => historyTrend(history), [history]);
   const update = (key: keyof ForecastSettings, value: number) => setSettings(s => normalizeForecast({ ...s, [key]: value }));
   const storageKey = `pulseiq:planning:v1:${businessKey(inputs.businessName)}`;
   function save() {
     if (!inputs.businessName.trim()) { setMessage("Add a business name before saving this plan."); return; }
-    try { localStorage.setItem(storageKey, JSON.stringify({ settings, history })); setMessage("Plan saved for this business in this browser."); }
+    try { localStorage.setItem(storageKey, JSON.stringify({ settings, history, revenueSwing, costSwing })); setMessage("Plan saved for this business in this browser."); }
     catch { setMessage("Your browser could not save the plan. Download the forecast to keep a copy."); }
   }
   function load() {
@@ -37,13 +43,14 @@ export default function PlanningPanel({ inputs, expenses, onUpdateExpense }: { i
       const raw = localStorage.getItem(storageKey);
       if (!raw) { setMessage("No saved plan for this business in this browser."); return; }
       const plan = JSON.parse(raw);
-      setSettings(normalizeForecast(plan.settings)); setHistory(normalizeHistory(plan.history)); setMessage("Saved plan loaded.");
+      setSettings(normalizeForecast(plan.settings)); setRevenueSwing(Number.isFinite(plan.revenueSwing) ? Math.min(50, Math.max(0, plan.revenueSwing)) : 15); setCostSwing(Number.isFinite(plan.costSwing) ? Math.min(50, Math.max(0, plan.costSwing)) : 5); setHistory(normalizeHistory(plan.history)); setMessage("Saved plan loaded.");
     } catch { setMessage("The saved plan could not be loaded."); }
   }
   function download() {
     const header = "month,revenue,baseline_costs,scenario_costs,baseline_profit,scenario_profit,baseline_cash,scenario_cash";
     const csv = [header, ...projection.rows.map(r => [r.month, r.revenue, r.baseCosts, r.scenarioCosts, r.baseProfit, r.scenarioProfit, r.baseCash, r.scenarioCash].join(","))].join("\n");
-    const assumptions = `PulseIQ planning scenario\nBusiness: ${inputs.businessName || "Unnamed business"}\nBaseline period: ${inputs.reportingPeriod}\nRevenue growth per month: ${settings.revenueGrowth}%\nCost growth per month: ${settings.expenseGrowth}%\nOne-time payroll + overtime change: ${settings.payrollChange}%\nOther-cost reduction: ${settings.costReduction}%\nOpening cash: ${settings.openingCash}\nMonthly net cash adjustments: ${settings.monthlyCashAdjustments}\nCash assumes revenue collected and costs paid in the same month. Taxes, debt service, timing and other unentered items are excluded. This is an assumption-based scenario, not a guaranteed prediction.\n\n${csv}`;
+    const caseCsv = ["case,month,revenue,costs,profit,cash", ...cases.flatMap(c => c.rows.map(r => [c.name, r.month, r.revenue, r.costs, r.profit, r.cash].join(",")))].join("\n");
+    const assumptions = `PulseIQ planning scenario\nBusiness: ${inputs.businessName || "Unnamed business"}\nBaseline period: ${inputs.reportingPeriod}\nRevenue growth per month: ${settings.revenueGrowth}%\nCost growth per month: ${settings.expenseGrowth}%\nOne-time payroll + overtime change: ${settings.payrollChange}%\nOther-cost reduction: ${settings.costReduction}%\nOpening cash: ${settings.openingCash}\nMonthly net cash adjustments: ${settings.monthlyCashAdjustments}\nCash assumes revenue collected and costs paid in the same month. Taxes, debt service, timing and other unentered items are excluded. This is an assumption-based scenario, not a guaranteed prediction.\n\n${csv}\n\nCase comparison: one-time revenue +/-${revenueSwing}%, costs -/+${costSwing}% versus the scenario in every month. These are stress tests, not probabilities or confidence intervals.\n${caseCsv}`;
     const url = URL.createObjectURL(new Blob([assumptions], { type: "text/plain;charset=utf-8" }));
     const a = document.createElement("a"); a.href = url; a.download = "pulseiq-forecast.txt"; a.click(); URL.revokeObjectURL(url);
   }
@@ -73,6 +80,22 @@ export default function PlanningPanel({ inputs, expenses, onUpdateExpense }: { i
             <div className="mt-5 rounded-2xl border border-black/10 p-3 md:p-5"><h3 className="mb-5 text-xl font-black">Revenue versus operating costs</h3><div className="h-[300px] w-full" role="img" aria-label="Projected revenue, baseline costs, and scenario costs. Exact values appear in the table below."><ResponsiveContainer width="100%" height="100%"><LineChart data={projection.rows} margin={{ left: 0, right: 8 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="label" tick={{ fontSize: 12 }} minTickGap={30} /><YAxis width={68} tickFormatter={n => `$${Math.round(n / 1000)}k`} tick={{ fontSize: 12 }} /><Tooltip formatter={value => money(Number(value))} /><Legend wrapperStyle={{ fontSize: 14 }} /><Line name="Revenue" type="linear" dataKey="revenue" stroke="#047857" strokeWidth={3} dot={false} isAnimationActive={false} /><Line name="Baseline costs" type="linear" dataKey="baseCosts" stroke="#be123c" strokeWidth={2} strokeDasharray="5 4" dot={false} isAnimationActive={false} /><Line name="Scenario costs" type="linear" dataKey="scenarioCosts" stroke="#2563eb" strokeWidth={3} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div></div>
             <div aria-live="polite" className="mt-5 space-y-3">{projection.firstLoss ? <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 leading-6"><AlertTriangle className="mr-2 inline" size={18} /><strong>Baseline operating loss in Month {projection.firstLoss}.</strong> Projected costs exceed revenue under the growth assumptions entered.</p> : <p className="rounded-2xl bg-emerald-50 p-4 leading-6">Baseline revenue covers entered operating costs throughout this horizon.</p>}{projection.firstCashShortfall ? <p className="rounded-2xl border border-red-200 bg-red-50 p-4 leading-6"><strong>Scenario cash shortfall in Month {projection.firstCashShortfall}.</strong> Review opening cash, collection timing, cost changes, and cash adjustments.</p> : null}</div>
             <div className="mt-5 overflow-x-auto rounded-2xl border border-black/10"><table className="w-full text-left text-sm"><caption className="p-4 text-left font-bold">Assumption-based monthly outlook</caption><thead className="bg-slate-50"><tr>{["Month", "Revenue", "Baseline costs", "Scenario costs", "Scenario profit", "Scenario cash"].map(label => <th className="whitespace-nowrap p-3" key={label}>{label}</th>)}</tr></thead><tbody>{projection.rows.map(r => <tr className="border-t border-black/10" key={r.month}><th className="p-3">{r.month}</th>{[r.revenue, r.baseCosts, r.scenarioCosts, r.scenarioProfit, r.scenarioCash].map((value, i) => <td key={i} className="whitespace-nowrap p-3">{money(value)}</td>)}</tr>)}</tbody></table></div>
+            <section className="mt-6 rounded-2xl border border-black/10 p-5">
+              <h3 className="text-xl font-black">Best, expected, and worst case</h3>
+              <p className="mt-3 text-sm leading-6 text-black/65">Expected uses your current scenario. Best raises each month's revenue and lowers costs; worst does the reverse. These level changes apply once to each projected month, without changing the growth rates.</p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2"><Control label="Revenue variation (%)" value={revenueSwing} min={0} max={50} onChange={setRevenueSwing} /><Control label="Cost variation (%)" value={costSwing} min={0} max={50} onChange={setCostSwing} /></div>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">{cases.map(c => <article key={c.name} className={`min-w-0 rounded-2xl p-5 ${c.name === "Expected case" ? "bg-black text-white" : "bg-slate-50"}`}><h4 className="font-black">{c.name}</h4><p className="mt-3 text-2xl font-black">{money(c.totalProfit)}</p><p className="mt-1 text-sm">Total operating profit · {settings.horizon} months</p><p className="mt-4 text-sm leading-6">Month {settings.horizon} profit: <strong>{money(c.final.profit)}</strong><br />Ending cash: <strong>{money(c.final.cash)}</strong></p><p className="mt-3 text-sm leading-6">{c.firstShortfall ? `First cash shortfall: Month ${c.firstShortfall}.` : "No projected cash shortfall in this horizon."}</p></article>)}</div>
+              <p className="mt-4 text-sm leading-6 text-black/65">The variation percentages are adjustable stress-test assumptions. They are not statistical confidence intervals or likelihoods. Cash uses the same collection and payment assumptions as the monthly outlook.</p>
+            </section>
+            <section className="mt-6 rounded-2xl border border-black/10 p-5">
+              <h3 className="text-xl font-black">Ask about your numbers</h3>
+              <p className="mt-3 text-sm leading-6 text-black/65">Calculated from the current monthly baseline. Review complete costs and the reporting period before making a decision.</p>
+              <div className="mt-4 flex flex-wrap gap-2">{([{ id: "spending", label: "Where am I overspending?" }, { id: "drop", label: "What if revenue drops 15%?" }, { id: "hire", label: "Can I cover another employee?" }] as const).map(q => <button key={q.id} aria-pressed={question === q.id} className={`rounded-2xl px-4 py-3 text-sm font-bold ${question === q.id ? "bg-black text-white" : "border border-black/15"}`} onClick={() => setQuestion(q.id)}>{q.label}</button>)}</div>
+              {question === "hire" ? <div className="mt-4 max-w-sm"><Control label="Full monthly employment cost ($)" value={hireCost} min={0} max={1e9} onChange={setHireCost} hint="Include wages, employer taxes, benefits, and other incremental costs." /></div> : null}
+              <div role="status" className="mt-5 rounded-2xl bg-slate-50 p-5 leading-7">
+                {question === "spending" ? analysis.directLeakTotal > 0 ? <p>Your entered spending exceeds your entered category targets by <strong>{money(analysis.directLeakTotal)} this month</strong>. {analysis.leaks.filter(l => l.type === "direct").slice(0, 3).map(l => `${l.name}: ${money(l.amount)} above target.`).join(" ")} Check activity, invoice timing, and budget assumptions before treating the difference as avoidable waste.</p> : <p>No overrun was detected against the targets entered. Categories without targets are excluded; this does not establish that all spending is efficient.</p> : question === "drop" ? <p>A one-time 15% revenue drop takes monthly revenue from {money(inputs.revenue)} to <strong>{money(inputs.revenue * 0.85)}</strong>. Holding entered costs at {money(analysis.totalExpenses)}, operating profit becomes <strong>{money(inputs.revenue * 0.85 - analysis.totalExpenses)}</strong>. This assumes unchanged costs and excludes taxes, debt service, and unentered items.</p> : hireCost <= 0 ? <p>Enter the full monthly employment cost to compare it with operating profit.</p> : <p>Current entered operating profit is {money(analysis.operatingProfit)}. Adding {money(hireCost)} in monthly employment costs leaves <strong>{money(analysis.operatingProfit - hireCost)}</strong>, assuming unchanged revenue and other costs. {analysis.operatingProfit - hireCost < 0 ? "The entered baseline would show an operating loss." : "The entered baseline covers this cost, but collection timing, reserves, and missing costs still matter."} No additional sales from the new employee are assumed.</p>}
+              </div>
+            </section>
             <button className="mt-4 inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-3 text-sm font-bold" onClick={download}><Download size={16} /> Download forecast & assumptions</button>
           </>}
           <p className="mt-5 text-sm leading-6 text-black/65">This is a planning scenario. Cash assumes revenue is collected and operating costs are paid in the same month, plus your net cash adjustments. It does not model receivables, payables, seasonality, or unentered costs. Alerts update while this workspace is open; they are not email or background notifications.</p>

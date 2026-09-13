@@ -814,6 +814,13 @@ export default function WorkspaceClient() {
                 <StatCard dark label="Annualized Impact" value={money(analysis.annualOpportunity)} note="If this monthly pattern persists" />
               </div>
 
+              <details className="mt-5 rounded-2xl border border-white/15 p-5">
+                <summary className="cursor-pointer text-base font-bold">What drives your PulseIQ Health Score?</summary>
+                <p className="mt-3 text-sm leading-6 text-white/70">Starts at 100, subtracts the signals below, rounds to a whole number, then limits the result to 10–98. Revenue is required. This prioritization score does not assess debt, actual cash flow, or creditworthiness.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">{analysis.scoreDeductions.map(item => <div key={item.name} className="rounded-xl bg-white/[0.06] p-4"><p className="font-bold">{item.name} · {analysis.score ? `−${item.points.toFixed(1)} points` : "Awaiting revenue"}</p><p className="mt-2 text-sm leading-6 text-white/70">{item.detail}</p></div>)}</div>
+                <p className="mt-4 text-sm leading-6 text-white/70">The coverage measure counts completed target comparisons and operational models. Unentered costs and unevaluated categories can make results look better than they are. Review the data checks before acting.</p>
+              </details>
+
               <div className="mt-6 rounded-[1.7rem] border border-white/10 bg-white/[0.06] p-5 md:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Money out · {useItemizedExpenses ? "itemized expenses" : "monthly totals"}</p><h3 className="mt-2 text-2xl font-black">Where the spending goes</h3></div><p className="text-2xl font-black">{exactMoney(analysis.totalExpenses)}</p></div>
                 <p className="mt-2 text-sm text-white/70">Actual spending by category. A large category is not automatically a waste or an overrun.</p>
@@ -868,7 +875,7 @@ export default function WorkspaceClient() {
                   </div>
 
                   <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.06] p-5">
-                    <div className="flex items-center gap-3"><Lightbulb size={19} /><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Fix-this-first plan</p><h3 className="text-xl font-black">Three moves, in order</h3></div></div>
+                    <div className="flex items-center gap-3"><Lightbulb size={19} /><div><p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Fix-this-first plan</p><h3 className="text-xl font-black">Your priorities this month</h3></div></div>
                     <div className="mt-5 space-y-4">
                       {analysis.priorityPlan.length ? analysis.priorityPlan.map((item) => (
                         <div key={item.rank} className="rounded-2xl bg-black/25 p-4"><div className="flex items-center justify-between gap-3"><p className="font-black">{item.rank}. {item.name}</p><p className="font-black">{money(item.amount)}/mo</p></div><p className="mt-2 text-sm leading-6 text-white/60">{item.firstMove}</p><p className="mt-3 text-xs font-bold leading-5 text-white/70">Track: {item.measure}</p></div>

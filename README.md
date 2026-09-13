@@ -163,3 +163,7 @@ The intended path is deliberately simple:
 **Problem-aware prospect → free PulseIQ workspace → quantified financial signal → prioritized first action → paid deeper analysis → recurring Monthly Pulse when ongoing monitoring has clear value.**
 
 The software should earn trust by being useful before asking for payment. The paid service should earn its fee by investigating the underlying data rather than repeating generic recommendations from the free scan.
+
+## Decision intelligence
+
+The health score now exposes the four deductions used in its existing formula; it does not assess debt or actual cash flow. Ranked priorities include up to five completed findings. Best/expected/worst comparisons apply adjustable one-time level shocks to each projected month's revenue and scenario costs, leaving monthly compound growth unchanged. Saved plans and exported forecasts include the variations. These comparisons are stress tests, not statistical confidence intervals. The three business question tools calculate target overruns, a fixed 15% revenue-drop scenario, and incremental employment-cost coverage from the current baseline locally; no external LLM or financial account connection is implied.

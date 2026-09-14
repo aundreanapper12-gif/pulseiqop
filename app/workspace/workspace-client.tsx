@@ -54,6 +54,7 @@ import {
   UNDATED_PERIOD,
 } from "./expenses";
 import PlanningPanel from "./planning-panel";
+import DetailPanel from "./detail-panel";
 import { defaultForecast } from "./forecast";
 import { forecastMonth, reportingMonth } from "./period";
 import type { ReportPlan } from "./pdf-report";
@@ -220,7 +221,7 @@ export default function WorkspaceClient() {
   useEffect(() => {
     const syncStage = () => {
       const hash = window.location.hash.slice(1);
-      setActiveStage(hash === "expense-entry" ? "expenses" : hash === "results" ? "results" : hash === "planning" ? "planning" : hash === "recovery-tracker" ? "actions" : "setup");
+      setActiveStage(hash === "expense-entry" ? "expenses" : hash === "results" ? "results" : hash === "details" ? "details" : hash === "planning" ? "planning" : hash === "recovery-tracker" ? "actions" : "setup");
     };
     syncStage();
     window.addEventListener("hashchange", syncStage);
@@ -695,7 +696,7 @@ export default function WorkspaceClient() {
 
       {activeStage === "setup" && analyzedInputs.revenue === 0 && analysis.totalExpenses === 0 ? <section className="mx-auto mb-6 max-w-7xl px-5"><div className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="text-xl font-semibold">Choose how to get started</h2><p className="mt-2 text-sm text-slate-600">Use totals for a quick scan, individual records for expense detail, or the fictional demo to explore.</p><div className="mt-4 flex flex-wrap gap-3"><a href="#budget" className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white">Enter monthly totals</a><a href="#expense-entry" onClick={() => setActiveStage("expenses")} className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold">Add expenses</a><button onClick={loadDemo} className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold">Explore demo</button></div></div></section> : null}
       <nav aria-label="Workspace sections" className="workspace-navigation mx-auto mb-6 flex max-w-7xl flex-wrap gap-2 px-5 text-sm font-bold">
-        {[{id:"setup",hash:"setup",label:"1. Business & budget"},{id:"expenses",hash:"expense-entry",label:"2. Expenses"},{id:"results",hash:"results",label:"3. Results & priorities"},{id:"planning",hash:"planning",label:"4. Forecast"},{id:"actions",hash:"recovery-tracker",label:"5. Track actions"}].map(stage => <a key={stage.id} href={`#${stage.hash}`} aria-current={activeStage === stage.id ? "page" : undefined} onClick={() => setActiveStage(stage.id)} className={`rounded-xl border px-4 py-3 ${activeStage === stage.id ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"}`}>{stage.label}</a>)}
+        {[{id:"setup",hash:"setup",label:"1. Business & budget"},{id:"expenses",hash:"expense-entry",label:"2. Expenses"},{id:"results",hash:"results",label:"3. Results & priorities"},{id:"details",hash:"details",label:"4. Labor, cash & jobs"},{id:"planning",hash:"planning",label:"5. Forecast"},{id:"actions",hash:"recovery-tracker",label:"6. Track actions"}].map(stage => <a key={stage.id} href={`#${stage.hash}`} aria-current={activeStage === stage.id ? "page" : undefined} onClick={() => setActiveStage(stage.id)} className={`rounded-xl border px-4 py-3 ${activeStage === stage.id ? "border-blue-700 bg-blue-700 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"}`}>{stage.label}</a>)}
       </nav>
       <section className="px-5 pb-12 md:px-8">
         <div className="mx-auto grid grid-cols-1 max-w-7xl gap-7 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -937,6 +938,7 @@ export default function WorkspaceClient() {
               </div>
             </section>
 
+      <div id="details" hidden={activeStage !== "details"}><DetailPanel key={`${businessKey(inputs.businessName)}:${currentPeriodLabel}`} inputs={analyzedInputs} profit={analysis.operatingProfit} period={currentPeriodLabel} /></div>
       <div hidden={activeStage !== "planning"}><PlanningPanel key={businessKey(inputs.businessName)} inputs={{ ...analyzedInputs, reportingPeriod: currentPeriodLabel }} expenses={expenses} onPlanChange={setReportPlan} onUpdateExpense={(id, patch) => setExpenses(current => current.map(entry => entry.id === id ? { ...entry, ...patch } : entry))} /></div>
             <section hidden={activeStage !== "actions"} id="recovery-tracker" className="rounded-2xl border border-slate-900/10 bg-white p-6 shadow-sm md:p-8">
               <SectionHeading eyebrow="Follow through" title="See whether the fix worked." body="Start tracking from a direct cost finding above. Record the next period after making a change. PulseIQ shows the observed spending change separately from any amount you personally confirm was caused by the action." />

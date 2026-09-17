@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import TrialBanner from "../components/trial-banner";
 import WorkspaceClient from "./workspace-client";
 
 export const metadata: Metadata = {
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function WorkspacePage() {
-  return <WorkspaceClient />;
+  return (
+    <>
+      <TrialBanner />
+      <WorkspaceClient />
+    </>
+  );
 }

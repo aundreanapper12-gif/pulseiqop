@@ -163,6 +163,7 @@ const utilityLinks = [
   ["Start 14-Day Trial", "/trial"],
   ["Dashboard", "/dashboard"],
   ["Workspace", "/workspace"],
+  ["Insights", "/insights"],
   ["Pricing", "/pricing"],
   ["Delivery process", "/next-steps"],
   ["FAQ", "/faq"],

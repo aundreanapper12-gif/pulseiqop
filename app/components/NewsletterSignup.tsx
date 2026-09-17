@@ -44,9 +44,10 @@ export default function NewsletterSignup({ compact = false }: { compact?: boolea
       </div>
       <form onSubmit={submit} className="mt-5 flex flex-col gap-3 sm:flex-row">
         <label className="sr-only" htmlFor="newsletter-email">Email address</label>
-        <input id="newsletter-email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@business.com" className="min-w-0 flex-1 rounded-xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3.5 font-semibold outline-none focus:border-blue-700" />
+        <input id="newsletter-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@business.com" className="min-w-0 flex-1 rounded-xl border border-slate-900/10 bg-[#f8fafc] px-4 py-3.5 font-semibold outline-none focus:border-blue-700" />
         <button disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3.5 font-semibold text-white disabled:opacity-60">{busy ? "Joining…" : "Join Free"} <ArrowRight size={16} /></button>
       </form>
+      <p className="mt-2 text-xs leading-5 text-slate-500">By joining, you agree to receive PulseIQ educational and product emails. You can unsubscribe at any time. See the <a href="/privacy" className="font-semibold underline">Privacy Policy</a>.</p>
       {status ? <p role="status" className="mt-3 text-sm font-semibold text-slate-600">{status}</p> : null}
       <a href="/resources/profit-leak-checklist" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-700">Open the free Profit Leak Checklist <ArrowRight size={15} /></a>
     </div>

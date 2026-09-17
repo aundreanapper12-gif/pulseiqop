@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | PulseIQ Operations",
   },
   description:
-    "Understand your business expenses, payroll, missed leads, and repeat work. Run a free business scan and get practical next steps with PulseIQ Operations.",
+    "Understand your business expenses, payroll, missed leads, and repeat work. Start a 14-day no-card PulseIQ trial and turn operating data into practical next steps.",
   applicationName: "PulseIQ Operations",
   icons: {
     icon: [{ url: "/pulseiq-solutions-icon.png", type: "image/png", sizes: "512x512" }],
@@ -98,6 +98,7 @@ const softwareSchema = {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
+    description: "14-day Premium Trial available with no credit card required.",
   },
 };
 
@@ -159,6 +160,8 @@ const serviceSchema = {
 };
 
 const utilityLinks = [
+  ["Start 14-Day Trial", "/trial"],
+  ["Dashboard", "/dashboard"],
   ["Workspace", "/workspace"],
   ["Pricing", "/pricing"],
   ["Delivery process", "/next-steps"],
@@ -192,8 +195,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </nav>
           </div>
         </div>
-
-
       </body>
     </html>
   );

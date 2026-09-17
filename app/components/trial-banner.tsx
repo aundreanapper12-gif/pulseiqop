@@ -16,6 +16,7 @@ type TrialState = {
 export default function TrialBanner() {
   const [trial, setTrial] = useState<TrialState | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [nowMs, setNowMs] = useState(0);
 
   useEffect(() => {
     try {
@@ -24,14 +25,15 @@ export default function TrialBanner() {
     } catch {
       // Keep the workspace usable when browser storage is unavailable.
     } finally {
+      setNowMs(Date.now());
       setHydrated(true);
     }
   }, []);
 
   const daysLeft = useMemo(() => {
-    if (!trial) return 0;
-    return Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - Date.now()) / 86_400_000));
-  }, [trial]);
+    if (!trial || !nowMs) return 0;
+    return Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - nowMs) / 86_400_000));
+  }, [trial, nowMs]);
 
   if (!hydrated) return null;
 

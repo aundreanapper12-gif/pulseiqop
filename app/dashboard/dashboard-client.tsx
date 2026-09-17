@@ -36,6 +36,7 @@ export default function DashboardClient() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [copyStatus, setCopyStatus] = useState("");
+  const [nowMs, setNowMs] = useState(0);
 
   useEffect(() => {
     try {
@@ -48,6 +49,7 @@ export default function DashboardClient() {
     } catch {
       // Browser-local data is optional; the dashboard still renders safely.
     } finally {
+      setNowMs(Date.now());
       setHydrated(true);
     }
   }, []);
@@ -71,7 +73,7 @@ export default function DashboardClient() {
     return { currentProfit, projectedProfit, change: projectedProfit - currentProfit, margin: nextRevenue > 0 ? (projectedProfit / nextRevenue) * 100 : 0 };
   }, [analysis.totalExpenses, costChange, inputs.revenue, revenueChange]);
 
-  const daysLeft = trial ? Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - Date.now()) / 86_400_000)) : 0;
+  const daysLeft = trial && nowMs ? Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - nowMs) / 86_400_000)) : 0;
   const tips = getIndustryTips(inputs.industry || trial?.industry || "");
 
   const askPulseIQ = () => {
@@ -127,7 +129,6 @@ export default function DashboardClient() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8"><div className="flex items-center gap-3"><Target size={20} /><h2 className="text-2xl font-semibold">Top priorities</h2></div><div className="mt-6 space-y-4">{topFindings.length ? topFindings.map((finding, index) => <article key={finding.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-sm font-semibold text-slate-500">#{index + 1} · {finding.severity}</p><h3 className="mt-1 text-xl font-semibold">{finding.name}</h3></div><p className="text-2xl font-semibold">{money(finding.amount)}<span className="text-sm text-slate-500">/mo</span></p></div><p className="mt-4 text-sm leading-6 text-slate-600">{finding.firstMove}</p></article>) : <div className="rounded-2xl bg-slate-50 p-6 text-slate-600">Add actuals, targets, and operating metrics in the workspace to generate ranked findings.</div>}</div><a href="/workspace#results" className="mt-6 inline-flex items-center gap-2 font-semibold text-blue-700">Review full analysis <ArrowRight size={16} /></a></section>
-
             <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8"><div className="flex items-center gap-3"><Lightbulb size={20} /><h2 className="text-2xl font-semibold">Industry focus</h2></div><p className="mt-3 text-sm leading-6 text-slate-600">Tailored prompts for {inputs.industry || trial?.industry || "your business model"}. These are investigation prompts, not external benchmarks.</p><div className="mt-6 space-y-3">{tips.map((tip) => <div key={tip} className="flex gap-3 rounded-2xl bg-slate-50 p-4 text-sm font-semibold"><CheckCircle2 size={17} className="shrink-0 text-teal-700" />{tip}</div>)}</div></section>
           </div>
 
@@ -135,7 +136,6 @@ export default function DashboardClient() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
             <section className="rounded-3xl bg-slate-900 p-6 text-white md:p-8"><div className="flex items-center gap-3"><MessageSquareText size={20} /><h2 className="text-2xl font-semibold">Ask PulseIQ</h2></div><p className="mt-3 text-sm leading-6 text-white/70">Ask about your current workspace numbers. Answers are generated from the analysis already in your browser.</p><div className="mt-6 flex flex-col gap-3 sm:flex-row"><input value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") askPulseIQ(); }} className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-semibold text-white outline-none placeholder:text-white/50" placeholder="What should I fix first?" /><button onClick={askPulseIQ} className="rounded-2xl bg-white px-5 py-3 font-semibold text-slate-900">Ask</button></div>{answer ? <div className="mt-5 rounded-2xl bg-white/10 p-5 text-sm leading-7 text-white/90">{answer}</div> : null}<div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-white/70">{["What should I fix first?", "How is my margin?", "What about overtime?", "Where am I overspending?"].map((sample) => <button key={sample} onClick={() => { setQuestion(sample); setTimeout(askPulseIQ, 0); }} className="rounded-full border border-white/15 px-3 py-2">{sample}</button>)}</div></section>
-
             <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8"><div className="flex items-center gap-3"><Share2 size={20} /><h2 className="text-2xl font-semibold">Refer a business</h2></div><p className="mt-3 text-sm leading-6 text-slate-600">Share PulseIQ with another owner. The referral link is ready for tracking once referral rewards are connected to the billing backend.</p><button onClick={copyReferral} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-5 py-3.5 font-semibold text-white"><Copy size={16} /> Copy referral link</button>{copyStatus ? <p className="mt-3 break-all text-xs leading-5 text-slate-500">{copyStatus}</p> : null}</section>
           </div>
 

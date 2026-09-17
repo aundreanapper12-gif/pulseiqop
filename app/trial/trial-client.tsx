@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { defaultInputs } from "../workspace/model";
 
@@ -17,6 +18,7 @@ const concerns = [
 ];
 
 export default function TrialClient() {
+  const router = useRouter();
   const [businessName, setBusinessName] = useState("");
   const [industry, setIndustry] = useState("");
   const [employees, setEmployees] = useState(0);
@@ -38,7 +40,7 @@ export default function TrialClient() {
       const draft = saved ? { ...defaultInputs, ...JSON.parse(saved) } : { ...defaultInputs };
       window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, businessName: businessName || draft.businessName, industry: industry || draft.industry, employees: employees || draft.employees }));
     } catch {}
-    window.location.href = "/dashboard";
+    router.push("/dashboard");
   };
 
   return (

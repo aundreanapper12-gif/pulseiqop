@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BarChart3, CheckCircle2, CircleDollarSign, Copy, Gauge, Lightbulb, MessageSquareText, RotateCcw, Share2, Sparkles, Target, TrendingUp } from "lucide-react";
 import { analyzeBusiness, defaultInputs, money } from "../workspace/model";
 import { parseTrialState, trialDaysLeft, trialStatus, type TrialState } from "../trial/state";
+import ProfitIntelligence from "./profit-intelligence";
 
 type RecoveryAction = { baselineActual?: number; followupActual?: number | null; categoryName?: string; plannedFix?: string; followupPeriod?: string };
 
@@ -145,6 +146,14 @@ export default function DashboardClient() {
             <div className="rounded-2xl border border-slate-200 bg-white p-6"><TrendingUp size={20} /><p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Operating Margin</p><p className="mt-2 text-4xl font-semibold">{analysis.operatingMargin.toFixed(1)}%</p><p className="mt-2 text-sm text-slate-600">Based on current entered figures</p></div>
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6"><CheckCircle2 size={20} className="text-emerald-700" /><p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">Recovered Profit</p><p className="mt-2 text-4xl font-semibold">{money(recovered)}</p><p className="mt-2 text-sm text-emerald-900/70">Measured reduction across tracked actions</p></div>
           </div>
+
+          <ProfitIntelligence
+            revenue={Number(inputs.revenue || 0)}
+            totalExpenses={Number(analysis.totalExpenses || 0)}
+            monthlyOpportunity={Number(analysis.totalOpportunity || 0)}
+            operatingMargin={Number(analysis.operatingMargin || 0)}
+            findings={analysis.leaks}
+          />
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8"><div className="flex items-center gap-3"><Target size={20} /><h2 className="text-2xl font-semibold">Top priorities</h2></div><div className="mt-6 space-y-4">{topFindings.length ? topFindings.map((finding, index) => <article key={finding.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-sm font-semibold text-slate-500">#{index + 1} · {finding.severity}</p><h3 className="mt-1 text-xl font-semibold">{finding.name}</h3></div><p className="text-2xl font-semibold">{money(finding.amount)}<span className="text-sm text-slate-500">/mo</span></p></div><p className="mt-4 text-sm leading-6 text-slate-600">{finding.firstMove}</p></article>) : <div className="rounded-2xl bg-slate-50 p-6 text-slate-600">Add actuals, targets, and operating metrics in the workspace to generate ranked findings.</div>}</div><a href="/workspace#results" className="mt-6 inline-flex items-center gap-2 font-semibold text-blue-700">Review full analysis <ArrowRight size={16} /></a></section>

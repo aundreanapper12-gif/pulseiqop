@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BarChart3, CheckCircle2, CircleDollarSign, Copy, Gauge, Lightbulb, MessageSquareText, RotateCcw, Share2, Sparkles, Target, TrendingUp } from "lucide-react";
 import { analyzeBusiness, defaultInputs, money } from "../workspace/model";
+import { parseTrialState, trialDaysLeft, trialStatus, type TrialState } from "../trial/state";
 
-type TrialState = { startedAt: string; endsAt: string; businessName?: string; industry?: string; concern?: string };
 type RecoveryAction = { baselineActual?: number; followupActual?: number | null; categoryName?: string; plannedFix?: string; followupPeriod?: string };
 
 const TRIAL_KEY = "pulseiq:trial:v1";
@@ -43,7 +43,7 @@ export default function DashboardClient() {
       const rawTrial = window.localStorage.getItem(TRIAL_KEY);
       const rawDraft = window.localStorage.getItem(DRAFT_KEY);
       const rawActions = window.localStorage.getItem(RECOVERY_KEY);
-      if (rawTrial) setTrial(JSON.parse(rawTrial));
+      if (rawTrial) setTrial(parseTrialState(rawTrial));
       if (rawDraft) setInputs({ ...defaultInputs, ...JSON.parse(rawDraft) });
       if (rawActions) setActions(JSON.parse(rawActions));
     } catch {
@@ -73,7 +73,7 @@ export default function DashboardClient() {
     return { currentProfit, projectedProfit, change: projectedProfit - currentProfit, margin: nextRevenue > 0 ? (projectedProfit / nextRevenue) * 100 : 0 };
   }, [analysis.totalExpenses, costChange, inputs.revenue, revenueChange]);
 
-  const daysLeft = trial && nowMs ? Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - nowMs) / 86_400_000)) : 0;
+  const daysLeft = trialDaysLeft(trial, nowMs);
   const tips = getIndustryTips(inputs.industry || trial?.industry || "");
 
   const askPulseIQ = () => {
@@ -106,6 +106,25 @@ export default function DashboardClient() {
   };
 
   if (!hydrated) return <main className="min-h-screen bg-[#f3f6fb] p-8 text-slate-600">Loading your PulseIQ dashboard…</main>;
+
+  const access = trialStatus(trial, nowMs);
+  if (access !== "active") {
+    const expired = access === "expired";
+    return (
+      <main className="flex min-h-screen items-center bg-[#f3f6fb] px-5 py-16 text-[#0f172a] md:px-8">
+        <section className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-900/10 bg-white p-8 shadow-xl md:p-12">
+          <Sparkles size={24} className="text-blue-700" />
+          <p className="mt-7 text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">{expired ? "Premium trial complete" : "Premium dashboard"}</p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{expired ? "Keep your work. Choose what comes next." : "Start your free trial to open the executive dashboard."}</h1>
+          <p className="mt-5 text-lg leading-8 text-slate-600">{expired ? "Your browser-local workspace data is still available. You can continue using the free workspace or compare paid analysis options for deeper support." : "The 14-day trial includes ranked priorities, scenario planning, recovery tracking, industry prompts, and Ask PulseIQ. No card is required."}</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a href={expired ? "/pricing" : "/trial"} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 font-semibold text-white">{expired ? "Compare plans" : "Start 14-Day Trial"} <ArrowRight size={17} /></a>
+            <a href="/workspace" className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-6 py-4 font-semibold">Open free workspace</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f3f6fb] text-[#0f172a]">

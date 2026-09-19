@@ -2,16 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Clock3, Sparkles } from "lucide-react";
+import { parseTrialState, trialDaysLeft, trialStatus, type TrialState } from "../trial/state";
 
 const TRIAL_KEY = "pulseiq:trial:v1";
-
-type TrialState = {
-  startedAt: string;
-  endsAt: string;
-  businessName?: string;
-  industry?: string;
-  concern?: string;
-};
 
 export default function TrialBanner() {
   const [trial, setTrial] = useState<TrialState | null>(null);
@@ -21,7 +14,7 @@ export default function TrialBanner() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(TRIAL_KEY);
-      if (raw) setTrial(JSON.parse(raw));
+      if (raw) setTrial(parseTrialState(raw));
     } catch {
       // Keep the workspace usable when browser storage is unavailable.
     } finally {
@@ -32,7 +25,7 @@ export default function TrialBanner() {
 
   const daysLeft = useMemo(() => {
     if (!trial || !nowMs) return 0;
-    return Math.max(0, Math.ceil((new Date(trial.endsAt).getTime() - nowMs) / 86_400_000));
+    return trialDaysLeft(trial, nowMs);
   }, [trial, nowMs]);
 
   if (!hydrated) return null;
@@ -51,7 +44,7 @@ export default function TrialBanner() {
     );
   }
 
-  const expired = daysLeft <= 0;
+  const expired = trialStatus(trial, nowMs) !== "active";
   return (
     <div className={`border-b px-5 py-3 md:px-8 ${expired ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50"}`}>
       <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

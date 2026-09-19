@@ -99,6 +99,26 @@ export default function DashboardClient() {
     }
   };
 
+  const startInstantTrial = () => {
+    const started = new Date();
+    const ends = new Date(started.getTime() + 14 * 86_400_000);
+    const newTrial: TrialState = {
+      startedAt: started.toISOString(),
+      endsAt: ends.toISOString(),
+      businessName: inputs.businessName || "Your business",
+      industry: inputs.industry || "",
+      concern: "Find where I am overspending",
+    };
+    try {
+      window.localStorage.setItem(TRIAL_KEY, JSON.stringify(newTrial));
+      const saved = window.localStorage.getItem(DRAFT_KEY);
+      const draft = saved ? { ...defaultInputs, ...JSON.parse(saved) } : { ...defaultInputs };
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {}
+    setTrial(newTrial);
+    setNowMs(Date.now());
+  };
+
   const copyReferral = async () => {
     const base = typeof window !== "undefined" ? window.location.origin : "https://www.pulseiqoperations.online";
     const code = (inputs.businessName || "pulseiq").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || "pulseiq";
@@ -119,8 +139,12 @@ export default function DashboardClient() {
           <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{expired ? "Keep your work. Choose what comes next." : "Start your free trial to open the executive dashboard."}</h1>
           <p className="mt-5 text-lg leading-8 text-slate-600">{expired ? "Your browser-local workspace data is still available. You can continue using the free workspace or compare paid analysis options for deeper support." : "The 14-day trial includes ranked priorities, scenario planning, recovery tracking, industry prompts, and Ask PulseIQ. No card is required."}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href={expired ? "/pricing" : "/trial"} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 font-semibold text-white">{expired ? "Compare plans" : "Start 14-Day Trial"} <ArrowRight size={17} /></a>
-            <a href="/workspace" className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-6 py-4 font-semibold">Open free workspace</a>
+            {expired ? (
+              <a href="/pricing" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 font-semibold text-white">Compare plans <ArrowRight size={17} /></a>
+            ) : (
+              <button onClick={startInstantTrial} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 font-semibold text-white">Start trial & open dashboard <ArrowRight size={17} /></button>
+            )}
+            <a href={expired ? "/workspace" : "/trial"} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-6 py-4 font-semibold">{expired ? "Open free workspace" : "Personalize trial first"}</a>
           </div>
         </section>
       </main>

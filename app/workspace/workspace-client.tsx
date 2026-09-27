@@ -211,6 +211,11 @@ export default function WorkspaceClient() {
     [inputs, currentExpenses, useItemizedExpenses],
   );
   const analysis = useMemo(() => analyzeBusiness(analyzedInputs, recoveryPct), [analyzedInputs, recoveryPct]);
+  const spendingByCategory = useMemo(() => costCategories
+    .map((category) => ({ ...category, amount: Number(analyzedInputs[category.actual]) || 0 }))
+    .filter((category) => category.amount > 0)
+    .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
+  const currentPeriodLabel = useItemizedExpenses ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
   const inputConfidence = useMemo(() => {
     let points = 0;
     if (analyzedInputs.revenue > 0) points += 25;
@@ -236,11 +241,6 @@ export default function WorkspaceClient() {
             : "Add revenue, costs, and a reporting month to establish an input-confidence signal.",
     };
   }, [analyzedInputs.revenue, analysis.totalExpenses, analysis.completeness, analysis.warnings.length, currentPeriodLabel, useItemizedExpenses, currentQualityFindings.length]);
-  const spendingByCategory = useMemo(() => costCategories
-    .map((category) => ({ ...category, amount: Number(analyzedInputs[category.actual]) || 0 }))
-    .filter((category) => category.amount > 0)
-    .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
-  const currentPeriodLabel = useItemizedExpenses ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
   const visibleActions = useMemo(() => recoveryActions.filter((action) => action.business === businessKey(inputs.businessName)), [recoveryActions, inputs.businessName]);
   const historicalBaseline = useMemo(() => {
     const key = businessKey(inputs.businessName);

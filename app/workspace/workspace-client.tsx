@@ -216,7 +216,66 @@ export default function WorkspaceClient() {
     .filter((category) => category.amount > 0)
     .sort((a, b) => b.amount - a.amount), [analyzedInputs]);
   const currentPeriodLabel = useItemizedExpenses ? formatExpensePeriod(activeExpensePeriod) : inputs.reportingPeriod;
+  const inputConfidence = useMemo(() => {
+    let points = 0;
+    if (analyzedInputs.revenue > 0) points += 25;
+    if (analysis.totalExpenses > 0) points += 25;
+    if (reportingMonth(currentPeriodLabel)) points += 15;
+    if (analysis.completeness >= 75) points += 20;
+    else if (analysis.completeness >= 50) points += 15;
+    else if (analysis.completeness >= 25) points += 8;
+    if (analysis.warnings.length === 0) points += 15;
+    else if (analysis.warnings.length === 1) points += 8;
+    if (useItemizedExpenses && currentQualityFindings.length > 0) points = Math.max(0, points - Math.min(15, currentQualityFindings.length * 3));
+    const score = Math.min(100, Math.round(points));
+    const label = score >= 80 ? "High" : score >= 55 ? "Medium" : score > 0 ? "Low" : "Incomplete";
+    return {
+      score,
+      label,
+      note: label === "High"
+        ? "Most core inputs are present and internally checkable."
+        : label === "Medium"
+          ? "Useful for prioritization, but some inputs or checks still need review."
+          : label === "Low"
+            ? "Treat results as preliminary until missing or flagged inputs are reviewed."
+            : "Add revenue, costs, and a reporting month to establish an input-confidence signal.",
+    };
+  }, [analyzedInputs.revenue, analysis.totalExpenses, analysis.completeness, analysis.warnings.length, currentPeriodLabel, useItemizedExpenses, currentQualityFindings.length]);
   const visibleActions = useMemo(() => recoveryActions.filter((action) => action.business === businessKey(inputs.businessName)), [recoveryActions, inputs.businessName]);
+  const historicalBaseline = useMemo(() => {
+    const key = businessKey(inputs.businessName);
+    if (!key) return null;
+    const rows = snapshots
+      .filter((snapshot) => businessKey(snapshot.inputs.businessName) === key && snapshot.inputs.reportingPeriod !== currentPeriodLabel)
+      .slice(0, 12)
+      .map((snapshot) => {
+        const savedExpenses = normalizeExpenseEntries(snapshot.expenses);
+        const savedPeriods = expensePeriods(savedExpenses);
+        const savedPeriod = savedPeriods.includes(snapshot.expensePeriod || "") ? snapshot.expensePeriod! : savedPeriods[0] || "";
+        const comparableInputs = snapshot.useItemizedExpenses && savedExpenses.length
+          ? applyExpensesToInputs(snapshot.inputs, expensesInPeriod(savedExpenses, savedPeriod))
+          : snapshot.inputs;
+        return { period: snapshot.inputs.reportingPeriod, inputs: comparableInputs };
+      });
+    if (rows.length < 3) return null;
+    const categories = costCategories.flatMap((category) => {
+      const history = rows.map((row) => Number(row.inputs[category.actual]) || 0).filter((value) => value > 0);
+      const current = Number(analyzedInputs[category.actual]) || 0;
+      if (history.length < 3 || current <= 0) return [];
+      const average = history.reduce((sum, value) => sum + value, 0) / history.length;
+      if (average <= 0) return [];
+      return [{
+        id: category.id,
+        name: category.name,
+        current,
+        average,
+        difference: current - average,
+        differencePct: ((current - average) / average) * 100,
+        months: history.length,
+      }];
+    }).sort((a, b) => Math.abs(b.differencePct) - Math.abs(a.differencePct));
+    return { months: rows.length, categories };
+  }, [snapshots, inputs.businessName, currentPeriodLabel, analyzedInputs]);
 
   useEffect(() => {
     const syncStage = () => {
@@ -557,6 +616,7 @@ export default function WorkspaceClient() {
       analysis.executiveSummary,
       "",
       `Operations health score: ${analysis.score ? `${analysis.score}/100` : "Incomplete"}`,
+      `Input confidence: ${inputConfidence.label} (${inputConfidence.score}/100 coverage signal; this does not verify bookkeeping accuracy)`,
       `Direct cost overruns: ${money(analysis.directLeakTotal)}/month`,
       `Modeled operational opportunity: ${money(analysis.modeledOpportunityTotal)}/month`,
       `Total monthly opportunity: ${money(analysis.totalOpportunity)}`,
@@ -578,6 +638,13 @@ export default function WorkspaceClient() {
         "DATA QUALITY",
         ...analysis.warnings,
         ...(useItemizedExpenses && periods.length > 1 ? [`Only the ${formatExpensePeriod(activeExpensePeriod)} expense entries are included in this monthly analysis. Check that revenue and targets refer to the same period.`] : []),
+        "",
+      ] : []),
+      ...(historicalBaseline ? [
+        "OWN HISTORICAL BASELINE",
+        `Compared with up to ${historicalBaseline.months} prior saved months for this business.`,
+        ...historicalBaseline.categories.slice(0, 5).map((category) => `${category.name}: ${exactMoney(category.current)} current vs ${exactMoney(category.average)} prior-month average (${category.differencePct >= 0 ? "+" : ""}${category.differencePct.toFixed(1)}%).`),
+        "Historical comparisons describe the records saved in this browser; they are not industry benchmarks and can be distorted by seasonality or scope changes.",
         "",
       ] : []),
       "PRIORITY FINDINGS",
@@ -616,7 +683,7 @@ export default function WorkspaceClient() {
       "PulseIQ identifies financial and operational signals from the data entered. A variance is not proof of waste or causation. Modeled opportunities are planning estimates, not guaranteed savings or revenue.",
     ];
     return lines.join("\n");
-  }, [analysis, inputs, analyzedInputs, currentExpenses, activeExpensePeriod, currentPeriodLabel, expenseSummary, useItemizedExpenses, recoveryPct, periods.length, visibleActions, reportPlan]);
+  }, [analysis, inputs, analyzedInputs, currentExpenses, activeExpensePeriod, currentPeriodLabel, expenseSummary, useItemizedExpenses, recoveryPct, periods.length, visibleActions, reportPlan, inputConfidence, historicalBaseline]);
 
   const downloadExecutivePdf = async () => {
     setPdfBusy(true);
@@ -842,20 +909,61 @@ export default function WorkspaceClient() {
                   <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{inputs.businessName || "Your business"}: where to look first.</h2>
                   <p className="mt-4 leading-7 text-white/80">{analyzedInputs.revenue > 0 && analysis.totalExpenses > 0 ? `For ${currentPeriodLabel}, revenue of ${money(analyzedInputs.revenue)} less entered operating costs of ${money(analysis.totalExpenses)} leaves ${money(analysis.operatingProfit)} in estimated operating profit (${analysis.operatingMargin.toFixed(1)}% margin). Review the priorities below and check that your records cover the same complete month.` : "Enter revenue and complete operating costs for a specific month to see your financial position. Results remain provisional until you review the records."}</p>
                 </div>
-                <div className={`rounded-xl px-4 py-2 text-sm font-semibold ${analysis.risk === "High" ? "bg-red-400/15 text-red-200" : analysis.risk === "Moderate" ? "bg-amber-300/15 text-amber-200" : analysis.risk === "Controlled" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/10 text-white/80"}`}>
-                  {analysis.risk} risk signal
+                <div className="flex flex-wrap gap-2">
+                  <div className={`rounded-xl px-4 py-2 text-sm font-semibold ${analysis.risk === "High" ? "bg-red-400/15 text-red-200" : analysis.risk === "Moderate" ? "bg-amber-300/15 text-amber-200" : analysis.risk === "Controlled" ? "bg-emerald-400/15 text-emerald-200" : "bg-white/10 text-white/80"}`}>
+                    {analysis.risk} risk signal
+                  </div>
+                  <div className={`rounded-xl px-4 py-2 text-sm font-semibold ${inputConfidence.label === "High" ? "bg-emerald-400/15 text-emerald-200" : inputConfidence.label === "Medium" ? "bg-amber-300/15 text-amber-200" : "bg-white/10 text-white/80"}`}>
+                    {inputConfidence.label} input confidence · {inputConfidence.score}/100
+                  </div>
                 </div>
               </div>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard dark label="Monthly revenue" value={money(analyzedInputs.revenue)} note={currentPeriodLabel || "Choose a reporting month"} />
-                <StatCard dark label="Operating costs" value={exactMoney(analysis.totalExpenses)} note={useItemizedExpenses ? "Selected-month expense records" : "Entered monthly totals"} />
-                <StatCard dark label="Operating profit" value={money(analysis.operatingProfit)} note={analyzedInputs.revenue > 0 ? `${analysis.operatingMargin.toFixed(1)}% operating margin` : "Revenue required to interpret"} />
-                <StatCard dark label="PulseIQ score" value={analysis.score ? `${analysis.score}/100` : "—"} note="Input-based prioritization signal" />
+                <StatCard dark label="Monthly revenue" value={money(analyzedInputs.revenue)} note={`${currentPeriodLabel || "Choose a reporting month"} · ${inputConfidence.label} input confidence`} />
+                <StatCard dark label="Operating costs" value={exactMoney(analysis.totalExpenses)} note={`${useItemizedExpenses ? "Selected-month expense records" : "Entered monthly totals"} · ${inputConfidence.label} input confidence`} />
+                <StatCard dark label="Operating profit" value={money(analysis.operatingProfit)} note={analyzedInputs.revenue > 0 ? `${analysis.operatingMargin.toFixed(1)}% operating margin · ${inputConfidence.label} input confidence` : "Revenue required to interpret"} />
+                <StatCard dark label="PulseIQ score" value={analysis.score ? `${analysis.score}/100` : "—"} note={`Input-based prioritization signal · ${inputConfidence.label} confidence`} />
+              </div>
+              <p className="mt-3 text-sm leading-6 text-white/65"><strong className="text-white/80">Input confidence measures completeness and consistency—not whether the books are correct.</strong> {inputConfidence.note}</p>
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/[0.08] p-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Direct budget overrun · high arithmetic confidence</p>
+                  <p className="mt-2 text-3xl font-semibold">{money(analysis.directLeakTotal)}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">Actual spending above owner-entered targets. This is arithmetic evidence of a variance—not proof that the full amount is waste or recoverable.</p>
+                </div>
+                <div className="rounded-xl border border-cyan-300/20 bg-cyan-300/[0.08] p-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-200">Modeled opportunity · medium model confidence</p>
+                  <p className="mt-2 text-3xl font-semibold">{money(analysis.modeledOpportunityTotal)}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">Calculated from entered assumptions such as missed leads, conversion, customer value, and rework. Treat this as a planning estimate, not guaranteed revenue or savings.</p>
+                </div>
               </div>
               <div className="mt-5 rounded-xl border border-white/15 bg-white/[0.06] p-5"><p className="font-semibold">Your biggest concern</p><p className="mt-2 leading-7 text-white/80">{analysis.operatingProfit < 0 && analyzedInputs.revenue > 0 ? `Entered costs exceed revenue by ${money(-analysis.operatingProfit)}. Confirm complete, comparable records and prioritize restoring operating coverage.` : analysis.leaks[0] ? `${analysis.leaks[0].name} is the largest investigation signal at ${money(analysis.leaks[0].amount)} this month. ${analysis.leaks[0].firstMove}` : "Complete the input checks and review category targets before drawing a conclusion."}</p><div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80"><span>Budget overruns: <strong>{money(analysis.directLeakTotal)}</strong></span><span>Modeled opportunity: <strong>{money(analysis.modeledOpportunityTotal)}</strong></span><span>Annualized signals: <strong>{money(analysis.annualOpportunity)}</strong></span></div></div>
 
-              <div className="mt-5 grid gap-3 lg:grid-cols-3">{analysis.priorityPlan.slice(0, 3).map(item => <article key={item.rank} className="rounded-xl border border-white/15 p-5"><p className="text-sm text-teal-200">Priority {item.rank} · {money(item.amount)} monthly signal</p><h3 className="mt-2 text-lg font-semibold">{item.name}</h3><p className="mt-3 text-sm leading-6 text-white/80">{item.firstMove}</p></article>)}</div>
+              {historicalBaseline ? (
+                <div className="mt-5 rounded-xl border border-indigo-300/20 bg-indigo-300/[0.07] p-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-indigo-200">Your own historical baseline</p>
+                  <h3 className="mt-2 text-xl font-semibold">Current spending vs up to {historicalBaseline.months} prior saved months</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/80">This compares the current period with this business's saved browser history. It is more useful than a made-up universal benchmark, but seasonality, growth, and changes in scope can still distort the comparison.</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {historicalBaseline.categories.slice(0, 6).map((category) => (
+                      <div key={category.id} className="rounded-xl bg-white/[0.06] p-4">
+                        <p className="font-semibold">{category.name}</p>
+                        <p className="mt-2 text-sm text-white/80">{exactMoney(category.current)} current · {exactMoney(category.average)} avg.</p>
+                        <p className={`mt-1 text-sm font-bold ${category.differencePct > 10 ? "text-amber-200" : category.differencePct < -10 ? "text-emerald-200" : "text-white/70"}`}>
+                          {category.differencePct >= 0 ? "+" : ""}{category.differencePct.toFixed(1)}% vs own history
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-white/65">
+                  Save at least three completed monthly snapshots for this business to unlock a 3–12 month self-baseline. PulseIQ will compare the business with its own history instead of inventing an industry target.
+                </div>
+              )}
+
+              <div className="mt-5 grid gap-3 lg:grid-cols-3">{analysis.priorityPlan.slice(0, 3).map(item => <article key={item.rank} className="rounded-xl border border-white/15 p-5"><p className="text-sm text-teal-200">Priority {item.rank} · {money(item.amount)} monthly signal · {item.confidence} finding confidence</p><h3 className="mt-2 text-lg font-semibold">{item.name}</h3><p className="mt-3 text-sm leading-6 text-white/80">{item.firstMove}</p></article>)}</div>
               <details className="mt-5 rounded-2xl border border-white/15 p-5">
                 <summary className="cursor-pointer text-base font-bold">What drives your PulseIQ Health Score?</summary>
                 <p className="mt-3 text-sm leading-6 text-white/80">Starts at 100, subtracts the signals below, rounds to a whole number, then limits the result to 10–98. Revenue is required. This prioritization score does not assess debt, actual cash flow, or creditworthiness.</p>

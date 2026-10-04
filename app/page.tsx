@@ -30,14 +30,14 @@ const steps = [
   {
     number: "03",
     title: "Choose your next move",
-    body: "Each finding is translated into a practical next step. Track the next period against your baseline and document the evidence behind any verified improvement.",
+    body: "PulseIQ ranks what to address first, explains the recommended action, and gives you a way to track the next period against your baseline so you can see whether the fix actually worked.",
   },
 ];
 
 const useCases = [
   ["Labor Efficiency", "Understand when payroll is rising faster than revenue and where to investigate first."],
   ["Overtime Exposure", "Identify the teams, shifts, or operating windows repeatedly generating overtime."],
-  ["Marketing Efficiency", "See whether increased spend is translating into profitable customer growth."],
+  ["Recurring Expense Creep", "Spot subscriptions, vendor charges, and repeat expenses that keep climbing or no longer support the business."],
   ["Refund and Recovery Cost", "Surface returns, credits, service recovery, and other costs quietly reducing margin."],
   ["Missed Revenue Opportunity", "Estimate the financial impact of unanswered calls, missed contacts, and unconverted demand."],
   ["Rework and Repeat Cost", "Measure the labor and material impact of repeat visits, corrections, and preventable do-overs."],
@@ -94,12 +94,12 @@ export default function Home() {
         <div className="absolute right-[7%] top-44 h-80 w-80 rounded-xl bg-cyan-200/30 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.04fr_.96fr] lg:items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-xl border border-slate-900/10 bg-white/75 px-4 py-2 text-sm font-semibold shadow-sm"><DollarSign size={16} /> Clear answers for service-business owners</div>
+            <div className="inline-flex items-center gap-2 rounded-xl border border-slate-900/10 bg-white/75 px-4 py-2 text-sm font-semibold shadow-sm"><DollarSign size={16} /> Find the leak. Fix the right thing first.</div>
             <h1 className="mt-7 max-w-5xl text-[2.65rem] font-semibold leading-[1.04] tracking-[-0.05em] md:text-6xl xl:text-[4.5rem]">
-              Know where your money goes.
-              <span className="mt-3 block text-slate-600">Know what to fix next.</span>
+              Find where your business is leaking money.
+              <span className="mt-3 block text-slate-600">Know exactly what to fix first.</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">See how expenses, payroll, missed leads, and repeat work affect your bottom line. PulseIQ turns your business numbers into a clear breakdown and practical next steps—no in-house analyst needed.</p>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">PulseIQ analyzes your expenses, payroll, recurring costs, missed revenue, and repeat work to uncover costly problems, prioritize the biggest opportunities, recommend what to do next, and track whether your fixes are actually working.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a href="/workspace" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-7 py-4 font-semibold text-white shadow-xl transition hover:-translate-y-1">Run the Free Business Scan <ArrowRight size={18} /></a>
               <a href="#sample" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-900/15 bg-white/70 px-7 py-4 font-semibold shadow-sm transition hover:-translate-y-1">View a Sample Analysis</a>
@@ -135,7 +135,18 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-5 rounded-xl bg-white p-5 text-slate-900">
-              <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white"><Lightbulb size={17} /></span><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">Priority Action</p><p className="mt-2 font-bold leading-6">Review four weeks of overtime by employee and shift. Isolate recurring patterns before changing staffing levels.</p></div></div>
+              <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white"><Lightbulb size={17} /></span>
+                <div className="w-full">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">What PulseIQ Helps You Do Next</p>
+                  <div className="mt-4 space-y-3 text-sm leading-6">
+                    <p><span className="font-bold">Finding:</span> Overtime is running about $3,200 above the entered monthly target.</p>
+                    <p><span className="font-bold">Recommended move:</span> Review four weeks of overtime by employee, shift, and day to isolate recurring staffing gaps before changing headcount.</p>
+                    <p><span className="font-bold">Potential impact:</span> Test whether reducing avoidable overtime improves margin without hurting coverage.</p>
+                    <p><span className="font-bold">Track the fix:</span> Save the current period as your baseline, make the change, then compare the next period to verify the result.</p>
+                  </div>
+                </div>
+              </div>
             </div>
             <p className="mt-4 text-sm leading-5 text-white/80">Sample numbers are fictional. PulseIQ identifies operating signals and planning opportunities; results are not guaranteed savings.</p>
           </div>
@@ -144,15 +155,15 @@ export default function Home() {
 
       <section className="border-y border-slate-900/10 bg-white/55 px-5 py-7 md:px-8">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm font-semibold uppercase tracking-[0.21em] text-slate-600">
-          <span>Profit Leakage</span><span>Labor Efficiency</span><span>Revenue Capture</span><span>Rework Cost</span><span>Recovery Modeling</span>
+          <span>Profit Leakage</span><span>Recurring Expenses</span><span>Labor Efficiency</span><span>Revenue Capture</span><span>Fix Tracking</span>
         </div>
       </section>
 
       <section id="how" className="px-5 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
-            <div><p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-600">How It Works</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Your numbers. Clear answers. A next step.</h2></div>
-            <p className="max-w-2xl text-lg leading-8 text-slate-600 lg:justify-self-end">PulseIQ does not force every business into the same benchmark. It starts with the targets, budgets, and operating facts you provide, then translates the gaps into clear priorities.</p>
+            <div><p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-600">How It Works</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Scan it. Prioritize it. Fix it. Track it.</h2></div>
+            <p className="max-w-2xl text-lg leading-8 text-slate-600 lg:justify-self-end">PulseIQ does more than flag a number that looks off. It starts with the targets, budgets, and operating facts you provide, identifies the gap, ranks what deserves attention first, and connects the finding to a practical action you can measure.</p>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {steps.map((step) => (
@@ -164,7 +175,7 @@ export default function Home() {
 
       <section id="use-cases" className="bg-[#0f172a] px-5 py-24 text-white md:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="max-w-4xl"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">What PulseIQ Evaluates</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Find the costs hiding in everyday work.</h2><p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">A business can be growing and still lose margin through labor timing, repeat work, weak revenue capture, or spending that quietly moves away from plan. PulseIQ makes those signals visible.</p></div>
+          <div className="max-w-4xl"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">What PulseIQ Evaluates</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Find the costs hiding in everyday work — then decide what to do about them.</h2><p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">A business can be growing and still lose margin through recurring expenses, labor timing, repeat work, weak revenue capture, or spending that quietly moves away from plan. PulseIQ makes those signals visible and turns them into prioritized decisions.</p></div>
           <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {useCases.map(([title, body], index) => {
               const icons = [BriefcaseBusiness, Gauge, TrendingDown, Wrench, Target, Search];
@@ -207,7 +218,7 @@ export default function Home() {
       <section className="px-5 py-20 md:px-8">
         <div className="mx-auto max-w-7xl rounded-[2.4rem] bg-slate-900 p-8 text-white md:p-12">
           <div className="grid gap-8 lg:grid-cols-[1fr_.72fr] lg:items-center">
-            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Built for the Question Behind the Numbers</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">“Revenue Is Growing. Why Does the Business Still Feel Tight?”</h2><p className="mt-5 max-w-2xl text-lg leading-8 text-white/80">Put the current month into the workspace and turn the first investigation into a financial decision—not a guess.</p></div>
+            <div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Built for the Question Behind the Numbers</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">“Where is the money going — and what should I fix first?”</h2><p className="mt-5 max-w-2xl text-lg leading-8 text-white/80">Put the current month into the workspace, find the biggest gap, get a practical next step, and create a baseline you can use to see whether the fix actually improved the business.</p></div>
             <a href="/workspace" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-4 font-semibold text-slate-900 lg:justify-self-end">Run my free business scan <ArrowRight size={18} /></a>
           </div>
         </div>

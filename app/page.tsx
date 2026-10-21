@@ -85,7 +85,7 @@ export default function Home() {
             <a href="/methodology" className="hover:text-slate-900">Methodology</a>
             <a href="/pricing" className="hover:text-slate-900">Pricing</a>
           </div>
-          <a href="/workspace" className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-lg">Free business scan <ArrowRight size={16} /></a>
+          <a href="/workspace" className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-lg">Start free scan <ArrowRight size={16} /></a>
         </div>
       </nav>
 
@@ -97,18 +97,18 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 rounded-xl border border-slate-900/10 bg-white/75 px-4 py-2 text-sm font-semibold shadow-sm"><DollarSign size={16} /> Find the leak. Fix the right thing first.</div>
             <h1 className="mt-7 max-w-5xl text-[2.65rem] font-semibold leading-[1.04] tracking-[-0.05em] md:text-6xl xl:text-[4.5rem]">
               Find where your business is leaking money.
-              <span className="mt-3 block text-slate-600">Know exactly what to fix first.</span>
+              <span className="mt-3 block text-slate-600">See which costs to investigate first.</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">PulseIQ analyzes your expenses, payroll, recurring costs, missed revenue, and repeat work to uncover costly problems, prioritize the biggest opportunities, recommend what to do next, and track whether your fixes are actually working.</p>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">Enter your business numbers to identify spending above your targets, explore potential missed revenue, and get a prioritized action plan. Track changes over time to see what actually improves.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a href="/workspace" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-7 py-4 font-semibold text-white shadow-xl transition hover:-translate-y-1">Run the Free Business Scan <ArrowRight size={18} /></a>
+              <a href="/workspace" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-7 py-4 font-semibold text-white shadow-xl transition hover:-translate-y-1">Start My Free Scan <ArrowRight size={18} /></a>
               <a href="#sample" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-900/15 bg-white/70 px-7 py-4 font-semibold shadow-sm transition hover:-translate-y-1">View a Sample Analysis</a>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold text-slate-600">
-              <span>✓ No Bank Login</span>
+              <span>✓ No Bank Connection</span>
               <span>✓ No Card Required</span>
-              <span>✓ Compare with your own targets</span>
-              <span>✓ Clear, printable reports</span>
+              <span>✓ Data saved in this browser</span>
+              <span>✓ Exportable results</span>
             </div>
           </div>
 
@@ -118,7 +118,7 @@ export default function Home() {
               <span className="rounded-xl bg-amber-300/10 px-3 py-2 text-sm font-semibold text-amber-200">MODERATE RISK</span>
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/80">Monthly Opportunity</p><p className="mt-2 text-3xl font-semibold">$10.2K</p><p className="mt-1 text-sm text-white/80">Illustrative Estimate</p></div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/80">Potential Monthly Opportunity</p><p className="mt-2 text-3xl font-semibold">$10.2K</p><p className="mt-1 text-sm text-white/80">Illustrative Estimate</p></div>
               <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/80">Operating Margin</p><p className="mt-2 text-3xl font-semibold">9.8%</p><p className="mt-1 text-sm text-white/80">Entered-Cost Estimate</p></div>
               <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-4"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/80">Annualized Opportunity</p><p className="mt-2 text-3xl font-semibold">$122K</p><p className="mt-1 text-sm text-white/80">If the Pattern Persists</p></div>
             </div>
@@ -205,7 +205,7 @@ export default function Home() {
 
       <section className="bg-[#e8eef7] px-5 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="text-center"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-600">When the Free Insight Is Not Enough</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Need a closer look? Choose your analysis.</h2><p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-600">Use the free workspace to identify where to look. Choose a paid analysis when the decision justifies a deeper review of schedules, transactions, calls, refunds, vendors, sales, or workflow data.</p></div>
+          <div className="text-center"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-600">Optional Expert Analysis</p><h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Need help finding the cause?</h2><p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-600">The free workspace highlights potential problems using your inputs. Paid services are separate, human-led reviews of supporting records, with the scope and delivery details agreed before work begins.</p></div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {plans.map((plan, index) => (
               <article key={plan.name} className={`flex flex-col rounded-2xl border p-8 ${index === 1 ? "border-slate-900 bg-slate-900 text-white shadow-2xl" : "border-slate-900/10 bg-white/75"}`}><p className={`text-sm font-semibold uppercase tracking-[0.18em] ${index === 1 ? "text-white/80" : "text-slate-600"}`}>{index === 1 ? "Most Comprehensive" : index === 0 ? "Focused Analysis" : "Ongoing Intelligence"}</p><h3 className="mt-5 text-2xl font-semibold">{plan.name}</h3><p className={`mt-4 leading-7 ${index === 1 ? "text-white/80" : "text-slate-600"}`}>{plan.body}</p><p className="mt-auto pt-8 text-4xl font-semibold">{plan.price}</p><a href={plan.href} className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 font-semibold ${index === 1 ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}>{plan.cta} <ArrowRight size={16} /></a></article>

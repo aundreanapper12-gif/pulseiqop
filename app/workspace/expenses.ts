@@ -163,7 +163,7 @@ function csvRows(text: string): string[][] {
 
 export function parseExpenseCsv(text: string) {
   const rows = csvRows(text);
-  const headers = (rows[0] || []).map((cell) => cell.toLowerCase());
+  const headers = (rows[0] || []).map((cell) => cell.trim().toLowerCase());
   const indices = ["date", "vendor", "description", "category", "amount"].map((header) => headers.indexOf(header));
   if (indices.some((index) => index < 0)) throw new Error("Use columns named date, vendor, description, category, and amount.");
   const entries: ExpenseEntry[] = [];
@@ -172,8 +172,10 @@ export function parseExpenseCsv(text: string) {
     const [date, vendor, description, rawCategory, rawAmount] = indices.map((index) => row[index] || "");
     const normalized = rawCategory.toLowerCase().replace(/[^a-z]/g, "");
     const category = expenseCategoryAliases[normalized];
-    const amount = Number(rawAmount.replace(/[$,\s]/g, ""));
-    if (!category || !Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000 || (date && !/^\d{4}-\d{2}-\d{2}$/.test(date))) {
+    const amountText = rawAmount.replace(/[$,\s]/g, "");
+    const amount = amountText ? Number(amountText) : NaN;
+    const validDate = !date || (/^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(`${date}T00:00:00Z`)) && new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) === date);
+    if (!vendor.trim() || !category || !Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000 || !validDate) {
       skipped++; continue;
     }
     entries.push({ id: crypto.randomUUID(), date, vendor: vendor.slice(0, 100), description: description.slice(0, 180), category, amount: cents(amount) });
